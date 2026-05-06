@@ -1,0 +1,34 @@
+{
+  "name": "oratoria-frontend",
+  "private": true,
+  "workspaces": {
+    "packages": [
+      "apps/*",
+      "packages/*"
+    ],
+    "catalog": {
+      "dotenv": "^17.4.2",
+      "zod": "^4.3.6",
+      "typescript": "^6.0.3"
+    }
+  },
+  "type": "module",
+  "scripts": {
+    "dev": "turbo dev",
+    "build": "turbo build",
+    "check-types": "turbo check-types",
+    "dev:native": "turbo -F native dev",
+    "dev:web": "turbo -F web dev"
+  },
+  "dependencies": {
+    "@oratoria-frontend/env": "workspace:*",
+    "dotenv": "catalog:",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@oratoria-frontend/config": "workspace:*",
+    "turbo": "^2.9.6",
+    "typescript": "catalog:"
+  },
+  "packageManager": "bun@1.3.12"
+}

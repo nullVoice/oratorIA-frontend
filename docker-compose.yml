@@ -1,0 +1,22 @@
+# Docker Compose for oratoria-frontend
+# Full-stack container orchestration
+
+name: oratoria-frontend
+
+services:
+  web:
+    build:
+      context: ./apps/web
+      dockerfile: Dockerfile
+    container_name: oratoria-frontend-web
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+    restart: unless-stopped
+    networks:
+      - oratoria-frontend-network
+
+networks:
+  oratoria-frontend-network:
+    driver: bridge
