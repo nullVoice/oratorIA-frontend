@@ -1,4 +1,4 @@
-import { HeadContent, Outlet, Scripts, createRootRouteWithContext } from "@tanstack/react-router";
+import { HeadContent, Outlet, Scripts, createRootRouteWithContext, useRouterState } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 
 import { Toaster } from "@/components/ui/sonner";
@@ -34,14 +34,17 @@ export const Route = createRootRouteWithContext<RouterAppContext>()({
 });
 
 function RootDocument() {
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const isAuthRoute = pathname === '/login' || pathname === '/register';
+
   return (
     <html lang="en" className="dark">
       <head>
         <HeadContent />
       </head>
       <body>
-        <div className="grid h-svh grid-rows-[auto_1fr]">
-          <Header />
+        <div className={isAuthRoute ? "h-svh" : "grid h-svh grid-rows-[auto_1fr]"}>
+          {!isAuthRoute && <Header />}
           <Outlet />
         </div>
         <Toaster richColors />
