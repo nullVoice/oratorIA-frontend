@@ -59,11 +59,11 @@ function UserPill({ name, plan }: { name: string; plan: User["plan"] }) {
       type="button"
       className="mb-5 flex w-full items-center gap-2.5 rounded-[10px] bg-gray-50 p-2.5 text-left transition-colors hover:bg-gray-100"
     >
-      <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-gradient-to-br from-[#C6FF3D] to-[#5C7A0F] text-xs font-extrabold text-[#0A0A0A]">
+      <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-gray-200 text-xs font-bold text-[#0A0A0A]">
         {initialsOf(name)}
       </span>
       <span className="min-w-0 flex-1">
-        <span className="block truncate text-[13px] font-bold text-[#0A0A0A]">
+        <span className="block truncate text-[13px] font-semibold text-[#0A0A0A]">
           {name}
         </span>
         <span className="block text-[11px] capitalize text-gray-500">
@@ -84,9 +84,7 @@ function SidebarSection({
 }) {
   return (
     <div className="mb-4">
-      <div className="px-2 pb-2 text-[10px] font-bold uppercase tracking-[0.1em] text-gray-400">
-        {label}
-      </div>
+      <div className="px-2 pb-2 text-xs font-semibold text-gray-400">{label}</div>
       {children}
     </div>
   );
@@ -106,9 +104,9 @@ function SidebarLink({
   disabled?: boolean;
 }) {
   const className = cn(
-    "mb-0.5 flex items-center gap-3 rounded-lg px-2.5 py-2.5 text-[13px] font-semibold transition-colors",
-    active && "bg-[#0A0A0A] text-[#C6FF3D]",
-    !active && !disabled && "text-gray-600 hover:bg-gray-100 hover:text-[#0A0A0A]",
+    "mb-0.5 flex items-center gap-3 rounded-lg px-2.5 py-2.5 text-[13px] font-medium transition-colors",
+    active && "bg-[#0A0A0A] text-[#C6FF3D] font-semibold",
+    !active && !disabled && "text-gray-700 hover:bg-gray-100 hover:text-[#0A0A0A]",
     disabled && "cursor-not-allowed text-gray-400",
   );
 
@@ -119,10 +117,8 @@ function SidebarLink({
       {badge && (
         <span
           className={cn(
-            "rounded-full px-1.5 py-0.5 text-[10px] font-bold",
-            active
-              ? "bg-[#C6FF3D] text-[#0A0A0A]"
-              : "bg-gray-200 text-gray-700",
+            "rounded-md px-1.5 py-0.5 text-[10px] font-semibold",
+            active ? "bg-[#C6FF3D] text-[#0A0A0A]" : "bg-gray-100 text-gray-600",
           )}
         >
           {badge}
@@ -148,19 +144,16 @@ function SidebarLink({
 function UpgradeCard({ plan }: { plan: User["plan"] }) {
   if (plan !== "free") return null;
   return (
-    <div className="relative mt-auto overflow-hidden rounded-2xl bg-gradient-to-br from-[#0A0A0A] to-gray-800 p-4 text-white">
-      <div className="absolute -right-10 -top-10 h-30 w-30 rounded-full bg-[radial-gradient(circle,rgba(198,255,61,0.25),transparent_70%)]" />
-      <p className="relative mb-1.5 text-[10px] font-bold uppercase tracking-[0.08em] text-[#C6FF3D]">
-        Plan Free · 2/3 sesiones
-      </p>
-      <h4 className="relative mb-2.5 text-sm font-bold leading-tight">
+    <div className="mt-auto rounded-xl border border-gray-200 bg-gray-50 p-4">
+      <p className="text-xs text-gray-600">2 de 3 sesiones usadas este mes.</p>
+      <h4 className="mt-1.5 text-sm font-bold text-[#0A0A0A]">
         Sesiones ilimitadas con Pro
       </h4>
       <button
         type="button"
-        className="relative w-full rounded-lg bg-[#C6FF3D] px-3 py-2 text-xs font-bold text-[#0A0A0A] transition-colors hover:bg-[#D4FF7A]"
+        className="mt-3 w-full rounded-lg bg-[#0A0A0A] px-3 py-2 text-xs font-bold text-white transition-colors hover:bg-gray-800"
       >
-        Upgrade a Pro
+        Cambiar a Pro
       </button>
     </div>
   );

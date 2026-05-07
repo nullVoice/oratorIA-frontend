@@ -1,4 +1,4 @@
-import { ArrowRight, RotateCcw, Sparkles, ThumbsUp, Wrench } from "lucide-react";
+import { ArrowRight, RotateCcw, ThumbsUp, Wrench } from "lucide-react";
 
 interface FinalReportProps {
   score: number;
@@ -34,38 +34,29 @@ export function FinalReport({
 
   return (
     <div className="flex flex-col gap-5">
-      {/* Score hero */}
-      <div className="grid grid-cols-1 items-center gap-6 rounded-2xl border border-[#D4FF7A] bg-gradient-to-br from-white to-[#F7FFE0] p-6 sm:grid-cols-[auto_1fr]">
-        <div className="grid h-32 w-32 place-items-center rounded-full bg-white shadow-[0_8px_32px_-8px_rgba(0,0,0,0.1)]">
+      <div className="grid grid-cols-1 items-center gap-6 rounded-2xl border border-gray-200 bg-white p-6 sm:grid-cols-[auto_1fr]">
+        <div className="grid h-28 w-28 place-items-center rounded-full bg-gray-50">
           <div className="text-center">
             <div className={`text-5xl font-extrabold tracking-tight ${scoreTone}`}>
               {score}
             </div>
-            <div className="mt-0.5 text-[10px] font-bold uppercase tracking-wider text-gray-500">
-              / 100
-            </div>
+            <div className="mt-0.5 text-xs text-gray-500">/ 100</div>
           </div>
         </div>
         <div>
-          <div className="mb-2 inline-flex items-center gap-2 rounded-full bg-[#0A0A0A] px-3 py-1 text-xs font-bold text-[#C6FF3D]">
-            <Sparkles className="h-3 w-3" />
-            Reporte de OratorIA Coach
-          </div>
           <h3 className="text-xl font-extrabold tracking-tight text-[#0A0A0A]">
-            ¡Sesión analizada!
+            Sesión analizada
           </h3>
           <p className="mt-1 text-sm leading-relaxed text-gray-700">{summary}</p>
         </div>
       </div>
 
-      {/* Quick metrics row */}
       <div className="grid grid-cols-3 gap-3">
         <SmallMetric label="Duración" value={`${minutes}:${seconds.toString().padStart(2, "0")}`} />
         <SmallMetric label="Muletillas" value={metrics.fillerTotal.toString()} />
-        <SmallMetric label="WPM" value={Math.round(metrics.wpm).toString()} />
+        <SmallMetric label="Palabras/min" value={Math.round(metrics.wpm).toString()} />
       </div>
 
-      {/* Strength + improvement */}
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <Card
           icon={<ThumbsUp className="h-5 w-5" />}
@@ -83,7 +74,6 @@ export function FinalReport({
         />
       </div>
 
-      {/* CTAs */}
       <div className="flex flex-col-reverse gap-2.5 sm:flex-row sm:justify-end">
         <button
           type="button"
@@ -95,7 +85,7 @@ export function FinalReport({
         <button
           type="button"
           onClick={onNewSession}
-          className="inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-[#C6FF3D] px-5 text-[13px] font-bold text-[#0A0A0A] transition-all hover:-translate-y-0.5 hover:bg-[#D4FF7A] hover:shadow-[0_0_24px_rgba(198,255,61,0.4)]"
+          className="inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-[#C6FF3D] px-5 text-[13px] font-bold text-[#0A0A0A] transition-all hover:-translate-y-0.5 hover:bg-[#D4FF7A]"
         >
           <RotateCcw className="h-4 w-4" strokeWidth={2.5} />
           Nueva sesión
@@ -109,9 +99,7 @@ export function FinalReport({
 function SmallMetric({ label, value }: { label: string; value: string }) {
   return (
     <div className="rounded-xl border border-gray-200 bg-white p-3.5">
-      <div className="text-[11px] font-semibold uppercase tracking-wider text-gray-500">
-        {label}
-      </div>
+      <div className="text-xs text-gray-500">{label}</div>
       <div className="mt-1 text-2xl font-extrabold tracking-tight text-[#0A0A0A]">{value}</div>
     </div>
   );
@@ -137,9 +125,7 @@ function Card({
           {icon}
         </span>
         <div>
-          <p className="text-[10px] font-bold uppercase tracking-wider text-[#C6FF3D]">
-            {eyebrow}
-          </p>
+          <p className="text-xs font-semibold text-[#C6FF3D]">{eyebrow}</p>
           <h4 className="mt-0.5 text-base font-bold">{title}</h4>
           <p className="mt-1 text-sm leading-relaxed text-gray-300">{body}</p>
         </div>
@@ -147,14 +133,12 @@ function Card({
     );
   }
   return (
-    <div className="flex items-start gap-3.5 rounded-2xl border border-[#D4FF7A] bg-[#F7FFE0] p-5">
-      <span className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-[#C6FF3D] text-[#0A0A0A]">
+    <div className="flex items-start gap-3.5 rounded-2xl border border-gray-200 bg-white p-5">
+      <span className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-[#F7FFE0] text-[#0A0A0A]">
         {icon}
       </span>
       <div>
-        <p className="text-[10px] font-bold uppercase tracking-wider text-emerald-700">
-          {eyebrow}
-        </p>
+        <p className="text-xs font-semibold text-emerald-700">{eyebrow}</p>
         <h4 className="mt-0.5 text-base font-bold text-[#0A0A0A]">{title}</h4>
         <p className="mt-1 text-sm leading-relaxed text-gray-700">{body}</p>
       </div>

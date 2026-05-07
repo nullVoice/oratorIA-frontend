@@ -179,31 +179,21 @@ function PracticeRoute() {
   if (phase === "active") {
     return (
       <div className="flex flex-col gap-6">
-        {/* Header strip */}
         <header className="flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <p className="text-[11px] font-bold uppercase tracking-wider text-gray-500">
-              Sesión en tiempo real
-            </p>
-            <h1 className="text-xl font-extrabold tracking-tight text-[#0A0A0A]">
-              Cuéntanos lo que practicas
-            </h1>
-          </div>
+          <h1 className="text-xl font-extrabold tracking-tight text-[#0A0A0A]">
+            Sesión en curso
+          </h1>
           <LiveTimer elapsedSeconds={recorder.elapsedSeconds} />
         </header>
 
-        {/* Stage: orb + floating metrics */}
-        <section className="relative overflow-hidden rounded-3xl border border-gray-200 bg-gradient-to-br from-white via-[#F7FFE0]/40 to-white p-8">
+        <section className="rounded-2xl border border-gray-200 bg-white p-6">
           <div className="grid grid-cols-1 items-center gap-6 lg:grid-cols-[1fr_auto]">
-            <div className="flex flex-col items-center gap-4">
+            <div className="flex flex-col items-center gap-3">
               <AudioOrb state={micMuted ? "idle" : "listening"} />
-              <span className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3.5 py-1.5 text-[11px] font-bold uppercase tracking-wider text-emerald-700">
-                <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-500" />
-                {micMuted ? "Micrófono silenciado" : "Te estamos escuchando"}
-              </span>
-              <p className="max-w-md text-center text-[15px] font-medium text-gray-700">
-                Habla con naturalidad. La transcripción y métricas se actualizan
-                cada pocos segundos.
+              <p className="text-sm text-gray-600">
+                {micMuted
+                  ? "Micrófono silenciado."
+                  : "Habla con naturalidad."}
               </p>
             </div>
             <FloatingMetrics
@@ -215,23 +205,20 @@ function PracticeRoute() {
           </div>
         </section>
 
-        {/* Detected fillers (compact strip) */}
         {fillers.byWord.length > 0 && (
-          <div className="rounded-2xl border border-amber-200 bg-amber-50/40 p-4">
-            <div className="mb-2 flex items-center justify-between text-[12px] font-semibold text-amber-900">
-              <span>Muletillas detectadas</span>
-              <span>Total: {fillers.total}</span>
+          <div className="rounded-2xl border border-gray-200 bg-white p-4">
+            <div className="mb-2 flex items-center justify-between text-sm">
+              <h3 className="font-bold text-[#0A0A0A]">Muletillas detectadas</h3>
+              <span className="text-gray-500">{fillers.total} en total</span>
             </div>
             <ul className="flex flex-wrap gap-2">
               {fillers.byWord.map(({ word, count }) => (
                 <li
                   key={word}
-                  className="inline-flex items-center gap-1.5 rounded-full border border-amber-200 bg-white px-3 py-1 text-xs"
+                  className="inline-flex items-center gap-1.5 rounded-full bg-amber-50 px-3 py-1 text-xs text-amber-900"
                 >
-                  <span className="font-semibold text-[#0A0A0A]">“{word}”</span>
-                  <span className="rounded-full bg-amber-200 px-1.5 py-0.5 text-[10px] font-bold text-amber-900">
-                    {count}
-                  </span>
+                  <span className="font-semibold">“{word}”</span>
+                  <span className="text-amber-700">×{count}</span>
                 </li>
               ))}
             </ul>

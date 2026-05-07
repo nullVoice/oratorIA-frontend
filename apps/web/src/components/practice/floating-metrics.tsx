@@ -22,22 +22,10 @@ export function FloatingMetrics({
   const fillerTone = fillerTotal === 0 ? "ok" : fillerTotal > 5 ? "warn" : "default";
 
   return (
-    <aside className="w-full rounded-2xl border border-gray-200 bg-white/90 p-4 shadow-lg backdrop-blur lg:w-[230px]">
-      <header className="mb-3 flex items-center justify-between border-b border-dashed border-gray-200 pb-2.5">
-        <span className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider text-gray-500">
-          <span
-            className={cn(
-              "h-1.5 w-1.5 rounded-full",
-              isListening
-                ? "animate-pulse bg-[#C6FF3D] shadow-[0_0_6px_#C6FF3D]"
-                : "bg-gray-300",
-            )}
-          />
-          Métricas en vivo
-        </span>
-        <span className="font-mono text-[10px] text-gray-400">
-          {formatTime(elapsedSeconds)}
-        </span>
+    <aside className="w-full rounded-2xl border border-gray-200 bg-white p-4 lg:w-[230px]">
+      <header className="mb-3 flex items-baseline justify-between border-b border-gray-100 pb-2.5">
+        <h3 className="text-sm font-bold text-[#0A0A0A]">Métricas</h3>
+        <span className="font-mono text-[11px] text-gray-400">{formatTime(elapsedSeconds)}</span>
       </header>
       <ul className="flex flex-col gap-3">
         <Row
@@ -60,8 +48,8 @@ export function FloatingMetrics({
         />
         <Row
           icon={<Mic className="h-3.5 w-3.5" strokeWidth={1.8} />}
-          label="Mic"
-          value={isListening ? "OK" : "—"}
+          label="Micrófono"
+          value={isListening ? "OK" : "Silencio"}
           tone={isListening ? "ok" : "default"}
         />
       </ul>

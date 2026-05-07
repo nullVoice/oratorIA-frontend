@@ -1,3 +1,4 @@
+import { Loader2 } from "lucide-react";
 import { useEffect, useRef } from "react";
 
 import { SPANISH_FILLERS } from "@/lib/practice/fillers";
@@ -27,27 +28,15 @@ export function ActiveTranscript({
   }, [transcript]);
 
   return (
-    <div className="rounded-2xl border border-gray-200 bg-white shadow-sm">
+    <div className="rounded-2xl border border-gray-200 bg-white">
       <div className="flex items-center justify-between border-b border-gray-100 px-5 py-3">
-        <span className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-wider text-gray-500">
-          <span
-            className={
-              recording
-                ? "h-2 w-2 animate-pulse rounded-full bg-emerald-500 shadow-[0_0_6px_rgba(16,185,129,0.6)]"
-                : "h-2 w-2 rounded-full bg-gray-300"
-            }
-          />
-          Tu transcripción · en vivo
-        </span>
-        <span className="text-[10px] text-gray-400">
-          {isTranscribing
-            ? "Transcribiendo…"
-            : recording
-              ? "Escuchando"
-              : transcript
-                ? "Final"
-                : "Inactivo"}
-        </span>
+        <h3 className="text-sm font-bold text-[#0A0A0A]">Transcripción</h3>
+        {isTranscribing && (
+          <span className="flex items-center gap-1.5 text-xs text-gray-500">
+            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+            Transcribiendo
+          </span>
+        )}
       </div>
       <div
         ref={scrollRef}
@@ -57,13 +46,13 @@ export function ActiveTranscript({
           <p className="whitespace-pre-wrap">
             {renderHighlighted(transcript)}
             {recording && (
-              <span className="ml-0.5 inline-block h-[18px] w-0.5 animate-pulse bg-[#C6FF3D] align-middle" />
+              <span className="ml-0.5 inline-block h-[18px] w-0.5 animate-pulse bg-[#0A0A0A] align-middle" />
             )}
           </p>
         ) : (
           <p className="italic text-gray-400">
             {recording
-              ? "Empieza a hablar; las primeras palabras aparecerán en unos segundos…"
+              ? "Las primeras palabras aparecerán en unos segundos."
               : "Aún no hay transcripción."}
           </p>
         )}
