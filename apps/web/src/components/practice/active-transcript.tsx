@@ -1,9 +1,8 @@
-import { Loader2 } from "lucide-react";
 import { useEffect, useRef } from "react";
 
 import { SPANISH_FILLERS } from "@/lib/practice/fillers";
 
-interface TranscriptPanelProps {
+interface ActiveTranscriptProps {
   transcript: string;
   isTranscribing: boolean;
   recording: boolean;
@@ -15,12 +14,11 @@ const FILLER_RE = new RegExp(
   "gi",
 );
 
-/**
- * Tokenises the transcript and wraps detected fillers in a highlighted span.
- * Bounded by a max-h-48 scroll container so a long transcript never pushes
- * the rest of the UI off-screen.
- */
-export function TranscriptPanel({ transcript, isTranscribing, recording }: TranscriptPanelProps) {
+export function ActiveTranscript({
+  transcript,
+  isTranscribing,
+  recording,
+}: ActiveTranscriptProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -29,37 +27,44 @@ export function TranscriptPanel({ transcript, isTranscribing, recording }: Trans
   }, [transcript]);
 
   return (
-    <div className="rounded-2xl border border-gray-200 bg-white">
+    <div className="rounded-2xl border border-gray-200 bg-white shadow-sm">
       <div className="flex items-center justify-between border-b border-gray-100 px-5 py-3">
-        <h3 className="text-sm font-bold tracking-tight text-[#0A0A0A]">
-          Transcripción en vivo
-        </h3>
-        <div className="flex items-center gap-2 text-xs text-gray-500">
-          {isTranscribing && (
-            <>
-              <Loader2 className="h-3.5 w-3.5 animate-spin" />
-              <span>Transcribiendo…</span>
-            </>
-          )}
-          {!isTranscribing && recording && (
-            <>
-              <span className="h-2 w-2 animate-pulse rounded-full bg-red-500" />
-              <span>Escuchando</span>
-            </>
-          )}
-          {!recording && transcript && <span>Final</span>}
-        </div>
+        <span className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-wider text-gray-500">
+          <span
+            className={
+              recording
+                ? "h-2 w-2 animate-pulse rounded-full bg-emerald-500 shadow-[0_0_6px_rgba(16,185,129,0.6)]"
+                : "h-2 w-2 rounded-full bg-gray-300"
+            }
+          />
+          Tu transcripción · en vivo
+        </span>
+        <span className="text-[10px] text-gray-400">
+          {isTranscribing
+            ? "Transcribiendo…"
+            : recording
+              ? "Escuchando"
+              : transcript
+                ? "Final"
+                : "Inactivo"}
+        </span>
       </div>
-      <div ref={scrollRef} className="max-h-48 overflow-y-auto px-5 py-4">
+      <div
+        ref={scrollRef}
+        className="max-h-44 overflow-y-auto px-5 py-4 font-mono text-[14px] leading-relaxed text-gray-800"
+      >
         {transcript ? (
-          <p className="whitespace-pre-wrap text-[14px] leading-relaxed text-gray-800">
+          <p className="whitespace-pre-wrap">
             {renderHighlighted(transcript)}
+            {recording && (
+              <span className="ml-0.5 inline-block h-[18px] w-0.5 animate-pulse bg-[#C6FF3D] align-middle" />
+            )}
           </p>
         ) : (
-          <p className="text-[14px] italic text-gray-400">
+          <p className="italic text-gray-400">
             {recording
               ? "Empieza a hablar; las primeras palabras aparecerán en unos segundos…"
-              : "La transcripción aparecerá aquí cuando empieces a grabar."}
+              : "Aún no hay transcripción."}
           </p>
         )}
       </div>
@@ -71,12 +76,9 @@ function renderHighlighted(text: string): React.ReactNode[] {
   const out: React.ReactNode[] = [];
   let lastIndex = 0;
   let match: RegExpExecArray | null;
-  // The regex is global; reset lastIndex to be safe across renders.
   FILLER_RE.lastIndex = 0;
   while ((match = FILLER_RE.exec(text)) !== null) {
-    if (match.index > lastIndex) {
-      out.push(text.slice(lastIndex, match.index));
-    }
+    if (match.index > lastIndex) out.push(text.slice(lastIndex, match.index));
     const matched = match[0];
     const isFiller = FILLER_SET.has(matched.toLowerCase());
     out.push(

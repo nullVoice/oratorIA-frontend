@@ -1,13 +1,15 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { Loader2 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 
-import { FillersPanel } from "@/components/practice/fillers-panel";
+import { ActiveTranscript } from "@/components/practice/active-transcript";
+import { AnalyzingState } from "@/components/practice/analyzing-state";
+import { AudioOrb } from "@/components/practice/audio-orb";
+import { ControlBar } from "@/components/practice/control-bar";
 import { FinalReport } from "@/components/practice/final-report";
-import { LiveMetrics } from "@/components/practice/live-metrics";
-import { RecordButton } from "@/components/practice/record-button";
-import { TranscriptPanel } from "@/components/practice/transcript-panel";
+import { FloatingMetrics } from "@/components/practice/floating-metrics";
+import { LiveTimer } from "@/components/practice/live-timer";
+import { PreSession } from "@/components/practice/pre-session";
 import { api } from "@/lib/api/client";
 import { calculateWpm, detectFillers } from "@/lib/practice/fillers";
 import { useRecorder } from "@/lib/practice/use-recorder";
@@ -25,20 +27,38 @@ export const Route = createFileRoute("/_authenticated/practice")({
   component: PracticeRoute,
 });
 
+type Phase = "pre" | "active" | "finalizing" | "report";
+
 function PracticeRoute() {
   const navigate = useNavigate();
+  const [phase, setPhase] = useState<Phase>("pre");
   const [report, setReport] = useState<FinalizeResponse | null>(null);
   const [finalMetrics, setFinalMetrics] = useState<{
     durationSeconds: number;
     fillerTotal: number;
     wpm: number;
   } | null>(null);
-  const [isFinalizing, setIsFinalizing] = useState(false);
+  const [micMuted, setMicMuted] = useState(false);
+  const muteTrackRef = useRef<MediaStreamTrack | null>(null);
 
   const recorder = useRecorder({
     transcribeIntervalMs: 8000,
     onError: (err) => toast.error(err.message || "Error al grabar"),
   });
+
+  // Find the active mic track once recording starts so we can toggle mute.
+  useEffect(() => {
+    if (recorder.state !== "recording") {
+      muteTrackRef.current = null;
+      return;
+    }
+    const recorderInstance = (window as unknown as { __recorder?: { stream?: MediaStream } });
+    const stream = recorderInstance?.__recorder?.stream;
+    if (stream) {
+      const track = stream.getAudioTracks()[0];
+      if (track) muteTrackRef.current = track;
+    }
+  }, [recorder.state]);
 
   const fillers = useMemo(() => detectFillers(recorder.transcript), [recorder.transcript]);
   const wpm = useMemo(
@@ -49,8 +69,10 @@ function PracticeRoute() {
   const handleStart = async () => {
     setReport(null);
     setFinalMetrics(null);
+    setMicMuted(false);
     try {
       await recorder.start();
+      setPhase("active");
     } catch (err) {
       const msg = err instanceof Error ? err.message : "No se pudo acceder al micrófono";
       toast.error(msg);
@@ -58,6 +80,8 @@ function PracticeRoute() {
   };
 
   const handleStop = async () => {
+    if (recorder.state !== "recording") return;
+    setPhase("finalizing");
     try {
       await recorder.stop();
       const finalTranscript = recorder.transcript;
@@ -71,11 +95,12 @@ function PracticeRoute() {
       });
 
       if (!finalTranscript.trim()) {
-        toast.error("No detectamos audio. Intenta hablar más fuerte.");
+        toast.error("No detectamos audio. Intenta hablar más fuerte y vuelve a empezar.");
+        setPhase("pre");
+        recorder.reset();
         return;
       }
 
-      setIsFinalizing(true);
       const resp = (await api
         .post("api/v1/practice/finalize", {
           json: {
@@ -87,22 +112,41 @@ function PracticeRoute() {
         })
         .json()) as FinalizeResponse;
       setReport(resp);
+      setPhase("report");
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Error al finalizar";
       toast.error(msg);
-    } finally {
-      setIsFinalizing(false);
+      setPhase("active");
     }
+  };
+
+  const handleCancel = () => {
+    if (recorder.state === "recording") void recorder.stop().catch(() => undefined);
+    recorder.reset();
+    setReport(null);
+    setFinalMetrics(null);
+    setPhase("pre");
   };
 
   const handleNewSession = () => {
     setReport(null);
     setFinalMetrics(null);
     recorder.reset();
+    setPhase("pre");
   };
 
-  // Render the report once Claude returns.
-  if (report && finalMetrics) {
+  const handleToggleMic = () => {
+    setMicMuted((prev) => {
+      const next = !prev;
+      const track = muteTrackRef.current;
+      if (track) track.enabled = !next;
+      return next;
+    });
+  };
+
+  // ============================ RENDER PHASES ============================
+
+  if (phase === "report" && report && finalMetrics) {
     return (
       <div className="mx-auto flex max-w-3xl flex-col gap-7">
         <div>
@@ -128,60 +172,93 @@ function PracticeRoute() {
     );
   }
 
-  // While Claude evaluates.
-  if (isFinalizing) {
+  if (phase === "finalizing") {
+    return <AnalyzingState />;
+  }
+
+  if (phase === "active") {
     return (
-      <div className="mx-auto flex max-w-md flex-col items-center gap-4 py-20 text-center">
-        <Loader2 className="h-10 w-10 animate-spin text-[#0A0A0A]" />
-        <h2 className="text-xl font-extrabold tracking-tight text-[#0A0A0A]">
-          Analizando tu desempeño
-        </h2>
-        <p className="text-sm text-gray-600">
-          OratorIA Coach está revisando tu transcripción y métricas.
-        </p>
+      <div className="flex flex-col gap-6">
+        {/* Header strip */}
+        <header className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <p className="text-[11px] font-bold uppercase tracking-wider text-gray-500">
+              Sesión en tiempo real
+            </p>
+            <h1 className="text-xl font-extrabold tracking-tight text-[#0A0A0A]">
+              Cuéntanos lo que practicas
+            </h1>
+          </div>
+          <LiveTimer elapsedSeconds={recorder.elapsedSeconds} />
+        </header>
+
+        {/* Stage: orb + floating metrics */}
+        <section className="relative overflow-hidden rounded-3xl border border-gray-200 bg-gradient-to-br from-white via-[#F7FFE0]/40 to-white p-8">
+          <div className="grid grid-cols-1 items-center gap-6 lg:grid-cols-[1fr_auto]">
+            <div className="flex flex-col items-center gap-4">
+              <AudioOrb state={micMuted ? "idle" : "listening"} />
+              <span className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3.5 py-1.5 text-[11px] font-bold uppercase tracking-wider text-emerald-700">
+                <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-500" />
+                {micMuted ? "Micrófono silenciado" : "Te estamos escuchando"}
+              </span>
+              <p className="max-w-md text-center text-[15px] font-medium text-gray-700">
+                Habla con naturalidad. La transcripción y métricas se actualizan
+                cada pocos segundos.
+              </p>
+            </div>
+            <FloatingMetrics
+              elapsedSeconds={recorder.elapsedSeconds}
+              fillerTotal={fillers.total}
+              wpm={wpm}
+              isListening={recorder.state === "recording" && !micMuted}
+            />
+          </div>
+        </section>
+
+        {/* Detected fillers (compact strip) */}
+        {fillers.byWord.length > 0 && (
+          <div className="rounded-2xl border border-amber-200 bg-amber-50/40 p-4">
+            <div className="mb-2 flex items-center justify-between text-[12px] font-semibold text-amber-900">
+              <span>Muletillas detectadas</span>
+              <span>Total: {fillers.total}</span>
+            </div>
+            <ul className="flex flex-wrap gap-2">
+              {fillers.byWord.map(({ word, count }) => (
+                <li
+                  key={word}
+                  className="inline-flex items-center gap-1.5 rounded-full border border-amber-200 bg-white px-3 py-1 text-xs"
+                >
+                  <span className="font-semibold text-[#0A0A0A]">“{word}”</span>
+                  <span className="rounded-full bg-amber-200 px-1.5 py-0.5 text-[10px] font-bold text-amber-900">
+                    {count}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        <ActiveTranscript
+          transcript={recorder.transcript}
+          isTranscribing={recorder.isTranscribing}
+          recording={recorder.state === "recording"}
+        />
+
+        <ControlBar
+          micMuted={micMuted}
+          onToggleMic={handleToggleMic}
+          onStop={handleStop}
+          onCancel={handleCancel}
+        />
       </div>
     );
   }
 
-  // Recording / idle UI.
+  // Pre-session (default).
   return (
-    <div className="mx-auto flex max-w-3xl flex-col gap-6">
-      <div>
-        <h1 className="text-2xl font-extrabold tracking-tight text-[#0A0A0A]">
-          Sesión en tiempo real
-        </h1>
-        <p className="mt-1 text-sm text-gray-600">
-          Habla con naturalidad. Detectamos muletillas, ritmo y duración mientras hablas; al
-          finalizar te damos un reporte con score, fortaleza y mejora.
-        </p>
-      </div>
-
-      <div className="flex flex-col items-center gap-4 rounded-2xl border border-gray-200 bg-white p-8">
-        <RecordButton state={recorder.state} onStart={handleStart} onStop={handleStop} />
-        <p className="text-sm font-semibold text-gray-700">
-          {recorder.state === "recording"
-            ? "Pulsa para detener y analizar"
-            : recorder.state === "starting"
-              ? "Solicitando micrófono…"
-              : recorder.state === "stopping"
-                ? "Procesando última transcripción…"
-                : "Pulsa para empezar a grabar"}
-        </p>
-      </div>
-
-      <LiveMetrics
-        elapsedSeconds={recorder.elapsedSeconds}
-        fillerTotal={fillers.total}
-        wpm={wpm}
-      />
-
-      <FillersPanel fillers={fillers} />
-
-      <TranscriptPanel
-        transcript={recorder.transcript}
-        isTranscribing={recorder.isTranscribing}
-        recording={recorder.state === "recording"}
-      />
-    </div>
+    <PreSession
+      starting={recorder.state === "starting"}
+      onStart={handleStart}
+    />
   );
 }
