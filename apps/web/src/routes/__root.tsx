@@ -35,7 +35,15 @@ export const Route = createRootRouteWithContext<RouterAppContext>()({
 
 function RootDocument() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
-  const isAuthRoute = pathname === '/login' || pathname === '/register';
+  // Routes that bring their own chrome — login/register show their
+  // marketing layout, /dashboard (and future authenticated routes)
+  // render their sidebar+topbar. Everywhere else gets the legacy
+  // global Header.
+  const ownsChrome =
+    pathname === "/login" ||
+    pathname === "/register" ||
+    pathname === "/dashboard" ||
+    pathname.startsWith("/dashboard/");
 
   return (
     <html lang="en" className="dark">
@@ -43,8 +51,8 @@ function RootDocument() {
         <HeadContent />
       </head>
       <body>
-        <div className={isAuthRoute ? "h-svh" : "grid h-svh grid-rows-[auto_1fr]"}>
-          {!isAuthRoute && <Header />}
+        <div className={ownsChrome ? "h-svh" : "grid h-svh grid-rows-[auto_1fr]"}>
+          {!ownsChrome && <Header />}
           <Outlet />
         </div>
         <Toaster richColors />
