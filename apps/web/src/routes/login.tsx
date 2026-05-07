@@ -1,31 +1,18 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { Eye, EyeOff, Loader2, Mail } from "lucide-react";
+import { ArrowRight, Eye, EyeOff, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
 
-import { AuthShowcase } from "@/components/auth/auth-showcase";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { AuthDivider } from "@/components/auth/auth-divider";
+import { AuthVisualLogin } from "@/components/auth/auth-visual-login";
+import { OAuthButtons } from "@/components/auth/oauth-buttons";
 import { useAuthStore } from "@/stores/auth-store";
 
 const LoginSchema = z.object({
   email: z.string().email("Email inválido"),
   password: z.string().min(8, "Mínimo 8 caracteres"),
 });
-
-const GithubIcon = ({ className }: { className?: string }) => (
-  <svg viewBox="0 0 24 24" fill="currentColor" className={className} xmlns="http://www.w3.org/2000/svg">
-    <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z" />
-  </svg>
-);
-
-const LinkedinIcon = ({ className }: { className?: string }) => (
-  <svg viewBox="0 0 24 24" fill="currentColor" className={className} xmlns="http://www.w3.org/2000/svg">
-    <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
-  </svg>
-);
 
 export const Route = createFileRoute("/login")({
   component: LoginRoute,
@@ -38,6 +25,7 @@ function LoginRoute() {
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [remember, setRemember] = useState(true);
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -58,131 +46,248 @@ function LoginRoute() {
     try {
       await login(parsed.data.email, parsed.data.password);
       toast.success("Sesión iniciada correctamente");
-      navigate({ to: "/" });
+      navigate({ to: "/dashboard" });
     } catch (err) {
       const message = err instanceof Error ? err.message : "Error al iniciar sesión";
-      const friendly = message.includes("401") || message.includes("Unauthorized")
-        ? "Email o contraseña incorrectos"
-        : message;
+      const friendly =
+        message.includes("401") || message.includes("Unauthorized")
+          ? "Email o contraseña incorrectos"
+          : message;
       toast.error(friendly);
     }
   };
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-gray-50 p-4 md:p-6">
-      <div className="grid min-h-[820px] w-full max-w-[1200px] grid-cols-1 overflow-hidden rounded-3xl bg-white shadow-2xl xl:grid-cols-2">
-        <section className="relative flex flex-col justify-center px-8 py-14 lg:px-16">
-          <div className="mx-auto w-full max-w-md">
-            <img src="/OratorIA-lockup.svg" alt="OratorIA" className="mb-12 h-8" />
+    <main className="grid min-h-svh grid-cols-1 bg-white lg:grid-cols-2">
+      {/* Form side */}
+      <section className="relative flex flex-col justify-center px-6 py-10 sm:px-10 lg:px-14 lg:py-14">
+        <div className="mx-auto w-full max-w-md">
+          <Link to="/" aria-label="OratorIA" className="inline-block">
+            <img src="/OratorIA-lockup.svg" alt="OratorIA" className="h-8" />
+          </Link>
 
-            <h2 className="mb-2 text-3xl font-extrabold tracking-tight text-gray-900">
-              Bienvenido de vuelta
-            </h2>
-            <p className="mb-8 text-sm text-gray-600">
-              Continúa tu camino de orador y mejora tus habilidades.
-            </p>
+          <h2 className="mt-8 text-3xl font-extrabold leading-tight tracking-tight text-[#0A0A0A]">
+            Bienvenido de vuelta
+          </h2>
+          <p className="mb-8 mt-2 text-[15px] text-gray-600">
+            Continúa tu camino de orador.
+          </p>
 
-            {/* Social login — disabled until OAuth lands. */}
-            <div className="mb-6 flex flex-col gap-3">
-              <Button
-                variant="outline"
-                className="flex h-11 w-full items-center gap-2"
-                disabled
-                title="Próximamente"
-              >
-                <GithubIcon className="h-5 w-5" />
-                Iniciar con GitHub
-                <span className="ml-auto text-xs text-gray-400">Próximamente</span>
-              </Button>
-              <Button
-                variant="outline"
-                className="flex h-11 w-full items-center gap-2"
-                disabled
-                title="Próximamente"
-              >
-                <LinkedinIcon className="h-5 w-5 text-[#0A66C2]" />
-                Iniciar con LinkedIn
-                <span className="ml-auto text-xs text-gray-400">Próximamente</span>
-              </Button>
-            </div>
+          <OAuthButtons />
 
-            <div className="my-6 flex items-center gap-3 text-xs font-medium uppercase tracking-wider text-gray-400">
-              <div className="h-px flex-1 bg-gray-200" />
-              <span>o usa tu email</span>
-              <div className="h-px flex-1 bg-gray-200" />
-            </div>
+          <AuthDivider>o usa tu email</AuthDivider>
 
-            <form onSubmit={handleSubmit} className="flex flex-col gap-5" noValidate>
-              <div className="flex flex-col gap-2">
-                <Label htmlFor="email">Email</Label>
-                <div className="relative">
-                  <Mail className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="tu@email.com"
-                    autoComplete="email"
-                    required
-                    className="h-11 pl-10"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    aria-invalid={!!errors.email}
-                  />
-                </div>
-                {errors.email && <p className="text-xs text-red-600">{errors.email}</p>}
-              </div>
+          <form onSubmit={handleSubmit} className="flex flex-col" noValidate>
+            <Field
+              id="email"
+              label="Email"
+              type="email"
+              autoComplete="email"
+              placeholder="tu@email.com"
+              value={email}
+              onChange={setEmail}
+              error={errors.email}
+            />
 
-              <div className="flex flex-col gap-2">
-                <Label htmlFor="password">Contraseña</Label>
-                <div className="relative">
-                  <Input
-                    id="password"
-                    type={showPassword ? "text" : "password"}
-                    autoComplete="current-password"
-                    required
-                    className="h-11 pr-10"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    aria-invalid={!!errors.password}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-3 text-gray-400 hover:text-gray-600"
-                    aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
-                  >
-                    {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
-                  </button>
-                </div>
-                {errors.password && <p className="text-xs text-red-600">{errors.password}</p>}
-              </div>
-
-              <div className="flex justify-end">
-                <a href="#" className="text-sm font-semibold text-lime-600 hover:text-lime-700">
-                  ¿Olvidaste tu contraseña?
+            <PasswordField
+              id="password"
+              label="Contraseña"
+              autoComplete="current-password"
+              value={password}
+              onChange={setPassword}
+              error={errors.password}
+              show={showPassword}
+              onToggleShow={() => setShowPassword((v) => !v)}
+              labelExtra={
+                <a
+                  href="#"
+                  className="text-[13px] font-semibold text-[#0A0A0A] underline decoration-gray-300 underline-offset-[3px] hover:decoration-[#C6FF3D]"
+                >
+                  Olvidé mi contraseña
                 </a>
-              </div>
+              }
+            />
 
-              <Button
-                type="submit"
-                disabled={isLoading}
-                className="mt-2 h-12 w-full bg-[#C6FF3D] text-base font-bold text-black shadow-lg transition-all hover:bg-[#b5f02c] hover:shadow-xl"
+            <Checkbox
+              checked={remember}
+              onChange={setRemember}
+              label="Mantener sesión iniciada en este dispositivo"
+            />
+
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="flex h-12 w-full items-center justify-center gap-2 rounded-lg bg-[#C6FF3D] text-[15px] font-bold text-[#0A0A0A] transition-all hover:-translate-y-0.5 hover:bg-[#D4FF7A] hover:shadow-[0_0_24px_rgba(198,255,61,0.4)] disabled:cursor-not-allowed disabled:opacity-70"
+            >
+              {isLoading ? (
+                <Loader2 className="h-5 w-5 animate-spin" />
+              ) : (
+                <>
+                  Iniciar sesión
+                  <ArrowRight className="h-4 w-4" strokeWidth={2.5} />
+                </>
+              )}
+            </button>
+
+            <p className="mt-6 text-center text-sm text-gray-600">
+              ¿Nuevo en OratorIA?{" "}
+              <Link
+                to="/register"
+                className="font-bold text-[#0A0A0A] underline decoration-[#C6FF3D] underline-offset-[3px]"
               >
-                {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : "Iniciar sesión"}
-              </Button>
-            </form>
-
-            <p className="mt-8 text-center text-sm text-gray-600">
-              ¿No tienes cuenta?{" "}
-              <Link to="/register" className="font-bold text-black hover:underline">
-                Regístrate aquí
+                Crear cuenta
               </Link>
             </p>
-          </div>
-        </section>
+          </form>
+        </div>
+      </section>
 
-        <AuthShowcase badge="OratorIA Active Sessions: 1,240" />
-      </div>
+      <AuthVisualLogin />
     </main>
+  );
+}
+
+interface FieldProps {
+  id: string;
+  label: string;
+  type?: string;
+  placeholder?: string;
+  autoComplete?: string;
+  value: string;
+  onChange: (v: string) => void;
+  error?: string;
+}
+
+function Field({
+  id,
+  label,
+  type = "text",
+  placeholder,
+  autoComplete,
+  value,
+  onChange,
+  error,
+}: FieldProps) {
+  return (
+    <div className="mb-4 flex flex-col gap-1.5">
+      <label htmlFor={id} className="text-[13px] font-semibold text-gray-700">
+        {label}
+      </label>
+      <input
+        id={id}
+        type={type}
+        placeholder={placeholder}
+        autoComplete={autoComplete}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        aria-invalid={!!error}
+        className={`h-11 w-full rounded-lg border px-4 text-[15px] outline-none transition-all focus:ring-3 ${
+          error
+            ? "border-red-500 focus:ring-red-500/15"
+            : "border-gray-200 focus:border-[#C6FF3D] focus:ring-[#C6FF3D]/25"
+        }`}
+      />
+      {error && (
+        <span className="mt-0.5 text-xs font-medium text-red-500">{error}</span>
+      )}
+    </div>
+  );
+}
+
+interface PasswordFieldProps {
+  id: string;
+  label: string;
+  autoComplete?: string;
+  value: string;
+  onChange: (v: string) => void;
+  error?: string;
+  show: boolean;
+  onToggleShow: () => void;
+  labelExtra?: React.ReactNode;
+  hint?: React.ReactNode;
+}
+
+function PasswordField({
+  id,
+  label,
+  autoComplete,
+  value,
+  onChange,
+  error,
+  show,
+  onToggleShow,
+  labelExtra,
+  hint,
+}: PasswordFieldProps) {
+  return (
+    <div className="mb-4 flex flex-col gap-1.5">
+      <div className="flex items-center justify-between">
+        <label htmlFor={id} className="text-[13px] font-semibold text-gray-700">
+          {label}
+        </label>
+        {labelExtra}
+      </div>
+      <div className="relative">
+        <input
+          id={id}
+          type={show ? "text" : "password"}
+          autoComplete={autoComplete}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          aria-invalid={!!error}
+          className={`h-11 w-full rounded-lg border px-4 pr-11 text-[15px] outline-none transition-all focus:ring-3 ${
+            error
+              ? "border-red-500 focus:ring-red-500/15"
+              : "border-gray-200 focus:border-[#C6FF3D] focus:ring-[#C6FF3D]/25"
+          }`}
+        />
+        <button
+          type="button"
+          onClick={onToggleShow}
+          aria-label={show ? "Ocultar contraseña" : "Mostrar contraseña"}
+          className="absolute right-3 top-1/2 grid h-6 w-6 -translate-y-1/2 place-items-center rounded text-gray-400 transition-colors hover:text-gray-700"
+        >
+          {show ? <EyeOff className="h-4.5 w-4.5" /> : <Eye className="h-4.5 w-4.5" />}
+        </button>
+      </div>
+      {hint}
+      {error && (
+        <span className="mt-0.5 text-xs font-medium text-red-500">{error}</span>
+      )}
+    </div>
+  );
+}
+
+function Checkbox({
+  checked,
+  onChange,
+  label,
+}: {
+  checked: boolean;
+  onChange: (v: boolean) => void;
+  label: React.ReactNode;
+}) {
+  return (
+    <label className="mb-6 flex cursor-pointer select-none items-start gap-2.5">
+      <input
+        type="checkbox"
+        checked={checked}
+        onChange={(e) => onChange(e.target.checked)}
+        className="sr-only"
+      />
+      <span
+        aria-hidden
+        className={`mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-md border transition-colors ${
+          checked ? "border-[#C6FF3D] bg-[#C6FF3D]" : "border-gray-300 bg-white"
+        }`}
+      >
+        {checked && (
+          <svg viewBox="0 0 24 24" className="h-3 w-3" fill="none" stroke="#0A0A0A" strokeWidth={3}>
+            <polyline points="20 6 9 17 4 12" />
+          </svg>
+        )}
+      </span>
+      <span className="text-[13px] leading-relaxed text-gray-700">{label}</span>
+    </label>
   );
 }

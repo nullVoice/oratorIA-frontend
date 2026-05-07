@@ -1,13 +1,12 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { Eye, EyeOff, Loader2, Mail } from "lucide-react";
+import { ArrowRight, Eye, EyeOff, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
 
-import { AuthShowcase } from "@/components/auth/auth-showcase";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { AuthDivider } from "@/components/auth/auth-divider";
+import { AuthVisualSignup } from "@/components/auth/auth-visual-signup";
+import { OAuthButtons } from "@/components/auth/oauth-buttons";
 import { UserSegmentSchema } from "@/lib/api/schemas";
 import { useAuthStore } from "@/stores/auth-store";
 
@@ -18,7 +17,7 @@ const RegisterSchema = z.object({
   segment: UserSegmentSchema,
 });
 
-type FormErrors = Partial<Record<keyof z.infer<typeof RegisterSchema>, string>>;
+type FormErrors = Partial<Record<keyof z.infer<typeof RegisterSchema> | "terms", string>>;
 
 const SEGMENT_OPTIONS: Array<{
   value: z.infer<typeof UserSegmentSchema>;
@@ -43,6 +42,14 @@ function calculateStrength(pw: string): number {
   return score;
 }
 
+const STRENGTH_HINT = [
+  "",
+  "Muy débil · agrega más caracteres",
+  "Débil · prueba con mayúsculas y números",
+  "Buena contraseña · agrega un símbolo para máxima seguridad",
+  "Excelente seguridad",
+];
+
 function RegisterRoute() {
   const navigate = useNavigate();
   const register = useAuthStore((s) => s.register);
@@ -52,6 +59,7 @@ function RegisterRoute() {
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
   const [segment, setSegment] = useState<z.infer<typeof UserSegmentSchema> | "">("");
+  const [acceptedTerms, setAcceptedTerms] = useState(true);
   const [errors, setErrors] = useState<FormErrors>({});
 
   const strength = calculateStrength(password);
@@ -59,6 +67,11 @@ function RegisterRoute() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrors({});
+
+    if (!acceptedTerms) {
+      setErrors({ terms: "Debes aceptar los términos para crear la cuenta." });
+      return;
+    }
 
     const parsed = RegisterSchema.safeParse({
       email,
@@ -79,157 +92,337 @@ function RegisterRoute() {
     try {
       await register(parsed.data);
       toast.success("Cuenta creada correctamente");
-      navigate({ to: "/" });
+      navigate({ to: "/dashboard" });
     } catch (err) {
       const message = err instanceof Error ? err.message : "Error al crear cuenta";
-      const friendly = message.includes("400") || message.includes("REGISTER_USER_ALREADY_EXISTS")
-        ? "Ya existe una cuenta con ese email"
-        : message;
+      const friendly =
+        message.includes("400") || message.includes("REGISTER_USER_ALREADY_EXISTS")
+          ? "Ya existe una cuenta con ese email"
+          : message;
       toast.error(friendly);
     }
   };
 
+  const strengthClass =
+    password.length === 0
+      ? "bg-gray-200"
+      : strength <= 1
+        ? "bg-red-500"
+        : strength === 2
+          ? "bg-amber-400"
+          : strength === 3
+            ? "bg-[#C6FF3D]"
+            : "bg-emerald-500";
+
   return (
-    <main className="flex min-h-screen items-center justify-center bg-gray-50 p-4 md:p-6">
-      <div className="grid min-h-[820px] w-full max-w-[1200px] grid-cols-1 overflow-hidden rounded-3xl bg-white shadow-2xl xl:grid-cols-2">
-        <section className="relative flex flex-col justify-center px-8 py-14 lg:px-16">
-          <div className="mx-auto w-full max-w-md">
-            <img src="/OratorIA-lockup.svg" alt="OratorIA" className="mb-10 h-8" />
+    <main className="grid min-h-svh grid-cols-1 bg-white lg:grid-cols-2">
+      {/* Form side */}
+      <section className="relative flex flex-col justify-center px-6 py-10 sm:px-10 lg:px-14 lg:py-14">
+        <div className="mx-auto w-full max-w-md">
+          <Link to="/" aria-label="OratorIA" className="inline-block">
+            <img src="/OratorIA-lockup.svg" alt="OratorIA" className="h-8" />
+          </Link>
 
-            <h2 className="mb-2 text-3xl font-extrabold tracking-tight text-gray-900">
-              Empieza a hablar mejor hoy
-            </h2>
-            <p className="mb-8 text-sm text-gray-600">
-              Crea tu cuenta gratis. No requiere tarjeta de crédito.
-            </p>
+          <h2 className="mt-8 text-3xl font-extrabold leading-tight tracking-tight text-[#0A0A0A]">
+            Empieza a hablar mejor hoy
+          </h2>
+          <p className="mb-8 mt-2 text-[15px] text-gray-600">
+            Crea tu cuenta gratis. No requiere tarjeta.
+          </p>
 
-            <form onSubmit={handleSubmit} className="flex flex-col gap-5" noValidate>
-              <div className="flex flex-col gap-2">
-                <Label htmlFor="full_name">Nombre completo</Label>
-                <Input
-                  id="full_name"
-                  placeholder="Ej. Ana García"
-                  autoComplete="name"
-                  required
-                  className="h-11"
-                  value={fullName}
-                  onChange={(e) => setFullName(e.target.value)}
-                  aria-invalid={!!errors.full_name}
-                />
-                {errors.full_name && <p className="text-xs text-red-600">{errors.full_name}</p>}
-              </div>
+          <OAuthButtons />
 
-              <div className="flex flex-col gap-2">
-                <Label htmlFor="email">Email</Label>
-                <div className="relative">
-                  <Mail className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="tu@email.com"
-                    autoComplete="email"
-                    required
-                    className="h-11 pl-10"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    aria-invalid={!!errors.email}
-                  />
-                </div>
-                {errors.email && <p className="text-xs text-red-600">{errors.email}</p>}
-              </div>
+          <AuthDivider>o regístrate con email</AuthDivider>
 
-              <div className="flex flex-col gap-2">
-                <Label htmlFor="password">Contraseña</Label>
-                <div className="relative">
-                  <Input
-                    id="password"
-                    type={showPassword ? "text" : "password"}
-                    autoComplete="new-password"
-                    required
-                    className="h-11 pr-10"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    aria-invalid={!!errors.password}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-3 text-gray-400 hover:text-gray-600"
-                    aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+          <form onSubmit={handleSubmit} className="flex flex-col" noValidate>
+            <Field
+              id="full_name"
+              label="Nombre completo"
+              autoComplete="name"
+              placeholder="María González"
+              value={fullName}
+              onChange={setFullName}
+              error={errors.full_name}
+            />
+
+            <Field
+              id="email"
+              label="Email"
+              type="email"
+              autoComplete="email"
+              placeholder="tu@email.com"
+              value={email}
+              onChange={setEmail}
+              error={errors.email}
+            />
+
+            <PasswordField
+              id="password"
+              label="Contraseña"
+              autoComplete="new-password"
+              placeholder="Mínimo 8 caracteres"
+              value={password}
+              onChange={setPassword}
+              error={errors.password}
+              show={showPassword}
+              onToggleShow={() => setShowPassword((v) => !v)}
+              hint={
+                password.length > 0 ? (
+                  <>
+                    <div className="mt-2 flex gap-1">
+                      {[1, 2, 3, 4].map((level) => (
+                        <span
+                          key={level}
+                          className={`h-1 flex-1 rounded-sm transition-colors ${
+                            level <= strength ? strengthClass : "bg-gray-200"
+                          }`}
+                        />
+                      ))}
+                    </div>
+                    <span className="mt-1 block text-xs text-gray-500">
+                      {STRENGTH_HINT[strength]}
+                    </span>
+                  </>
+                ) : null
+              }
+            />
+
+            <fieldset className="mb-5 flex flex-col gap-2">
+              <legend className="mb-1 text-[13px] font-semibold text-gray-700">
+                ¿En qué contexto te ves?
+              </legend>
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+                {SEGMENT_OPTIONS.map((opt) => (
+                  <label
+                    key={opt.value}
+                    className={`flex cursor-pointer flex-col gap-0.5 rounded-lg border p-3 transition-colors ${
+                      segment === opt.value
+                        ? "border-[#C6FF3D] bg-[#F7FFE0]"
+                        : "border-gray-200 hover:border-gray-300"
+                    }`}
                   >
-                    {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
-                  </button>
-                </div>
-                <div className="mt-2 flex gap-1">
-                  {[1, 2, 3, 4].map((level) => {
-                    const color = password.length === 0
-                      ? "bg-gray-200"
-                      : level <= strength
-                        ? strength <= 2
-                          ? "bg-orange-400"
-                          : strength === 3
-                            ? "bg-yellow-400"
-                            : "bg-lime-500"
-                        : "bg-gray-200";
-                    return (
-                      <span
-                        key={level}
-                        className={`h-1.5 flex-1 rounded-full transition-colors ${color}`}
-                      />
-                    );
-                  })}
-                </div>
-                {errors.password && <p className="text-xs text-red-600">{errors.password}</p>}
+                    <input
+                      type="radio"
+                      name="segment"
+                      value={opt.value}
+                      checked={segment === opt.value}
+                      onChange={() => setSegment(opt.value)}
+                      className="sr-only"
+                    />
+                    <span className="text-sm font-semibold text-[#0A0A0A]">{opt.label}</span>
+                    <span className="text-xs text-gray-500">{opt.description}</span>
+                  </label>
+                ))}
               </div>
+              {errors.segment && (
+                <span className="text-xs font-medium text-red-500">{errors.segment}</span>
+              )}
+            </fieldset>
 
-              <fieldset className="flex flex-col gap-2">
-                <legend className="text-sm font-medium text-gray-900">¿En qué contexto te ves?</legend>
-                <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
-                  {SEGMENT_OPTIONS.map((opt) => (
-                    <label
-                      key={opt.value}
-                      className={`flex cursor-pointer flex-col gap-0.5 rounded-lg border p-3 transition-colors ${
-                        segment === opt.value
-                          ? "border-lime-500 bg-lime-50"
-                          : "border-gray-200 hover:border-gray-300"
-                      }`}
-                    >
-                      <input
-                        type="radio"
-                        name="segment"
-                        value={opt.value}
-                        checked={segment === opt.value}
-                        onChange={() => setSegment(opt.value)}
-                        className="sr-only"
-                      />
-                      <span className="text-sm font-semibold text-gray-900">{opt.label}</span>
-                      <span className="text-xs text-gray-500">{opt.description}</span>
-                    </label>
-                  ))}
-                </div>
-                {errors.segment && <p className="text-xs text-red-600">{errors.segment}</p>}
-              </fieldset>
+            <Checkbox
+              checked={acceptedTerms}
+              onChange={setAcceptedTerms}
+              label={
+                <>
+                  Acepto los{" "}
+                  <a
+                    href="#"
+                    className="font-semibold text-[#0A0A0A] underline decoration-gray-300 underline-offset-[2px] hover:decoration-[#C6FF3D]"
+                  >
+                    Términos de servicio
+                  </a>{" "}
+                  y la{" "}
+                  <a
+                    href="#"
+                    className="font-semibold text-[#0A0A0A] underline decoration-gray-300 underline-offset-[2px] hover:decoration-[#C6FF3D]"
+                  >
+                    Política de privacidad
+                  </a>{" "}
+                  de OratorIA.
+                </>
+              }
+              error={errors.terms}
+            />
 
-              <Button
-                type="submit"
-                disabled={isLoading}
-                className="mt-2 h-12 w-full bg-[#C6FF3D] text-base font-bold text-black shadow-lg transition-all hover:bg-[#b5f02c] hover:shadow-xl"
-              >
-                {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : "Crear cuenta gratis"}
-              </Button>
-            </form>
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="flex h-12 w-full items-center justify-center gap-2 rounded-lg bg-[#C6FF3D] text-[15px] font-bold text-[#0A0A0A] transition-all hover:-translate-y-0.5 hover:bg-[#D4FF7A] hover:shadow-[0_0_24px_rgba(198,255,61,0.4)] disabled:cursor-not-allowed disabled:opacity-70"
+            >
+              {isLoading ? (
+                <Loader2 className="h-5 w-5 animate-spin" />
+              ) : (
+                <>
+                  Crear cuenta gratis
+                  <ArrowRight className="h-4 w-4" strokeWidth={2.5} />
+                </>
+              )}
+            </button>
 
-            <p className="mt-8 text-center text-sm text-gray-600">
+            <p className="mt-6 text-center text-sm text-gray-600">
               ¿Ya tienes cuenta?{" "}
-              <Link to="/login" className="font-bold text-black hover:underline">
-                Inicia sesión
+              <Link
+                to="/login"
+                className="font-bold text-[#0A0A0A] underline decoration-[#C6FF3D] underline-offset-[3px]"
+              >
+                Iniciar sesión
               </Link>
             </p>
-          </div>
-        </section>
+          </form>
+        </div>
+      </section>
 
-        <AuthShowcase badge="+12.000 oradores entrenándose hoy" />
-      </div>
+      <AuthVisualSignup />
     </main>
+  );
+}
+
+interface FieldProps {
+  id: string;
+  label: string;
+  type?: string;
+  placeholder?: string;
+  autoComplete?: string;
+  value: string;
+  onChange: (v: string) => void;
+  error?: string;
+}
+
+function Field({
+  id,
+  label,
+  type = "text",
+  placeholder,
+  autoComplete,
+  value,
+  onChange,
+  error,
+}: FieldProps) {
+  return (
+    <div className="mb-4 flex flex-col gap-1.5">
+      <label htmlFor={id} className="text-[13px] font-semibold text-gray-700">
+        {label}
+      </label>
+      <input
+        id={id}
+        type={type}
+        placeholder={placeholder}
+        autoComplete={autoComplete}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        aria-invalid={!!error}
+        className={`h-11 w-full rounded-lg border px-4 text-[15px] outline-none transition-all focus:ring-3 ${
+          error
+            ? "border-red-500 focus:ring-red-500/15"
+            : "border-gray-200 focus:border-[#C6FF3D] focus:ring-[#C6FF3D]/25"
+        }`}
+      />
+      {error && (
+        <span className="mt-0.5 text-xs font-medium text-red-500">{error}</span>
+      )}
+    </div>
+  );
+}
+
+interface PasswordFieldProps {
+  id: string;
+  label: string;
+  autoComplete?: string;
+  placeholder?: string;
+  value: string;
+  onChange: (v: string) => void;
+  error?: string;
+  show: boolean;
+  onToggleShow: () => void;
+  hint?: React.ReactNode;
+}
+
+function PasswordField({
+  id,
+  label,
+  autoComplete,
+  placeholder,
+  value,
+  onChange,
+  error,
+  show,
+  onToggleShow,
+  hint,
+}: PasswordFieldProps) {
+  return (
+    <div className="mb-4 flex flex-col gap-1.5">
+      <label htmlFor={id} className="text-[13px] font-semibold text-gray-700">
+        {label}
+      </label>
+      <div className="relative">
+        <input
+          id={id}
+          type={show ? "text" : "password"}
+          autoComplete={autoComplete}
+          placeholder={placeholder}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          aria-invalid={!!error}
+          className={`h-11 w-full rounded-lg border px-4 pr-11 text-[15px] outline-none transition-all focus:ring-3 ${
+            error
+              ? "border-red-500 focus:ring-red-500/15"
+              : "border-gray-200 focus:border-[#C6FF3D] focus:ring-[#C6FF3D]/25"
+          }`}
+        />
+        <button
+          type="button"
+          onClick={onToggleShow}
+          aria-label={show ? "Ocultar contraseña" : "Mostrar contraseña"}
+          className="absolute right-3 top-1/2 grid h-6 w-6 -translate-y-1/2 place-items-center rounded text-gray-400 transition-colors hover:text-gray-700"
+        >
+          {show ? <EyeOff className="h-4.5 w-4.5" /> : <Eye className="h-4.5 w-4.5" />}
+        </button>
+      </div>
+      {hint}
+      {error && (
+        <span className="mt-0.5 text-xs font-medium text-red-500">{error}</span>
+      )}
+    </div>
+  );
+}
+
+function Checkbox({
+  checked,
+  onChange,
+  label,
+  error,
+}: {
+  checked: boolean;
+  onChange: (v: boolean) => void;
+  label: React.ReactNode;
+  error?: string;
+}) {
+  return (
+    <div className="mb-5">
+      <label className="flex cursor-pointer select-none items-start gap-2.5">
+        <input
+          type="checkbox"
+          checked={checked}
+          onChange={(e) => onChange(e.target.checked)}
+          className="sr-only"
+        />
+        <span
+          aria-hidden
+          className={`mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-md border transition-colors ${
+            checked ? "border-[#C6FF3D] bg-[#C6FF3D]" : "border-gray-300 bg-white"
+          }`}
+        >
+          {checked && (
+            <svg viewBox="0 0 24 24" className="h-3 w-3" fill="none" stroke="#0A0A0A" strokeWidth={3}>
+              <polyline points="20 6 9 17 4 12" />
+            </svg>
+          )}
+        </span>
+        <span className="text-[13px] leading-relaxed text-gray-700">{label}</span>
+      </label>
+      {error && (
+        <span className="ml-7 mt-1 block text-xs font-medium text-red-500">{error}</span>
+      )}
+    </div>
   );
 }
