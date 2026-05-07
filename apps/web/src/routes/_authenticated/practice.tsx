@@ -36,13 +36,15 @@ function PracticeRoute() {
   const [finalMetrics, setFinalMetrics] = useState<{
     durationSeconds: number;
     fillerTotal: number;
+    fillerByWord: Array<{ word: string; count: number }>;
     wpm: number;
+    transcript: string;
   } | null>(null);
   const [micMuted, setMicMuted] = useState(false);
   const muteTrackRef = useRef<MediaStreamTrack | null>(null);
 
   const recorder = useRecorder({
-    transcribeIntervalMs: 8000,
+    transcribeIntervalMs: 4000,
     onError: (err) => toast.error(err.message || "Error al grabar"),
   });
 
@@ -91,7 +93,9 @@ function PracticeRoute() {
       setFinalMetrics({
         durationSeconds: finalDuration,
         fillerTotal: finalFillers.total,
+        fillerByWord: finalFillers.byWord,
         wpm: finalWpm,
+        transcript: finalTranscript,
       });
 
       if (!finalTranscript.trim()) {

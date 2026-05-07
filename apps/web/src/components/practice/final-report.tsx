@@ -1,5 +1,7 @@
 import { ArrowRight, RotateCcw, ThumbsUp, Wrench } from "lucide-react";
 
+import { SPANISH_FILLERS } from "@/lib/practice/fillers";
+
 interface FinalReportProps {
   score: number;
   summary: string;
@@ -10,7 +12,9 @@ interface FinalReportProps {
   metrics: {
     durationSeconds: number;
     fillerTotal: number;
+    fillerByWord: Array<{ word: string; count: number }>;
     wpm: number;
+    transcript: string;
   };
   onNewSession: () => void;
   onBackToDashboard: () => void;
@@ -57,6 +61,13 @@ export function FinalReport({
         <SmallMetric label="Palabras/min" value={Math.round(metrics.wpm).toString()} />
       </div>
 
+      <FillersBreakdown
+        total={metrics.fillerTotal}
+        byWord={metrics.fillerByWord}
+      />
+
+      <TranscriptCard transcript={metrics.transcript} />
+
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <Card
           icon={<ThumbsUp className="h-5 w-5" />}
@@ -74,18 +85,18 @@ export function FinalReport({
         />
       </div>
 
-      <div className="flex flex-col-reverse gap-2.5 sm:flex-row sm:justify-end">
+      <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
         <button
           type="button"
           onClick={onBackToDashboard}
-          className="inline-flex h-11 items-center justify-center rounded-lg border border-gray-200 bg-white px-5 text-[13px] font-bold text-[#0A0A0A] transition-colors hover:border-gray-300"
+          className="inline-flex h-11 items-center justify-center rounded-lg border border-gray-200 bg-white px-5 text-sm font-semibold text-[#0A0A0A] transition-colors hover:border-gray-300"
         >
           Volver al dashboard
         </button>
         <button
           type="button"
           onClick={onNewSession}
-          className="inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-[#C6FF3D] px-5 text-[13px] font-bold text-[#0A0A0A] transition-all hover:-translate-y-0.5 hover:bg-[#D4FF7A]"
+          className="inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-[#C6FF3D] px-5 text-sm font-bold text-[#0A0A0A] transition-all hover:-translate-y-0.5 hover:bg-[#D4FF7A]"
         >
           <RotateCcw className="h-4 w-4" strokeWidth={2.5} />
           Nueva sesión
@@ -94,6 +105,86 @@ export function FinalReport({
       </div>
     </div>
   );
+}
+
+function FillersBreakdown({
+  total,
+  byWord,
+}: {
+  total: number;
+  byWord: Array<{ word: string; count: number }>;
+}) {
+  return (
+    <div className="rounded-2xl border border-gray-200 bg-white p-5">
+      <div className="mb-3 flex items-center justify-between">
+        <h4 className="text-sm font-semibold text-[#0A0A0A]">Muletillas detectadas</h4>
+        <span className="text-xs text-gray-500">{total} en total</span>
+      </div>
+      {byWord.length === 0 ? (
+        <p className="text-sm text-gray-500">
+          No detectamos ninguna muletilla en esta sesión.
+        </p>
+      ) : (
+        <ul className="flex flex-wrap gap-2">
+          {byWord.map(({ word, count }) => (
+            <li
+              key={word}
+              className="inline-flex items-center gap-1.5 rounded-full bg-amber-50 px-3 py-1 text-xs text-amber-900"
+            >
+              <span className="font-semibold">“{word}”</span>
+              <span className="text-amber-700">×{count}</span>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
+const FILLER_SET = new Set<string>(SPANISH_FILLERS as readonly string[]);
+const FILLER_RE = new RegExp(
+  `\\b(${SPANISH_FILLERS.map((f) => f.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|")})\\b`,
+  "gi",
+);
+
+function TranscriptCard({ transcript }: { transcript: string }) {
+  return (
+    <div className="rounded-2xl border border-gray-200 bg-white">
+      <div className="border-b border-gray-100 px-5 py-3">
+        <h4 className="text-sm font-semibold text-[#0A0A0A]">Transcripción completa</h4>
+      </div>
+      <div className="max-h-72 overflow-y-auto px-5 py-4 text-sm leading-relaxed text-gray-800">
+        <p className="whitespace-pre-wrap">{renderHighlighted(transcript)}</p>
+      </div>
+    </div>
+  );
+}
+
+function renderHighlighted(text: string): React.ReactNode[] {
+  const out: React.ReactNode[] = [];
+  let lastIndex = 0;
+  let match: RegExpExecArray | null;
+  FILLER_RE.lastIndex = 0;
+  while ((match = FILLER_RE.exec(text)) !== null) {
+    if (match.index > lastIndex) out.push(text.slice(lastIndex, match.index));
+    const matched = match[0];
+    const isFiller = FILLER_SET.has(matched.toLowerCase());
+    out.push(
+      <mark
+        key={`${match.index}-${matched}`}
+        className={
+          isFiller
+            ? "rounded bg-amber-200/70 px-1 py-0 font-semibold text-amber-900"
+            : ""
+        }
+      >
+        {matched}
+      </mark>,
+    );
+    lastIndex = match.index + matched.length;
+  }
+  if (lastIndex < text.length) out.push(text.slice(lastIndex));
+  return out;
 }
 
 function SmallMetric({ label, value }: { label: string; value: string }) {

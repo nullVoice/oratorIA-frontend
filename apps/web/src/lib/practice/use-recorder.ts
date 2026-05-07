@@ -53,7 +53,7 @@ function isTranscribeResponse(value: unknown): value is TranscribeResponseShape 
 }
 
 export function useRecorder(options: UseRecorderOptions = {}): UseRecorderReturn {
-  const { transcribeIntervalMs = 8000, onTranscriptUpdate, onError } = options;
+  const { transcribeIntervalMs = 4000, onTranscriptUpdate, onError } = options;
 
   const [state, setState] = useState<RecorderState>("idle");
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
