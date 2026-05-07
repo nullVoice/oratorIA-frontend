@@ -1,11 +1,19 @@
-import { createFileRoute, useNavigate } from '@tanstack/react-router';
-import { useState } from 'react';
-import { Mail, Eye, EyeOff, Loader2 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { authClient } from '@/lib/auth-client';
-import { toast } from 'sonner';
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { Eye, EyeOff, Loader2, Mail } from "lucide-react";
+import { useState } from "react";
+import { toast } from "sonner";
+import { z } from "zod";
+
+import { AuthShowcase } from "@/components/auth/auth-showcase";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useAuthStore } from "@/stores/auth-store";
+
+const LoginSchema = z.object({
+  email: z.string().email("Email inválido"),
+  password: z.string().min(8, "Mínimo 8 caracteres"),
+});
 
 const GithubIcon = ({ className }: { className?: string }) => (
   <svg viewBox="0 0 24 24" fill="currentColor" className={className} xmlns="http://www.w3.org/2000/svg">
@@ -19,120 +27,92 @@ const LinkedinIcon = ({ className }: { className?: string }) => (
   </svg>
 );
 
-export const Route = createFileRoute('/login')({
+export const Route = createFileRoute("/login")({
   component: LoginRoute,
 });
 
 function LoginRoute() {
   const navigate = useNavigate();
-  const [isLoginView, setIsLoginView] = useState(true);
+  const login = useAuthStore((s) => s.login);
+  const isLoading = useAuthStore((s) => s.isLoading);
   const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-
-  const calculatePasswordStrength = (pw: string): number => {
-    let score = 0;
-    if (pw.length >= 8) score++;
-    if (/[A-Z]/.test(pw)) score++;
-    if (/[0-9]/.test(pw)) score++;
-    if (/[^A-Za-z0-9]/.test(pw)) score++;
-    return score;
-  };
-
-  const strength = calculatePasswordStrength(password);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
-    try {
-      if (isLoginView) {
-        await authClient.signIn.email({
-          email,
-          password,
-        }, {
-          onSuccess: () => {
-            toast.success('Sesión iniciada correctamente');
-            navigate({ to: '/' });
-          },
-          onError: (ctx) => {
-            toast.error(ctx.error.message || 'Error al iniciar sesión');
-          }
-        });
-      } else {
-        await authClient.signUp.email({
-          email,
-          password,
-          name,
-        }, {
-          onSuccess: () => {
-            toast.success('Cuenta creada correctamente');
-            navigate({ to: '/' });
-          },
-          onError: (ctx) => {
-            toast.error(ctx.error.message || 'Error al crear cuenta');
-          }
-        });
+    setErrors({});
+
+    const parsed = LoginSchema.safeParse({ email, password });
+    if (!parsed.success) {
+      const fieldErrors: typeof errors = {};
+      for (const issue of parsed.error.issues) {
+        const key = issue.path[0] as keyof typeof errors;
+        fieldErrors[key] = issue.message;
       }
-    } catch (error) {
-      toast.error('Ocurrió un error inesperado');
-    } finally {
-      setIsLoading(false);
+      setErrors(fieldErrors);
+      return;
+    }
+
+    try {
+      await login(parsed.data.email, parsed.data.password);
+      toast.success("Sesión iniciada correctamente");
+      navigate({ to: "/" });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Error al iniciar sesión";
+      const friendly = message.includes("401") || message.includes("Unauthorized")
+        ? "Email o contraseña incorrectos"
+        : message;
+      toast.error(friendly);
     }
   };
 
   return (
-    <main className="min-h-screen bg-gray-50 flex items-center justify-center p-4 md:p-6">
-      <div className="w-full max-w-[1200px] bg-white rounded-3xl overflow-hidden shadow-2xl grid grid-cols-1 xl:grid-cols-2 min-h-[820px]">
-        {/* Lado izquierdo: Formulario */}
-        <section className="flex flex-col justify-center px-8 py-14 lg:px-16 relative">
-          <div className="max-w-md w-full mx-auto">
-            <img src="/OratorIA-lockup.svg" alt="OratorIA" className="h-8 mb-12" />
+    <main className="flex min-h-screen items-center justify-center bg-gray-50 p-4 md:p-6">
+      <div className="grid min-h-[820px] w-full max-w-[1200px] grid-cols-1 overflow-hidden rounded-3xl bg-white shadow-2xl xl:grid-cols-2">
+        <section className="relative flex flex-col justify-center px-8 py-14 lg:px-16">
+          <div className="mx-auto w-full max-w-md">
+            <img src="/OratorIA-lockup.svg" alt="OratorIA" className="mb-12 h-8" />
 
-            <h2 className="text-3xl font-extrabold text-gray-900 tracking-tight mb-2">
-              {isLoginView ? 'Bienvenido de vuelta' : 'Empieza a hablar mejor hoy'}
+            <h2 className="mb-2 text-3xl font-extrabold tracking-tight text-gray-900">
+              Bienvenido de vuelta
             </h2>
-            <p className="text-gray-600 text-sm mb-8">
-              {isLoginView
-                ? 'Continúa tu camino de orador y mejora tus habilidades.'
-                : 'Crea tu cuenta gratis. No requiere tarjeta de crédito.'}
+            <p className="mb-8 text-sm text-gray-600">
+              Continúa tu camino de orador y mejora tus habilidades.
             </p>
 
-            {/* Botones Sociales */}
-            <div className="flex flex-col gap-3 mb-6">
-              <Button variant="outline" className="h-11 w-full flex items-center gap-2">
-                <GithubIcon className="w-5 h-5" />
-                {isLoginView ? 'Iniciar con GitHub' : 'Continuar con GitHub'}
+            {/* Social login — disabled until OAuth lands. */}
+            <div className="mb-6 flex flex-col gap-3">
+              <Button
+                variant="outline"
+                className="flex h-11 w-full items-center gap-2"
+                disabled
+                title="Próximamente"
+              >
+                <GithubIcon className="h-5 w-5" />
+                Iniciar con GitHub
+                <span className="ml-auto text-xs text-gray-400">Próximamente</span>
               </Button>
-              <Button variant="outline" className="h-11 w-full flex items-center gap-2">
-                <LinkedinIcon className="w-5 h-5 text-[#0A66C2]" />
-                {isLoginView ? 'Iniciar con LinkedIn' : 'Continuar con LinkedIn'}
+              <Button
+                variant="outline"
+                className="flex h-11 w-full items-center gap-2"
+                disabled
+                title="Próximamente"
+              >
+                <LinkedinIcon className="h-5 w-5 text-[#0A66C2]" />
+                Iniciar con LinkedIn
+                <span className="ml-auto text-xs text-gray-400">Próximamente</span>
               </Button>
             </div>
 
-            <div className="flex items-center gap-3 my-6 text-xs font-medium uppercase text-gray-400 tracking-wider">
-              <div className="flex-1 h-px bg-gray-200" />
+            <div className="my-6 flex items-center gap-3 text-xs font-medium uppercase tracking-wider text-gray-400">
+              <div className="h-px flex-1 bg-gray-200" />
               <span>o usa tu email</span>
-              <div className="flex-1 h-px bg-gray-200" />
+              <div className="h-px flex-1 bg-gray-200" />
             </div>
 
-            {/* Formulario */}
-            <form onSubmit={handleSubmit} className="flex flex-col gap-5">
-              {!isLoginView && (
-                <div className="flex flex-col gap-2">
-                  <Label htmlFor="name">Nombre completo</Label>
-                  <Input 
-                    id="name" 
-                    placeholder="Ej. Ana García" 
-                    required 
-                    className="h-11"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                  />
-                </div>
-              )}
-
+            <form onSubmit={handleSubmit} className="flex flex-col gap-5" noValidate>
               <div className="flex flex-col gap-2">
                 <Label htmlFor="email">Email</Label>
                 <div className="relative">
@@ -141,12 +121,15 @@ function LoginRoute() {
                     id="email"
                     type="email"
                     placeholder="tu@email.com"
+                    autoComplete="email"
                     required
                     className="h-11 pl-10"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
+                    aria-invalid={!!errors.email}
                   />
                 </div>
+                {errors.email && <p className="text-xs text-red-600">{errors.email}</p>}
               </div>
 
               <div className="flex flex-col gap-2">
@@ -154,133 +137,51 @@ function LoginRoute() {
                 <div className="relative">
                   <Input
                     id="password"
-                    type={showPassword ? 'text' : 'password'}
+                    type={showPassword ? "text" : "password"}
+                    autoComplete="current-password"
                     required
                     className="h-11 pr-10"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
+                    aria-invalid={!!errors.password}
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
                     className="absolute right-3 top-3 text-gray-400 hover:text-gray-600"
+                    aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
                   >
-                    {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                    {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                   </button>
                 </div>
-
-                {/* Medidor de fuerza de contraseña (Solo en registro) */}
-                {!isLoginView && (
-                  <div className="flex gap-1 mt-2">
-                    {[1, 2, 3, 4].map((level) => (
-                      <span
-                        key={level}
-                        className={`h-1.5 flex-1 rounded-full transition-colors ${
-                          password.length === 0
-                            ? 'bg-gray-200'
-                            : level <= strength
-                              ? strength <= 2
-                                ? 'bg-orange-400'
-                                : strength === 3
-                                  ? 'bg-yellow-400'
-                                  : 'bg-lime-500'
-                              : 'bg-gray-200'
-                        }`}
-                      />
-                    ))}
-                  </div>
-                )}
+                {errors.password && <p className="text-xs text-red-600">{errors.password}</p>}
               </div>
 
-              {isLoginView && (
-                <div className="flex justify-end">
-                  <a href="#" className="text-sm font-semibold text-lime-600 hover:text-lime-700">
-                    ¿Olvidaste tu contraseña?
-                  </a>
-                </div>
-              )}
+              <div className="flex justify-end">
+                <a href="#" className="text-sm font-semibold text-lime-600 hover:text-lime-700">
+                  ¿Olvidaste tu contraseña?
+                </a>
+              </div>
 
               <Button
                 type="submit"
                 disabled={isLoading}
-                className="w-full h-12 mt-2 bg-[#C6FF3D] hover:bg-[#b5f02c] text-black font-bold text-base shadow-lg hover:shadow-xl transition-all"
+                className="mt-2 h-12 w-full bg-[#C6FF3D] text-base font-bold text-black shadow-lg transition-all hover:bg-[#b5f02c] hover:shadow-xl"
               >
-                {isLoading ? (
-                  <Loader2 className="w-5 h-5 animate-spin" />
-                ) : isLoginView ? (
-                  'Iniciar sesión'
-                ) : (
-                  'Crear cuenta gratis'
-                )}
+                {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : "Iniciar sesión"}
               </Button>
             </form>
 
-            <p className="text-center text-sm text-gray-600 mt-8">
-              {isLoginView ? '¿No tienes cuenta? ' : '¿Ya tienes cuenta? '}
-              <button
-                onClick={() => {
-                  setIsLoginView(!isLoginView);
-                  setPassword('');
-                }}
-                className="font-bold text-black hover:underline"
-              >
-                {isLoginView ? 'Regístrate aquí' : 'Inicia sesión'}
-              </button>
+            <p className="mt-8 text-center text-sm text-gray-600">
+              ¿No tienes cuenta?{" "}
+              <Link to="/register" className="font-bold text-black hover:underline">
+                Regístrate aquí
+              </Link>
             </p>
           </div>
         </section>
 
-        {/* Lado derecho: Visual Showcase */}
-        <section className="hidden xl:flex flex-col justify-between bg-zinc-950 p-12 relative overflow-hidden text-white">
-          {/* Decorative Background */}
-          <div className="absolute top-[-20%] right-[-10%] w-[600px] h-[600px] bg-lime-500/20 rounded-full blur-[120px] pointer-events-none" />
-
-          {/* Top Badge */}
-          <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-md border border-white/10 rounded-full text-xs font-semibold w-max z-10">
-            <span className="w-2 h-2 rounded-full bg-lime-400 shadow-[0_0_8px_#C6FF3D] animate-pulse"></span>
-            {isLoginView ? 'OratorIA Active Sessions: 1,240' : '+12.000 oradores entrenándose hoy'}
-          </div>
-
-          {/* Central Mockup */}
-          <div className="z-10 bg-white/5 border border-white/10 rounded-2xl p-8 backdrop-blur-xl shadow-2xl">
-            <div className="flex items-center gap-4 mb-6">
-              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-lime-400 to-emerald-500 flex items-center justify-center font-bold text-black text-xl">
-                O
-              </div>
-              <div>
-                <h3 className="font-bold text-lg">Tu Coach Personal</h3>
-                <p className="text-sm text-gray-400">Análisis en tiempo real</p>
-              </div>
-            </div>
-            
-            {/* Visualizer Mock */}
-            <div className="h-32 flex items-end gap-2 justify-center py-4">
-              {[40, 70, 45, 90, 65, 30, 85, 50, 20].map((h, i) => (
-                <div 
-                  key={i} 
-                  className="w-4 bg-lime-400 rounded-t-sm" 
-                  style={{ height: `${h}%`, opacity: 0.5 + (h / 200) }}
-                />
-              ))}
-            </div>
-            <p className="text-center text-sm font-medium text-lime-400 mt-4">Analizando tono y ritmo...</p>
-          </div>
-
-          {/* Testimonial Quote */}
-          <div className="z-10 mt-12">
-            <span className="font-serif text-6xl leading-[0.5] text-lime-400 font-extrabold block mb-4">"</span>
-            <blockquote className="text-xl font-medium text-gray-200 mb-6">
-              Pasé de tartamudear en mis pitches a cerrar mi primera ronda de inversión. OratorIA cambió mi carrera.
-            </blockquote>
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-gray-800" />
-              <div>
-                <p className="font-bold text-sm">Carlos M.</p>
-                <p className="text-xs text-gray-400">CEO & Founder en TechCorp</p>
-              </div>
-            </div>
-          </div>
-        </section>
+        <AuthShowcase badge="OratorIA Active Sessions: 1,240" />
       </div>
     </main>
   );
