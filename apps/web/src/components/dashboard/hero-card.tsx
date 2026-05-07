@@ -1,6 +1,6 @@
+import { Link } from "@tanstack/react-router";
 import { ArrowRight } from "lucide-react";
 
-import { streak } from "@/lib/dashboard/mock-data";
 import { cn } from "@/lib/utils";
 
 function greeting(now = new Date()) {
@@ -10,7 +10,29 @@ function greeting(now = new Date()) {
   return "Buenas noches";
 }
 
-export function HeroCard({ firstName }: { firstName: string }) {
+interface HeroCardProps {
+  firstName: string;
+  streakDays: number;
+  weekDots: Array<"done" | "today" | "future">;
+  weeklyCount: number;
+  weeklyGoal: number;
+}
+
+export function HeroCard({
+  firstName,
+  streakDays,
+  weekDots,
+  weeklyCount,
+  weeklyGoal,
+}: HeroCardProps) {
+  const remainingThisWeek = Math.max(0, weeklyGoal - weeklyCount);
+  const subtitle = streakDays > 0
+    ? `Llevas ${streakDays} día${streakDays === 1 ? "" : "s"} seguidos practicando.`
+    : "Empieza tu próxima sesión cuando quieras.";
+  const goalLine = remainingThisWeek > 0
+    ? `Te falta${remainingThisWeek === 1 ? "" : "n"} ${remainingThisWeek} sesió${remainingThisWeek === 1 ? "n" : "nes"} para tu meta semanal.`
+    : "Ya cumpliste tu meta semanal — sigue así.";
+
   return (
     <section className="grid grid-cols-1 items-center gap-8 rounded-2xl border border-gray-200 bg-white p-7 xl:grid-cols-[1fr_auto]">
       <div>
@@ -18,39 +40,41 @@ export function HeroCard({ firstName }: { firstName: string }) {
           {greeting()}, {firstName}.
         </h1>
         <p className="mt-2 max-w-md text-[15px] text-gray-600">
-          Llevas {streak.days} días seguidos practicando. Estás a una sesión de tu meta semanal.
+          {subtitle} {goalLine}
         </p>
-        <div className="mt-5 flex flex-wrap items-center gap-2.5">
-          <button
-            type="button"
-            className="inline-flex h-11 items-center gap-2 rounded-lg bg-[#0A0A0A] px-5 text-[13px] font-bold text-white transition-colors hover:bg-gray-800"
+        <div className="mt-5 flex flex-wrap items-center gap-2">
+          <Link
+            to="/practice"
+            className="inline-flex h-11 items-center gap-2 rounded-lg bg-[#0A0A0A] px-5 text-sm font-bold text-white transition-colors hover:bg-gray-800"
           >
             Empezar nueva sesión
             <ArrowRight className="h-4 w-4" strokeWidth={2} />
-          </button>
-          <button
-            type="button"
-            className="inline-flex h-11 items-center rounded-lg border border-gray-200 bg-white px-5 text-[13px] font-bold text-[#0A0A0A] transition-colors hover:border-gray-300"
-          >
-            Ver mi plan
-          </button>
+          </Link>
         </div>
       </div>
 
-      <StreakBadge />
+      <StreakBadge days={streakDays} weekDots={weekDots} />
     </section>
   );
 }
 
-function StreakBadge() {
+function StreakBadge({
+  days,
+  weekDots,
+}: {
+  days: number;
+  weekDots: Array<"done" | "today" | "future">;
+}) {
   return (
     <div className="flex flex-col items-center gap-3 rounded-2xl border border-gray-200 bg-gray-50 px-6 py-5">
       <span className="text-5xl font-bold leading-none tracking-tight text-[#0A0A0A]">
-        {streak.days}
+        {days}
       </span>
-      <span className="text-xs text-gray-600">días seguidos</span>
+      <span className="text-xs text-gray-600">
+        {days === 1 ? "día seguido" : "días seguidos"}
+      </span>
       <div className="flex gap-1">
-        {streak.weekDots.map((s, i) => (
+        {weekDots.map((s, i) => (
           <span
             key={i}
             className={cn(

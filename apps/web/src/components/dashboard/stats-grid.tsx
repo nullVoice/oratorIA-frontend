@@ -1,27 +1,39 @@
-import { Calendar, Clock, Target, Trophy, type LucideIcon } from "lucide-react";
+import { Calendar, Clock, Target, TrendingUp, type LucideIcon } from "lucide-react";
 
-import { stats } from "@/lib/dashboard/mock-data";
+interface StatsGridProps {
+  totalSessions: number;
+  averageScore: number | null;
+  weeklyCount: number;
+  weeklyGoal: number;
+  practicedSeconds: number;
+}
 
-export function StatsGrid() {
-  const hours = Math.floor(stats.practicedTimeMinutes / 60);
-  const minutes = stats.practicedTimeMinutes % 60;
+export function StatsGrid({
+  totalSessions,
+  averageScore,
+  weeklyCount,
+  weeklyGoal,
+  practicedSeconds,
+}: StatsGridProps) {
+  const hours = Math.floor(practicedSeconds / 3600);
+  const minutes = Math.round((practicedSeconds % 3600) / 60);
 
   return (
     <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
       <StatCard
-        label="Score global"
+        label="Score promedio"
         icon={Target}
         value={
-          <>
-            {stats.globalScore}
-            <span className="ml-1 text-[13px] font-semibold text-gray-500">/100</span>
-          </>
+          averageScore === null ? (
+            "—"
+          ) : (
+            <>
+              {averageScore}
+              <span className="ml-1 text-[13px] font-medium text-gray-500">/100</span>
+            </>
+          )
         }
-        meta={
-          <>
-            <span className="font-bold text-emerald-500">↑ +{stats.globalScoreDelta}</span> vs mes pasado
-          </>
-        }
+        meta={averageScore === null ? "Aún sin sesiones completadas" : "Promedio de tus reportes"}
       />
 
       <StatCard
@@ -29,33 +41,44 @@ export function StatsGrid() {
         icon={Calendar}
         value={
           <>
-            {stats.weeklySessions.done}
-            <span className="ml-1 text-[13px] font-semibold text-gray-500">
-              / {stats.weeklySessions.goal}
-            </span>
+            {weeklyCount}
+            <span className="ml-1 text-[13px] font-medium text-gray-500">/ {weeklyGoal}</span>
           </>
         }
-        meta={<MetaProgress percent={(stats.weeklySessions.done / stats.weeklySessions.goal) * 100} />}
+        meta={
+          <MetaProgress
+            percent={weeklyGoal > 0 ? (weeklyCount / weeklyGoal) * 100 : 0}
+          />
+        }
       />
 
       <StatCard
         label="Tiempo practicado"
         icon={Clock}
         value={
-          <>
-            {hours}
-            <span className="text-[13px] font-semibold text-gray-500">h</span> {minutes}
-            <span className="text-[13px] font-semibold text-gray-500">min</span>
-          </>
+          hours > 0 ? (
+            <>
+              {hours}
+              <span className="text-[13px] font-medium text-gray-500">h</span> {minutes}
+              <span className="text-[13px] font-medium text-gray-500">min</span>
+            </>
+          ) : minutes > 0 ? (
+            <>
+              {minutes}
+              <span className="text-[13px] font-medium text-gray-500">min</span>
+            </>
+          ) : (
+            "—"
+          )
         }
         meta="Total acumulado"
       />
 
       <StatCard
-        label="Próximo logro"
-        icon={Trophy}
-        value={<span className="text-lg leading-tight">{stats.nextAchievement}</span>}
-        meta={stats.nextAchievementCopy}
+        label="Total de sesiones"
+        icon={TrendingUp}
+        value={totalSessions.toString()}
+        meta={totalSessions === 0 ? "Empieza tu primera sesión" : "Incluye estados intermedios"}
       />
     </div>
   );
@@ -75,8 +98,8 @@ function StatCard({
   return (
     <div className="rounded-2xl border border-gray-200 bg-white p-4 transition-all hover:-translate-y-0.5 hover:shadow-md">
       <div className="mb-3 flex items-center justify-between">
-        <span className="text-xs font-semibold text-gray-500">{label}</span>
-        <span className="grid h-7 w-7 place-items-center rounded-lg bg-[#F7FFE0] text-[#0A0A0A]">
+        <span className="text-xs font-medium text-gray-500">{label}</span>
+        <span className="grid h-7 w-7 place-items-center rounded-lg bg-gray-100 text-[#0A0A0A]">
           <Icon className="h-3.5 w-3.5" strokeWidth={1.8} />
         </span>
       </div>
