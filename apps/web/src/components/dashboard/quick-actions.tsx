@@ -3,7 +3,7 @@ import { Mic, Upload } from "lucide-react";
 
 export function QuickActions() {
   return (
-    <div className="grid grid-cols-1 gap-3.5 xl:grid-cols-2">
+    <div className="grid grid-cols-1 gap-3 xl:grid-cols-2">
       <ActionCard
         title="Sesión en tiempo real"
         description="Practica con feedback inmediato. Detectamos muletillas, ritmo y duración mientras hablas."

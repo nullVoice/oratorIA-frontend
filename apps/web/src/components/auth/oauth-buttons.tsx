@@ -39,7 +39,7 @@ export function OAuthButtons() {
         title="Próximamente"
         className="flex h-11 w-full cursor-not-allowed items-center justify-center gap-2.5 rounded-lg border border-gray-200 bg-white px-4 text-sm font-semibold text-[#0A0A0A] opacity-70"
       >
-        <GoogleIcon className="h-4.5 w-4.5" />
+        <GoogleIcon className="h-5 w-5" />
         Continuar con Google
         <span className="ml-auto text-[10px] font-bold uppercase tracking-wider text-gray-400">
           Próximamente
@@ -51,7 +51,7 @@ export function OAuthButtons() {
         title="Próximamente"
         className="flex h-11 w-full cursor-not-allowed items-center justify-center gap-2.5 rounded-lg border border-gray-200 bg-white px-4 text-sm font-semibold text-[#0A0A0A] opacity-70"
       >
-        <LinkedinIcon className="h-4.5 w-4.5" />
+        <LinkedinIcon className="h-5 w-5" />
         Continuar con LinkedIn
         <span className="ml-auto text-[10px] font-bold uppercase tracking-wider text-gray-400">
           Próximamente

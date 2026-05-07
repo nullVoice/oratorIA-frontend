@@ -70,7 +70,7 @@ function UserMenu({ name, initials }: { name: string; initials: string }) {
         onClick={() => setOpen((v) => !v)}
         className="flex items-center gap-2 rounded-full border border-gray-200 bg-gray-50 py-1 pl-1 pr-3 transition-colors hover:bg-gray-100"
       >
-        <span className="grid h-7 w-7 place-items-center rounded-full bg-gradient-to-br from-[#C6FF3D] to-[#5C7A0F] text-[10px] font-extrabold text-[#0A0A0A]">
+        <span className="grid h-7 w-7 place-items-center rounded-full bg-gradient-to-br from-[#C6FF3D] to-[#5C7A0F] text-[10px] font-bold text-[#0A0A0A]">
           {initials}
         </span>
         <span className="text-[13px] font-semibold text-[#0A0A0A]">{name}</span>

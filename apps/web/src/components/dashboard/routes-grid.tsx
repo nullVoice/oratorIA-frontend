@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 
 export function RoutesGrid() {
   return (
-    <div className="grid grid-cols-1 gap-3.5 xl:grid-cols-2">
+    <div className="grid grid-cols-1 gap-3 xl:grid-cols-2">
       {activeRoutes.map((r) => (
         <RouteCard key={r.id} route={r} />
       ))}
@@ -16,7 +16,7 @@ export function RoutesGrid() {
 function RouteCard({ route }: { route: ActiveRoute }) {
   const percent = Math.round((route.done / route.total) * 100);
   return (
-    <div className="rounded-2xl border border-gray-200 bg-white p-4.5 transition-all hover:-translate-y-0.5 hover:shadow-sm">
+    <div className="rounded-2xl border border-gray-200 bg-white p-4 transition-all hover:-translate-y-0.5 hover:shadow-sm">
       <div className="mb-3 flex items-center gap-3">
         <span
           className={cn(

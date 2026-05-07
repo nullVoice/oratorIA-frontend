@@ -112,7 +112,7 @@ function SidebarLink({
 
   const content = (
     <>
-      <Icon className="h-4.5 w-4.5 shrink-0" strokeWidth={1.8} />
+      <Icon className="h-5 w-5 shrink-0" strokeWidth={1.8} />
       <span className="flex-1">{label}</span>
       {badge && (
         <span

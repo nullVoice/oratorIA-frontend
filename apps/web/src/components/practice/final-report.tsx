@@ -37,14 +37,14 @@ export function FinalReport({
       <div className="grid grid-cols-1 items-center gap-6 rounded-2xl border border-gray-200 bg-white p-6 sm:grid-cols-[auto_1fr]">
         <div className="grid h-28 w-28 place-items-center rounded-full bg-gray-50">
           <div className="text-center">
-            <div className={`text-5xl font-extrabold tracking-tight ${scoreTone}`}>
+            <div className={`text-5xl font-bold tracking-tight ${scoreTone}`}>
               {score}
             </div>
             <div className="mt-0.5 text-xs text-gray-500">/ 100</div>
           </div>
         </div>
         <div>
-          <h3 className="text-xl font-extrabold tracking-tight text-[#0A0A0A]">
+          <h3 className="text-xl font-bold tracking-tight text-[#0A0A0A]">
             Sesión analizada
           </h3>
           <p className="mt-1 text-sm leading-relaxed text-gray-700">{summary}</p>
@@ -100,7 +100,7 @@ function SmallMetric({ label, value }: { label: string; value: string }) {
   return (
     <div className="rounded-xl border border-gray-200 bg-white p-3.5">
       <div className="text-xs text-gray-500">{label}</div>
-      <div className="mt-1 text-2xl font-extrabold tracking-tight text-[#0A0A0A]">{value}</div>
+      <div className="mt-1 text-2xl font-bold tracking-tight text-[#0A0A0A]">{value}</div>
     </div>
   );
 }
@@ -120,7 +120,7 @@ function Card({
 }) {
   if (tone === "dark") {
     return (
-      <div className="flex items-start gap-3.5 rounded-2xl border border-[#0A0A0A] bg-[#0A0A0A] p-5 text-white">
+      <div className="flex items-start gap-3 rounded-2xl border border-[#0A0A0A] bg-[#0A0A0A] p-5 text-white">
         <span className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-[#C6FF3D] text-[#0A0A0A]">
           {icon}
         </span>
@@ -133,7 +133,7 @@ function Card({
     );
   }
   return (
-    <div className="flex items-start gap-3.5 rounded-2xl border border-gray-200 bg-white p-5">
+    <div className="flex items-start gap-3 rounded-2xl border border-gray-200 bg-white p-5">
       <span className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-[#F7FFE0] text-[#0A0A0A]">
         {icon}
       </span>

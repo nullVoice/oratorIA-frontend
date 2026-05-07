@@ -150,7 +150,7 @@ function PracticeRoute() {
     return (
       <div className="mx-auto flex max-w-3xl flex-col gap-7">
         <div>
-          <h1 className="text-2xl font-extrabold tracking-tight text-[#0A0A0A]">
+          <h1 className="text-2xl font-bold tracking-tight text-[#0A0A0A]">
             Tu reporte
           </h1>
           <p className="mt-1 text-sm text-gray-600">
@@ -180,7 +180,7 @@ function PracticeRoute() {
     return (
       <div className="flex flex-col gap-6">
         <header className="flex flex-wrap items-center justify-between gap-3">
-          <h1 className="text-xl font-extrabold tracking-tight text-[#0A0A0A]">
+          <h1 className="text-xl font-bold tracking-tight text-[#0A0A0A]">
             Sesión en curso
           </h1>
           <LiveTimer elapsedSeconds={recorder.elapsedSeconds} />

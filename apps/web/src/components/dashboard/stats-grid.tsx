@@ -7,7 +7,7 @@ export function StatsGrid() {
   const minutes = stats.practicedTimeMinutes % 60;
 
   return (
-    <div className="grid grid-cols-2 gap-3.5 lg:grid-cols-4">
+    <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
       <StatCard
         label="Score global"
         icon={Target}
@@ -73,14 +73,14 @@ function StatCard({
   meta: React.ReactNode;
 }) {
   return (
-    <div className="rounded-2xl border border-gray-200 bg-white p-4.5 transition-all hover:-translate-y-0.5 hover:shadow-md">
+    <div className="rounded-2xl border border-gray-200 bg-white p-4 transition-all hover:-translate-y-0.5 hover:shadow-md">
       <div className="mb-3 flex items-center justify-between">
         <span className="text-xs font-semibold text-gray-500">{label}</span>
         <span className="grid h-7 w-7 place-items-center rounded-lg bg-[#F7FFE0] text-[#0A0A0A]">
           <Icon className="h-3.5 w-3.5" strokeWidth={1.8} />
         </span>
       </div>
-      <div className="flex items-baseline gap-1 text-[28px] font-extrabold leading-none tracking-tight text-[#0A0A0A]">
+      <div className="flex items-baseline gap-1 text-3xl font-bold leading-none tracking-tight text-[#0A0A0A]">
         {value}
       </div>
       <div className="mt-2.5 flex items-center gap-1.5 text-xs text-gray-500">{meta}</div>

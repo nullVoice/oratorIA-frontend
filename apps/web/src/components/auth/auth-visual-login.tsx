@@ -46,7 +46,7 @@ function ProgressMockup() {
         <span className="ml-2 font-mono text-[11px] text-gray-500">tu progreso</span>
       </div>
       <div className="p-6">
-        <div className="mb-4 flex items-center gap-3.5">
+        <div className="mb-4 flex items-center gap-3">
           <div className="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-[#C6FF3D]">
             <Equalizer scale={0.7} />
           </div>
@@ -62,7 +62,7 @@ function ProgressMockup() {
             <span className="font-semibold text-emerald-600">+8 pts</span>
           </div>
           <div className="flex items-baseline gap-1.5">
-            <span className="text-3xl font-extrabold tracking-tight text-[#0A0A0A]">87</span>
+            <span className="text-3xl font-bold tracking-tight text-[#0A0A0A]">87</span>
             <span className="text-[13px] text-gray-500">/ 100</span>
           </div>
           <div className="mt-2.5 h-1.5 overflow-hidden rounded-sm bg-gray-200">

@@ -14,7 +14,7 @@ export function LastSessionCard() {
         <p className="mt-1 text-xs text-gray-500">
           Hace {lastSession.daysAgo} días · {lastSession.durationMinutes} minutos · Sesión #{lastSession.sessionNumber}
         </p>
-        <div className="mt-2 flex flex-wrap gap-3.5 text-xs text-gray-700">
+        <div className="mt-2 flex flex-wrap gap-3 text-xs text-gray-700">
           <Mini icon={<MessageSquare className="h-3.5 w-3.5" strokeWidth={1.8} />}>
             <strong className="font-semibold text-[#0A0A0A]">{lastSession.fillerWords}</strong> muletillas
           </Mini>
@@ -28,7 +28,7 @@ export function LastSessionCard() {
       </div>
 
       <div className="flex flex-col items-center justify-center self-stretch border-x border-gray-200 px-4">
-        <span className="text-3xl font-extrabold leading-none tracking-tight text-[#0A0A0A]">
+        <span className="text-3xl font-bold leading-none tracking-tight text-[#0A0A0A]">
           {lastSession.score}
         </span>
         <span className="mt-1 text-xs text-gray-500">Score</span>

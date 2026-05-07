@@ -123,7 +123,7 @@ function RegisterRoute() {
             <img src="/OratorIA-lockup.svg" alt="OratorIA" className="h-8" />
           </Link>
 
-          <h2 className="mt-8 text-3xl font-extrabold leading-tight tracking-tight text-[#0A0A0A]">
+          <h2 className="mt-8 text-3xl font-bold leading-tight tracking-tight text-[#0A0A0A]">
             Empieza a hablar mejor hoy
           </h2>
           <p className="mb-8 mt-2 text-[15px] text-gray-600">
@@ -375,7 +375,7 @@ function PasswordField({
           aria-label={show ? "Ocultar contraseña" : "Mostrar contraseña"}
           className="absolute right-3 top-1/2 grid h-6 w-6 -translate-y-1/2 place-items-center rounded text-gray-400 transition-colors hover:text-gray-700"
         >
-          {show ? <EyeOff className="h-4.5 w-4.5" /> : <Eye className="h-4.5 w-4.5" />}
+          {show ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
         </button>
       </div>
       {hint}

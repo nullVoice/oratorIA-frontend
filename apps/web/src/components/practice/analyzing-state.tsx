@@ -76,7 +76,7 @@ export function AnalyzingState() {
           style={{ animation: "oratoria-ring-pulse 2.5s ease-in-out infinite" }}
         >
           <div className="text-center">
-            <div className="text-3xl font-extrabold leading-none tracking-tight text-[#0A0A0A]">
+            <div className="text-3xl font-bold leading-none tracking-tight text-[#0A0A0A]">
               {pct}
               <span className="text-lg">%</span>
             </div>
@@ -88,7 +88,7 @@ export function AnalyzingState() {
       </div>
 
       <div>
-        <h1 className="text-2xl font-extrabold tracking-tight text-[#0A0A0A]">
+        <h1 className="text-2xl font-bold tracking-tight text-[#0A0A0A]">
           Analizando tu sesión…
         </h1>
         <div className="mt-2 inline-flex items-center gap-2 text-sm font-semibold text-[#0A0A0A]">

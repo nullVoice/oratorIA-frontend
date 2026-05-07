@@ -8,7 +8,7 @@ export function ProgressChart() {
   const last = progressSeries.points[progressSeries.points.length - 1];
 
   return (
-    <div className="rounded-2xl border border-gray-200 bg-white p-5.5">
+    <div className="rounded-2xl border border-gray-200 bg-white p-5">
       <div className="grid grid-cols-1 items-center gap-6 lg:grid-cols-[1fr_220px]">
         <div>
           <svg viewBox="0 0 600 140" preserveAspectRatio="none" className="h-35 w-full">
@@ -84,7 +84,7 @@ function ChartStat({
   return (
     <div className="flex items-baseline justify-between gap-2 border-b border-dashed border-gray-200 pb-3 last:border-b-0 last:pb-0">
       <span className="text-xs font-medium text-gray-500">{label}</span>
-      <span className={`text-lg font-extrabold tracking-tight text-[#0A0A0A] ${valueClassName}`}>
+      <span className={`text-lg font-bold tracking-tight text-[#0A0A0A] ${valueClassName}`}>
         {value}
       </span>
     </div>

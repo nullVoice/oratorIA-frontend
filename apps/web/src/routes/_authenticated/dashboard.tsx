@@ -59,10 +59,13 @@ function Section({
 }) {
   return (
     <section>
-      <div className="mb-3.5 flex items-center justify-between">
-        <h2 className="text-[15px] font-bold tracking-tight text-[#0A0A0A]">{title}</h2>
+      <div className="mb-4 flex items-center justify-between">
+        <h2 className="text-base font-semibold text-[#0A0A0A]">{title}</h2>
         {link && (
-          <button type="button" className="text-xs font-semibold text-gray-500 transition-colors hover:text-[#0A0A0A]">
+          <button
+            type="button"
+            className="text-xs font-medium text-gray-500 transition-colors hover:text-[#0A0A0A]"
+          >
             {link}
           </button>
         )}

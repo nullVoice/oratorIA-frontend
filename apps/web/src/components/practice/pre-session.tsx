@@ -9,7 +9,7 @@ export function PreSession({ onStart, starting }: PreSessionProps) {
   return (
     <div className="mx-auto flex max-w-2xl flex-col gap-8">
       <header className="text-center">
-        <h1 className="text-3xl font-extrabold leading-tight tracking-tight text-[#0A0A0A]">
+        <h1 className="text-3xl font-bold leading-tight tracking-tight text-[#0A0A0A]">
           ¿Listo para empezar?
         </h1>
         <p className="mt-2 text-[15px] text-gray-600">
@@ -21,7 +21,7 @@ export function PreSession({ onStart, starting }: PreSessionProps) {
       <div className="rounded-2xl border border-gray-200 bg-white p-5">
         <div className="flex items-start gap-4">
           <span className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-[#F7FFE0] text-[#0A0A0A]">
-            <Mic className="h-4.5 w-4.5" strokeWidth={1.8} />
+            <Mic className="h-5 w-5" strokeWidth={1.8} />
           </span>
           <div>
             <h2 className="text-sm font-bold text-[#0A0A0A]">Antes de empezar</h2>

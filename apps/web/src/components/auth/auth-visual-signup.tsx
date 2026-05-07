@@ -72,7 +72,7 @@ function SignupMockup() {
 function MiniStat({ value, label }: { value: string; label: string }) {
   return (
     <div className="rounded-lg border border-gray-100 bg-gray-50 px-2 py-2.5 text-center">
-      <div className="text-lg font-extrabold tracking-tight text-[#0A0A0A]">{value}</div>
+      <div className="text-lg font-bold tracking-tight text-[#0A0A0A]">{value}</div>
       <div className="mt-0.5 text-[11px] text-gray-500">{label}</div>
     </div>
   );
