@@ -52,6 +52,38 @@ export const SessionDetailSchema = z.object({
 });
 export type SessionDetail = z.infer<typeof SessionDetailSchema>;
 
+export const SessionReadSchema = z.object({
+  id: z.string().uuid(),
+  user_id: z.string().uuid(),
+  type: z.string(),
+  status: z.string(),
+  title: z.string().nullable().default(null),
+  context: z.record(z.string(), z.unknown()).default({}),
+  started_at: z.string().nullable(),
+  ended_at: z.string().nullable(),
+  created_at: z.string(),
+  updated_at: z.string(),
+});
+export type SessionRead = z.infer<typeof SessionReadSchema>;
+
+export interface SessionContext {
+  presentation_type: string;
+  audience: string;
+  objective: string;
+  formality: "alta" | "media" | "baja";
+  duration_target: number;
+}
+
+export async function createSession(
+  context: SessionContext,
+  type: "live" | "async" = "live",
+): Promise<SessionRead> {
+  const data = await api
+    .post("api/v1/sessions", { json: { type, context } })
+    .json();
+  return SessionReadSchema.parse(data);
+}
+
 export const SessionListResponseSchema = z.object({
   items: z.array(SessionSummarySchema),
   total: z.number().int(),
