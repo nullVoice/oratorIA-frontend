@@ -84,6 +84,43 @@ export async function createSession(
   return SessionReadSchema.parse(data);
 }
 
+export async function uploadSessionAudio(
+  sessionId: string,
+  audio: Blob,
+  filename = "audio.webm",
+): Promise<SessionRead> {
+  const form = new FormData();
+  form.append("audio", audio, filename);
+  const data = await api
+    .post(`api/v1/sessions/${sessionId}/audio`, { body: form })
+    .json();
+  return SessionReadSchema.parse(data);
+}
+
+export const ReportReadSchema = z.object({
+  id: z.string().uuid(),
+  session_id: z.string().uuid(),
+  score: z.number().int().min(0).max(100),
+  summary: z.string(),
+  strengths: z.array(z.record(z.string(), z.unknown())),
+  improvements: z.array(z.record(z.string(), z.unknown())),
+  paraverbal_metrics: z.record(z.string(), z.unknown()),
+  next_steps: z.array(z.string()),
+  pdf_url: z.string().nullable().default(null),
+  created_at: z.string(),
+});
+export type ReportRead = z.infer<typeof ReportReadSchema>;
+
+export async function evaluateSession(sessionId: string): Promise<ReportRead> {
+  const data = await api
+    .post(`api/v1/sessions/${sessionId}/evaluate`, {
+      timeout: 120_000,
+    })
+    .json();
+  return ReportReadSchema.parse(data);
+}
+
+
 export const SessionListResponseSchema = z.object({
   items: z.array(SessionSummarySchema),
   total: z.number().int(),
