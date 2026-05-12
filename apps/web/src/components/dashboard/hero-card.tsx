@@ -44,7 +44,7 @@ export function HeroCard({
         </p>
         <div className="mt-5 flex flex-wrap items-center gap-2">
           <Link
-            to="/practice"
+            to="/practice/new"
             className="inline-flex h-11 items-center gap-2 rounded-lg bg-[#0A0A0A] px-5 text-sm font-bold text-white transition-colors hover:bg-gray-800"
           >
             Empezar nueva sesión

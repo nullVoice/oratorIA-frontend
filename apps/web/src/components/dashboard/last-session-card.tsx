@@ -57,8 +57,8 @@ export function LastSessionCard({ session }: LastSessionCardProps) {
       </div>
 
       <Link
-        to="/sessions/$sessionId"
-        params={{ sessionId: session.id }}
+        to="/reports/$reportId"
+        params={{ reportId: session.id }}
         className="inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-[#0A0A0A] px-4 text-sm font-bold text-white transition-colors hover:bg-gray-800"
       >
         <Clock className="h-4 w-4" strokeWidth={1.8} />

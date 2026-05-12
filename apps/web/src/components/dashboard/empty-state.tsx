@@ -22,7 +22,7 @@ export function EmptyState({ firstName }: EmptyStateProps) {
         </p>
         <div className="mt-6 flex justify-center">
           <Link
-            to="/practice"
+            to="/practice/new"
             className="inline-flex h-11 items-center gap-2 rounded-lg bg-[#C6FF3D] px-5 text-sm font-bold text-[#0A0A0A] transition-all hover:-translate-y-0.5 hover:bg-[#D4FF7A]"
           >
             Empezar mi primera sesión

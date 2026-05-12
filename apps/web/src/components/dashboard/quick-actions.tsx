@@ -9,7 +9,7 @@ export function QuickActions() {
         description="Practica con feedback inmediato. Detectamos muletillas, ritmo y duración mientras hablas."
         icon={<Mic className="h-5 w-5" strokeWidth={1.8} />}
         ctaLabel="Empezar"
-        href="/practice"
+        href="/practice/new"
         primary
       />
       <ActionCard

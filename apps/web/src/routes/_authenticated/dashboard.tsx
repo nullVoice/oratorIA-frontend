@@ -1,10 +1,11 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { Loader2 } from "lucide-react";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { Loader2, Plus } from "lucide-react";
 
 import { EmptyState } from "@/components/dashboard/empty-state";
 import { HeroCard } from "@/components/dashboard/hero-card";
 import { LastSessionCard } from "@/components/dashboard/last-session-card";
 import { QuickActions } from "@/components/dashboard/quick-actions";
+import { SessionsList } from "@/components/dashboard/sessions-list";
 import { StatsGrid } from "@/components/dashboard/stats-grid";
 import { useDashboardData } from "@/lib/dashboard/use-dashboard-data";
 import { namePartOfEmail } from "@/lib/utils";
@@ -33,35 +34,56 @@ function DashboardHome() {
   }
 
   return (
-    <div className="flex flex-col gap-7">
-      <HeroCard
-        firstName={firstName}
-        streakDays={data.streakDays}
-        weekDots={data.weekDots}
-        weeklyCount={data.weeklyCount}
-        weeklyGoal={data.weeklyGoal}
-      />
-
-      <Section title="Tus métricas">
-        <StatsGrid
-          totalSessions={data.totalSessions}
-          averageScore={data.averageScore}
+    <>
+      <div className="flex flex-col gap-7">
+        <HeroCard
+          firstName={firstName}
+          streakDays={data.streakDays}
+          weekDots={data.weekDots}
           weeklyCount={data.weeklyCount}
           weeklyGoal={data.weeklyGoal}
-          practicedSeconds={data.practicedSeconds}
         />
-      </Section>
 
-      <Section title="Acciones rápidas">
-        <QuickActions />
-      </Section>
-
-      {data.lastCompleted && (
-        <Section title="Tu última sesión">
-          <LastSessionCard session={data.lastCompleted} />
+        <Section title="Tus métricas">
+          <StatsGrid
+            totalSessions={data.totalSessions}
+            averageScore={data.averageScore}
+            weeklyCount={data.weeklyCount}
+            weeklyGoal={data.weeklyGoal}
+            practicedSeconds={data.practicedSeconds}
+          />
         </Section>
-      )}
-    </div>
+
+        <Section title="Acciones rápidas">
+          <QuickActions />
+        </Section>
+
+        {data.lastCompleted && (
+          <Section title="Tu última sesión">
+            <LastSessionCard session={data.lastCompleted} />
+          </Section>
+        )}
+
+        <Section title="Todas tus sesiones">
+          <SessionsList sessions={data.sessions} />
+        </Section>
+      </div>
+
+      <FabNewPractice />
+    </>
+  );
+}
+
+function FabNewPractice() {
+  return (
+    <Link
+      to="/practice/new"
+      aria-label="Nueva práctica"
+      className="fixed bottom-6 right-6 z-20 inline-flex h-14 items-center gap-2 rounded-full bg-[#0A0A0A] px-5 text-sm font-bold text-white shadow-lg shadow-black/20 transition-all hover:-translate-y-0.5 hover:bg-gray-800 sm:px-6"
+    >
+      <Plus className="h-5 w-5" strokeWidth={2.5} />
+      <span className="hidden sm:inline">Nueva práctica</span>
+    </Link>
   );
 }
 

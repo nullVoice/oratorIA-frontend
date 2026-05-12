@@ -16,6 +16,9 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedPracticeRouteImport } from './routes/_authenticated/practice'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedSessionsSessionIdRouteImport } from './routes/_authenticated/sessions.$sessionId'
+import { Route as AuthenticatedReportsReportIdRouteImport } from './routes/_authenticated/reports.$reportId'
+import { Route as AuthenticatedPracticeNewRouteImport } from './routes/_authenticated/practice.new'
+import { Route as AuthenticatedPracticeSessionIdRouteImport } from './routes/_authenticated/practice.$sessionId'
 
 const RegisterRoute = RegisterRouteImport.update({
   id: '/register',
@@ -52,13 +55,34 @@ const AuthenticatedSessionsSessionIdRoute =
     path: '/sessions/$sessionId',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedReportsReportIdRoute =
+  AuthenticatedReportsReportIdRouteImport.update({
+    id: '/reports/$reportId',
+    path: '/reports/$reportId',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedPracticeNewRoute =
+  AuthenticatedPracticeNewRouteImport.update({
+    id: '/new',
+    path: '/new',
+    getParentRoute: () => AuthenticatedPracticeRoute,
+  } as any)
+const AuthenticatedPracticeSessionIdRoute =
+  AuthenticatedPracticeSessionIdRouteImport.update({
+    id: '/$sessionId',
+    path: '/$sessionId',
+    getParentRoute: () => AuthenticatedPracticeRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
-  '/practice': typeof AuthenticatedPracticeRoute
+  '/practice': typeof AuthenticatedPracticeRouteWithChildren
+  '/practice/$sessionId': typeof AuthenticatedPracticeSessionIdRoute
+  '/practice/new': typeof AuthenticatedPracticeNewRoute
+  '/reports/$reportId': typeof AuthenticatedReportsReportIdRoute
   '/sessions/$sessionId': typeof AuthenticatedSessionsSessionIdRoute
 }
 export interface FileRoutesByTo {
@@ -66,7 +90,10 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
-  '/practice': typeof AuthenticatedPracticeRoute
+  '/practice': typeof AuthenticatedPracticeRouteWithChildren
+  '/practice/$sessionId': typeof AuthenticatedPracticeSessionIdRoute
+  '/practice/new': typeof AuthenticatedPracticeNewRoute
+  '/reports/$reportId': typeof AuthenticatedReportsReportIdRoute
   '/sessions/$sessionId': typeof AuthenticatedSessionsSessionIdRoute
 }
 export interface FileRoutesById {
@@ -76,7 +103,10 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
-  '/_authenticated/practice': typeof AuthenticatedPracticeRoute
+  '/_authenticated/practice': typeof AuthenticatedPracticeRouteWithChildren
+  '/_authenticated/practice/$sessionId': typeof AuthenticatedPracticeSessionIdRoute
+  '/_authenticated/practice/new': typeof AuthenticatedPracticeNewRoute
+  '/_authenticated/reports/$reportId': typeof AuthenticatedReportsReportIdRoute
   '/_authenticated/sessions/$sessionId': typeof AuthenticatedSessionsSessionIdRoute
 }
 export interface FileRouteTypes {
@@ -87,6 +117,9 @@ export interface FileRouteTypes {
     | '/register'
     | '/dashboard'
     | '/practice'
+    | '/practice/$sessionId'
+    | '/practice/new'
+    | '/reports/$reportId'
     | '/sessions/$sessionId'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -95,6 +128,9 @@ export interface FileRouteTypes {
     | '/register'
     | '/dashboard'
     | '/practice'
+    | '/practice/$sessionId'
+    | '/practice/new'
+    | '/reports/$reportId'
     | '/sessions/$sessionId'
   id:
     | '__root__'
@@ -104,6 +140,9 @@ export interface FileRouteTypes {
     | '/register'
     | '/_authenticated/dashboard'
     | '/_authenticated/practice'
+    | '/_authenticated/practice/$sessionId'
+    | '/_authenticated/practice/new'
+    | '/_authenticated/reports/$reportId'
     | '/_authenticated/sessions/$sessionId'
   fileRoutesById: FileRoutesById
 }
@@ -165,18 +204,56 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSessionsSessionIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/reports/$reportId': {
+      id: '/_authenticated/reports/$reportId'
+      path: '/reports/$reportId'
+      fullPath: '/reports/$reportId'
+      preLoaderRoute: typeof AuthenticatedReportsReportIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/practice/new': {
+      id: '/_authenticated/practice/new'
+      path: '/new'
+      fullPath: '/practice/new'
+      preLoaderRoute: typeof AuthenticatedPracticeNewRouteImport
+      parentRoute: typeof AuthenticatedPracticeRoute
+    }
+    '/_authenticated/practice/$sessionId': {
+      id: '/_authenticated/practice/$sessionId'
+      path: '/$sessionId'
+      fullPath: '/practice/$sessionId'
+      preLoaderRoute: typeof AuthenticatedPracticeSessionIdRouteImport
+      parentRoute: typeof AuthenticatedPracticeRoute
+    }
   }
 }
 
+interface AuthenticatedPracticeRouteChildren {
+  AuthenticatedPracticeSessionIdRoute: typeof AuthenticatedPracticeSessionIdRoute
+  AuthenticatedPracticeNewRoute: typeof AuthenticatedPracticeNewRoute
+}
+
+const AuthenticatedPracticeRouteChildren: AuthenticatedPracticeRouteChildren = {
+  AuthenticatedPracticeSessionIdRoute: AuthenticatedPracticeSessionIdRoute,
+  AuthenticatedPracticeNewRoute: AuthenticatedPracticeNewRoute,
+}
+
+const AuthenticatedPracticeRouteWithChildren =
+  AuthenticatedPracticeRoute._addFileChildren(
+    AuthenticatedPracticeRouteChildren,
+  )
+
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
-  AuthenticatedPracticeRoute: typeof AuthenticatedPracticeRoute
+  AuthenticatedPracticeRoute: typeof AuthenticatedPracticeRouteWithChildren
+  AuthenticatedReportsReportIdRoute: typeof AuthenticatedReportsReportIdRoute
   AuthenticatedSessionsSessionIdRoute: typeof AuthenticatedSessionsSessionIdRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
-  AuthenticatedPracticeRoute: AuthenticatedPracticeRoute,
+  AuthenticatedPracticeRoute: AuthenticatedPracticeRouteWithChildren,
+  AuthenticatedReportsReportIdRoute: AuthenticatedReportsReportIdRoute,
   AuthenticatedSessionsSessionIdRoute: AuthenticatedSessionsSessionIdRoute,
 }
 
