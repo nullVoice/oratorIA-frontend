@@ -1,12 +1,15 @@
 import { HeadContent, Outlet, Scripts, createRootRouteWithContext, useRouterState } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
+import type { QueryClient } from "@tanstack/react-query";
 
 import { Toaster } from "@/components/ui/sonner";
 
 import Header from "../components/header";
 import appCss from "../index.css?url";
 
-export interface RouterAppContext {}
+export interface RouterAppContext {
+  queryClient: QueryClient;
+}
 
 export const Route = createRootRouteWithContext<RouterAppContext>()({
   head: () => ({
