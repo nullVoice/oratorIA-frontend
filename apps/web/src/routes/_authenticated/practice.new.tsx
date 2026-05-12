@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { ArrowRight, Loader2 } from "lucide-react";
+import { ArrowRight, Loader2, Mic, Users } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -9,6 +9,8 @@ import { createSession } from "@/lib/api/sessions";
 export const Route = createFileRoute("/_authenticated/practice/new")({
   component: NewPracticeRoute,
 });
+
+type PracticeMode = "simple" | "avatar";
 
 const PRESENTATION_TYPES = [
   { value: "tesis", label: "Tesis o defensa académica" },
@@ -42,6 +44,8 @@ type FormErrors = Partial<Record<keyof z.infer<typeof FormSchema>, string>>;
 
 function NewPracticeRoute() {
   const navigate = useNavigate();
+  const [mode, setMode] = useState<PracticeMode>("simple");
+  const [interactive, setInteractive] = useState(false);
   const [presentationType, setPresentationType] = useState<string>(
     PRESENTATION_TYPES[0].value,
   );
@@ -79,10 +83,18 @@ function NewPracticeRoute() {
     setSubmitting(true);
     try {
       const session = await createSession(parsed.data);
-      navigate({
-        to: "/practice/$sessionId",
-        params: { sessionId: session.id },
-      });
+      if (mode === "avatar") {
+        navigate({
+          to: "/practice/$sessionId/avatar",
+          params: { sessionId: session.id },
+          search: { interactive },
+        });
+      } else {
+        navigate({
+          to: "/practice/$sessionId",
+          params: { sessionId: session.id },
+        });
+      }
     } catch (err) {
       const message =
         err instanceof Error ? err.message : "No se pudo crear la sesión";
@@ -105,10 +117,54 @@ function NewPracticeRoute() {
           Nueva práctica
         </h1>
         <p className="mt-2 text-[15px] text-gray-600">
-          Cuéntanos el contexto. Con esa información el coach IA evalúa tu
-          presentación con más precisión.
+          Elige el modo y cuéntanos el contexto. Con esa información el coach
+          IA evalúa tu presentación con más precisión.
         </p>
       </header>
+
+      <fieldset className="flex flex-col gap-2">
+        <legend className="mb-1 text-[13px] font-semibold text-gray-700">
+          Modo de práctica
+        </legend>
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <ModeCard
+            selected={mode === "simple"}
+            onClick={() => setMode("simple")}
+            icon={<Mic className="h-5 w-5" strokeWidth={1.8} />}
+            title="Práctica simple"
+            description="Graba audio y recibe un reporte con score, fortalezas y mejoras."
+          />
+          <ModeCard
+            selected={mode === "avatar"}
+            onClick={() => setMode("avatar")}
+            icon={<Users className="h-5 w-5" strokeWidth={1.8} />}
+            title="Audiencia digital"
+            description="Presenta frente a un avatar que escucha y reacciona en tiempo real."
+            badge="NUEVO"
+          />
+        </div>
+
+        {mode === "avatar" && (
+          <label className="mt-3 flex cursor-pointer items-start gap-3 rounded-lg border border-gray-200 bg-white p-4 hover:border-gray-300">
+            <input
+              type="checkbox"
+              checked={interactive}
+              onChange={(e) => setInteractive(e.target.checked)}
+              className="mt-0.5 h-4 w-4 accent-[#0A0A0A]"
+            />
+            <span className="flex flex-col gap-0.5">
+              <span className="text-sm font-semibold text-[#0A0A0A]">
+                Permitir que el avatar me interrumpa con preguntas
+              </span>
+              <span className="text-xs text-gray-500">
+                Si está activado, el avatar puede interrumpir 1–2 veces durante
+                tu presentación. Si está desactivado, sólo escucha y hace una
+                pregunta al final.
+              </span>
+            </span>
+          </label>
+        )}
+      </fieldset>
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-5" noValidate>
         <fieldset className="flex flex-col gap-2">
@@ -230,13 +286,66 @@ function NewPracticeRoute() {
             <Loader2 className="h-5 w-5 animate-spin" />
           ) : (
             <>
-              Empezar práctica
+              {mode === "avatar"
+                ? "Empezar con audiencia digital"
+                : "Empezar práctica"}
               <ArrowRight className="h-4 w-4" strokeWidth={2.5} />
             </>
           )}
         </button>
       </form>
     </div>
+  );
+}
+
+interface ModeCardProps {
+  selected: boolean;
+  onClick: () => void;
+  icon: React.ReactNode;
+  title: string;
+  description: string;
+  badge?: string;
+}
+
+function ModeCard({
+  selected,
+  onClick,
+  icon,
+  title,
+  description,
+  badge,
+}: ModeCardProps) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`flex items-start gap-3 rounded-2xl border p-4 text-left transition-colors ${
+        selected
+          ? "border-[#C6FF3D] bg-[#F7FFE0]"
+          : "border-gray-200 bg-white hover:border-gray-300"
+      }`}
+    >
+      <span
+        className={`grid h-10 w-10 shrink-0 place-items-center rounded-lg ${
+          selected ? "bg-[#C6FF3D] text-[#0A0A0A]" : "bg-gray-100 text-[#0A0A0A]"
+        }`}
+      >
+        {icon}
+      </span>
+      <span className="flex-1">
+        <span className="flex items-center gap-2">
+          <span className="text-sm font-bold text-[#0A0A0A]">{title}</span>
+          {badge && (
+            <span className="inline-flex items-center rounded-full bg-[#0A0A0A] px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-[#C6FF3D]">
+              {badge}
+            </span>
+          )}
+        </span>
+        <span className="mt-1 block text-xs leading-relaxed text-gray-600">
+          {description}
+        </span>
+      </span>
+    </button>
   );
 }
 
