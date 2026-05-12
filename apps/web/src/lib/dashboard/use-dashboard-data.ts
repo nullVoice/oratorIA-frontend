@@ -1,8 +1,9 @@
 /**
  * Pulls the current user's sessions and derives the metrics the
- * dashboard cards consume. Replaces the previous mock-data snapshot.
+ * dashboard cards consume. Uses TanStack Query so the list stays
+ * cached across navigations (dashboard ↔ report ↔ back).
  */
-import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 
 import { fetchSessions, type SessionSummary } from "@/lib/api/sessions";
 
@@ -25,7 +26,6 @@ const WEEKLY_GOAL = 5;
 function startOfWeekUTC(d = new Date()): number {
   const x = new Date(d);
   x.setUTCHours(0, 0, 0, 0);
-  // Treat Monday as the start of the week. JS getUTCDay -> Sun=0..Sat=6.
   const day = (x.getUTCDay() + 6) % 7;
   x.setUTCDate(x.getUTCDate() - day);
   return x.getTime();
@@ -38,8 +38,6 @@ function startOfTodayUTC(): number {
 }
 
 function computeStreak(sessions: SessionSummary[]): number {
-  // Walk the unique session dates backwards from today, counting consecutive
-  // days that had at least one session.
   const days = new Set<number>();
   for (const s of sessions) {
     const d = new Date(s.created_at);
@@ -56,10 +54,7 @@ function computeStreak(sessions: SessionSummary[]): number {
 }
 
 function buildWeekDots(streakDays: number): Array<"done" | "today" | "future"> {
-  // Show today as the (Mon-indexed) current day; everything before today
-  // up to the streak length renders as `done`, today is `today`, after
-  // is `future`. Caps at 7 dots.
-  const todayIdx = (new Date().getUTCDay() + 6) % 7; // 0..6, Mon=0
+  const todayIdx = (new Date().getUTCDay() + 6) % 7;
   const done = Math.max(0, Math.min(todayIdx, streakDays - 1));
   const dots: Array<"done" | "today" | "future"> = [];
   for (let i = 0; i < 7; i++) {
@@ -72,27 +67,16 @@ function buildWeekDots(streakDays: number): Array<"done" | "today" | "future"> {
 }
 
 export function useDashboardData(): DashboardData {
-  const [loading, setLoading] = useState(true);
-  const [sessions, setSessions] = useState<SessionSummary[]>([]);
+  const query = useQuery({
+    queryKey: ["sessions"],
+    queryFn: () => fetchSessions({ page_size: 100 }),
+    staleTime: 30_000,
+  });
 
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      try {
-        const data = await fetchSessions();
-        if (!cancelled) setSessions(data);
-      } catch {
-        if (!cancelled) setSessions([]);
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  const completed = sessions.filter((s) => s.status === "completed" && s.score !== null);
+  const sessions = query.data ?? [];
+  const completed = sessions.filter(
+    (s) => s.status === "completed" && s.score !== null,
+  );
 
   const averageScore = completed.length
     ? Math.round(
@@ -117,7 +101,7 @@ export function useDashboardData(): DashboardData {
   const lastCompleted = completed[0] ?? null;
 
   return {
-    loading,
+    loading: query.isLoading,
     sessions,
     totalSessions: sessions.length,
     completedSessions: completed,

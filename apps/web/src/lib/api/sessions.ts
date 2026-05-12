@@ -13,6 +13,7 @@ export const SessionSummarySchema = z.object({
   duration_seconds: z.number().int().nullable(),
   score: z.number().int().nullable(),
   summary: z.string().nullable(),
+  context: z.record(z.string(), z.unknown()).default({}),
   created_at: z.string(),
 });
 export type SessionSummary = z.infer<typeof SessionSummarySchema>;
