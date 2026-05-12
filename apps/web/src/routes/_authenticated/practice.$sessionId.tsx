@@ -63,10 +63,12 @@ function ActivePracticeRoute() {
     try {
       const ext = guessExtension(recorder.mimeType);
       await uploadSessionAudio(sessionId, recorder.audioBlob, `audio.${ext}`);
-      const report = await evaluateSession(sessionId);
+      await evaluateSession(sessionId);
+      // The :reportId URL param carries the session id — reports map 1:1
+      // to sessions so we fetch /sessions/:id on the report page.
       navigate({
         to: "/reports/$reportId",
-        params: { reportId: report.id },
+        params: { reportId: sessionId },
       });
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Error al evaluar";

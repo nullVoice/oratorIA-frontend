@@ -46,6 +46,7 @@ function RootDocument() {
     pathname.startsWith("/dashboard/") ||
     pathname === "/practice" ||
     pathname.startsWith("/practice/") ||
+    pathname.startsWith("/reports/") ||
     pathname.startsWith("/sessions/");
 
   return (

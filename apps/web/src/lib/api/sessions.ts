@@ -23,17 +23,18 @@ export const FillerByWordSchema = z.object({
 });
 export type FillerByWord = z.infer<typeof FillerByWordSchema>;
 
+// Two report shapes can land here:
+//   - Legacy (/practice/finalize): strengths/improvements as {title, text}
+//   - New (/sessions/:id/evaluate): strengths as
+//     {title, description, dimension, evidence, impact} and
+//     improvements as {... suggestion, priority}.
+// Use loose record types and let the UI layer normalize per-item.
 export const SessionReportSchema = z.object({
   score: z.number().int(),
   summary: z.string(),
-  strengths: z.array(z.object({ title: z.string(), text: z.string() })),
-  improvements: z.array(z.object({ title: z.string(), text: z.string() })),
-  paraverbal_metrics: z.object({
-    words_per_minute: z.number(),
-    filler_words_count: z.number().int(),
-    filler_by_word: z.array(FillerByWordSchema).default([]),
-    duration_seconds: z.number().optional(),
-  }),
+  strengths: z.array(z.record(z.string(), z.unknown())),
+  improvements: z.array(z.record(z.string(), z.unknown())),
+  paraverbal_metrics: z.record(z.string(), z.unknown()),
   next_steps: z.array(z.string()).default([]),
 });
 export type SessionReport = z.infer<typeof SessionReportSchema>;
