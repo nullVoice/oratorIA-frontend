@@ -58,9 +58,13 @@ export function AvatarCall({ conversationUrl, onEnd, onError }: AvatarCallProps)
         showLeaveButton: true,
       });
     } catch (err) {
-      onErrorRef.current?.(
-        err instanceof Error ? err : new Error(String(err)),
-      );
+      const msg = err instanceof Error ? err.message : String(err);
+      // StrictMode/HMR double-mount: Daily refuses to create two instances.
+      // The sibling mount owns the working frame, so just bail silently.
+      if (msg.toLowerCase().includes("duplicate")) {
+        return;
+      }
+      onErrorRef.current?.(err instanceof Error ? err : new Error(msg));
       return;
     }
     callRef.current = frame;
