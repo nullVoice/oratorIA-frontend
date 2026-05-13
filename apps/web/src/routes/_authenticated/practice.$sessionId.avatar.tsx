@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
 
-import { AvatarCall } from "@/components/audio/avatar-call";
+import { AvatarCall, type TavusEvent } from "@/components/audio/avatar-call";
 import { AnalyzingState } from "@/components/practice/analyzing-state";
 import {
   endAvatarSession,
@@ -37,6 +37,7 @@ function AvatarPracticeRoute() {
   );
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const startedRef = useRef(false);
+  const eventsRef = useRef<TavusEvent[]>([]);
 
   // 1) Start the avatar conversation exactly once.
   useEffect(() => {
@@ -59,12 +60,15 @@ function AvatarPracticeRoute() {
     })();
   }, [interactive, sessionId]);
 
-  // 2) When the call ends, hit /avatar-end and switch to evaluating.
+  // 2) When the call ends, hit /avatar-end with the accumulated event
+  //    stream and switch to evaluating.
   const handleEnd = async () => {
     if (phase !== "live") return;
     setPhase("ending");
     try {
-      const result = await endAvatarSession(sessionId);
+      const result = await endAvatarSession(sessionId, {
+        events: eventsRef.current,
+      });
       if (result.report_ready) {
         navigate({
           to: "/reports/$reportId",
@@ -79,6 +83,12 @@ function AvatarPracticeRoute() {
       toast.error(msg);
       setPhase("evaluating");
     }
+  };
+
+  // Accumulate every Daily app-message event in a ref so we can ship them
+  // all to the backend in one shot when the call ends.
+  const handleEvent = (ev: TavusEvent) => {
+    eventsRef.current.push(ev);
   };
 
   // 3) While "evaluating", poll GET /sessions/:id until report appears, then
@@ -176,6 +186,7 @@ function AvatarPracticeRoute() {
           <AvatarCall
             conversationUrl={conversation.conversation_url}
             onEnd={handleEnd}
+            onEvent={handleEvent}
             onError={(err) => {
               toast.error(err.message);
             }}

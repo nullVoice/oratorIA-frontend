@@ -34,11 +34,19 @@ export async function startAvatarSession(
   return AvatarStartResponseSchema.parse(data);
 }
 
+export interface AvatarEndPayload {
+  events?: unknown[];
+}
+
 export async function endAvatarSession(
   sessionId: string,
+  payload: AvatarEndPayload = {},
 ): Promise<AvatarEndResponse> {
   const data = await api
-    .post(`api/v1/sessions/${sessionId}/avatar-end`, { timeout: 60_000 })
+    .post(`api/v1/sessions/${sessionId}/avatar-end`, {
+      json: { events: payload.events ?? [] },
+      timeout: 120_000,
+    })
     .json();
   return AvatarEndResponseSchema.parse(data);
 }
