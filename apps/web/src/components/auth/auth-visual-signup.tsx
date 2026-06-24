@@ -5,13 +5,19 @@ export function AuthVisualSignup() {
   return (
     <aside className="relative hidden flex-col justify-center overflow-hidden p-12 lg:flex">
       <AuthBackdrop />
+      {/* Legibility scrim: calms the centre band so text/cards read clearly
+          while the neon keeps glowing at the edges. */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(78%_64%_at_50%_50%,rgba(3,6,2,0.66),transparent_80%)]"
+      />
 
-      <div className="relative z-10 mx-auto flex w-full max-w-sm flex-col gap-7">
-        <header className="px-1">
-          <h2 className="text-balance text-[28px] font-bold leading-[1.15] tracking-tight text-white">
+      <div className="relative z-10 mx-auto flex w-full max-w-sm flex-col gap-8">
+        <header className="text-center">
+          <h2 className="text-balance text-[32px] font-bold leading-[1.12] tracking-tight text-white drop-shadow-[0_2px_12px_rgba(0,0,0,0.55)]">
             Empezá a <span className="text-[#C6FF3D]">hablar mejor</span> hoy
           </h2>
-          <p className="mt-2.5 text-[14px] leading-relaxed text-white/55">
+          <p className="mx-auto mt-3 max-w-xs text-[14px] leading-relaxed text-white/75">
             Creá tu cuenta y hacé tu primera sesión en minutos. Sin tarjeta.
           </p>
         </header>
@@ -37,7 +43,7 @@ function SignupMockup() {
       <p className="text-center text-sm font-semibold text-white">
         Tu primera sesión
       </p>
-      <p className="mt-0.5 text-center text-xs text-white/50">
+      <p className="mt-0.5 text-center text-xs text-white/65">
         Pitch de dos minutos · análisis al final
       </p>
       <div className="mt-4 grid grid-cols-3 gap-2">
@@ -55,7 +61,7 @@ function MiniStat({ value, label }: { value: string; label: string }) {
       <div className="font-display text-lg font-bold text-[#39FF14]">
         {value}
       </div>
-      <div className="mt-0.5 text-[11px] text-white/50">{label}</div>
+      <div className="mt-0.5 text-[11px] text-white/60">{label}</div>
     </div>
   );
 }
@@ -92,7 +98,7 @@ function QuoteCard() {
         </div>
         <div>
           <div className="text-[13px] font-bold text-white">María González</div>
-          <div className="text-[11px] text-white/45">CEO · Fintech LATAM</div>
+          <div className="text-[11px] text-white/55">CEO · Fintech LATAM</div>
         </div>
       </figcaption>
     </figure>

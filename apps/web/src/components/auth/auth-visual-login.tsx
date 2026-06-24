@@ -39,14 +39,20 @@ export function AuthVisualLogin() {
   return (
     <aside className="relative hidden flex-col justify-center overflow-hidden p-12 lg:flex">
       <AuthBackdrop />
+      {/* Legibility scrim: calms the centre band so text/cards read clearly
+          while the neon keeps glowing at the edges. */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(78%_64%_at_50%_50%,rgba(3,6,2,0.66),transparent_80%)]"
+      />
 
-      <div className="relative z-10 mx-auto flex w-full max-w-sm flex-col gap-7">
-        <header className="px-1">
-          <h2 className="text-balance text-[28px] font-bold leading-[1.15] tracking-tight text-white">
+      <div className="relative z-10 mx-auto flex w-full max-w-sm flex-col gap-8">
+        <header className="text-center">
+          <h2 className="text-balance text-[32px] font-bold leading-[1.12] tracking-tight text-white drop-shadow-[0_2px_12px_rgba(0,0,0,0.55)]">
             Tu escenario para{" "}
             <span className="text-[#C6FF3D]">hablar mejor</span>
           </h2>
-          <p className="mt-2.5 text-[14px] leading-relaxed text-white/55">
+          <p className="mx-auto mt-3 max-w-xs text-[14px] leading-relaxed text-white/75">
             Practicá, medí tu progreso y ganá confianza con un coach de IA que
             te escucha 24/7.
           </p>
@@ -77,7 +83,7 @@ function ProgressMockup() {
         </div>
         <div className="min-w-0">
           <div className="text-[14px] font-bold text-white">Hola, María</div>
-          <div className="text-[12px] text-white/45">
+          <div className="text-[12px] text-white/60">
             racha de 6 días · 14 sesiones
           </div>
         </div>
@@ -85,14 +91,14 @@ function ProgressMockup() {
 
       <div className="mt-6 flex items-end justify-between">
         <div>
-          <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-white/40">
+          <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-white/55">
             Score global
           </div>
           <div className="mt-1 flex items-baseline gap-1.5">
             <span className="font-display text-[46px] font-bold leading-none tabular-nums text-white">
               {score}
             </span>
-            <span className="text-sm text-white/35">/ 100</span>
+            <span className="text-sm text-white/45">/ 100</span>
           </div>
         </div>
         <span className="rounded-full border border-[#39FF14]/30 bg-[#39FF14]/10 px-2.5 py-1 text-[11px] font-bold text-[#39FF14]">
@@ -117,7 +123,7 @@ function ProgressMockup() {
         ))}
       </div>
 
-      <p className="mt-5 text-[12px] text-white/45">
+      <p className="mt-5 text-[12px] text-white/60">
         Próxima lección:{" "}
         <strong className="font-semibold text-white">
           Pausas intencionales · 4 de 7
@@ -162,7 +168,7 @@ function QuoteCard() {
         </div>
         <div>
           <div className="text-[13px] font-bold text-white">María González</div>
-          <div className="text-[11px] text-white/45">CEO · Fintech LATAM</div>
+          <div className="text-[11px] text-white/55">CEO · Fintech LATAM</div>
         </div>
       </figcaption>
     </figure>
