@@ -13,7 +13,13 @@ import ky from "ky";
 
 export const AUTH_TOKEN_STORAGE_KEY = "oratoria.auth.token";
 
-const API_BASE_URL = import.meta.env.VITE_API_URL ?? "http://localhost:8000";
+// In local dev we always target the local backend. The committed
+// .env(.local) points VITE_API_URL at a Cloudflare tunnel that may be
+// down, so dev must not depend on it. Production builds still honor the
+// configured VITE_API_URL.
+const API_BASE_URL = import.meta.env.DEV
+  ? "http://localhost:8000"
+  : (import.meta.env.VITE_API_URL ?? "http://localhost:8000");
 
 function readToken(): string | null {
   if (typeof window === "undefined") return null;

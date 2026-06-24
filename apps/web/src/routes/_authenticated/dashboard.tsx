@@ -5,9 +5,10 @@ import { EmptyState } from "@/components/dashboard/empty-state";
 import { HeroCard } from "@/components/dashboard/hero-card";
 import { LastSessionCard } from "@/components/dashboard/last-session-card";
 import { QuickActions } from "@/components/dashboard/quick-actions";
-import { SessionsList } from "@/components/dashboard/sessions-list";
+import { ScoreJourney } from "@/components/dashboard/score-journey";
 import { StatsGrid } from "@/components/dashboard/stats-grid";
 import { useDashboardData } from "@/lib/dashboard/use-dashboard-data";
+import { useReveal } from "@/lib/anim/use-reveal";
 import { namePartOfEmail } from "@/lib/utils";
 import { useAuthStore } from "@/stores/auth-store";
 
@@ -18,13 +19,14 @@ export const Route = createFileRoute("/_authenticated/dashboard")({
 function DashboardHome() {
   const user = useAuthStore((s) => s.user);
   const data = useDashboardData();
+  const reveal = useReveal<HTMLDivElement>();
   const displayName = user?.full_name ?? (user ? namePartOfEmail(user.email) : "");
   const firstName = displayName.split(" ")[0] ?? displayName;
 
   if (data.loading) {
     return (
-      <div className="grid place-items-center py-24 text-sm text-gray-500">
-        <Loader2 className="h-6 w-6 animate-spin" />
+      <div className="grid place-items-center py-24 text-sm text-ink-soft">
+        <Loader2 className="h-6 w-6 animate-spin text-accent" />
       </div>
     );
   }
@@ -35,16 +37,18 @@ function DashboardHome() {
 
   return (
     <>
-      <div className="flex flex-col gap-7">
-        <HeroCard
-          firstName={firstName}
-          streakDays={data.streakDays}
-          weekDots={data.weekDots}
-          weeklyCount={data.weeklyCount}
-          weeklyGoal={data.weeklyGoal}
-        />
+      <div ref={reveal} className="flex flex-col gap-8">
+        <div data-reveal>
+          <HeroCard
+            firstName={firstName}
+            streakDays={data.streakDays}
+            weekDots={data.weekDots}
+            weeklyCount={data.weeklyCount}
+            weeklyGoal={data.weeklyGoal}
+          />
+        </div>
 
-        <Section title="Tus métricas">
+        <Section title="Métricas">
           <StatsGrid
             totalSessions={data.totalSessions}
             averageScore={data.averageScore}
@@ -54,19 +58,22 @@ function DashboardHome() {
           />
         </Section>
 
-        <Section title="Acciones rápidas">
-          <QuickActions />
-        </Section>
-
-        {data.lastCompleted && (
-          <Section title="Tu última sesión">
-            <LastSessionCard session={data.lastCompleted} />
+        <div className="grid gap-x-6 gap-y-8 lg:grid-cols-[1.65fr_1fr]">
+          <Section title="Progresión">
+            <ScoreJourney sessions={data.sessions} />
           </Section>
-        )}
 
-        <Section title="Todas tus sesiones">
-          <SessionsList sessions={data.sessions} />
-        </Section>
+          <div className="flex flex-col gap-8">
+            <Section title="Practicar">
+              <QuickActions />
+            </Section>
+            {data.lastCompleted && (
+              <Section title="Última sesión">
+                <LastSessionCard session={data.lastCompleted} />
+              </Section>
+            )}
+          </div>
+        </div>
       </div>
 
       <FabNewPractice />
@@ -79,9 +86,9 @@ function FabNewPractice() {
     <Link
       to="/practice/new"
       aria-label="Nueva práctica"
-      className="fixed bottom-6 right-6 z-20 inline-flex h-14 items-center gap-2 rounded-full bg-[#0A0A0A] px-5 text-sm font-bold text-white shadow-lg shadow-black/20 transition-all hover:-translate-y-0.5 hover:bg-gray-800 sm:px-6"
+      className="fixed bottom-7 right-7 z-20 inline-flex h-12 items-center gap-2 rounded-full bg-lime px-5 text-sm font-bold text-on-lime shadow-[0_0_28px_var(--color-lime-shadow)] transition-colors hover:bg-lime-dim sm:px-6"
     >
-      <Plus className="h-5 w-5" strokeWidth={2.5} />
+      <Plus className="h-4.5 w-4.5" strokeWidth={2.2} />
       <span className="hidden sm:inline">Nueva práctica</span>
     </Link>
   );
@@ -95,8 +102,10 @@ function Section({
   children: React.ReactNode;
 }) {
   return (
-    <section>
-      <h2 className="mb-4 text-base font-semibold text-[#0A0A0A]">{title}</h2>
+    <section data-reveal>
+      <h2 className="mb-5 text-[11px] font-semibold uppercase tracking-[0.16em] text-ink-faint">
+        {title}
+      </h2>
       {children}
     </section>
   );

@@ -1,16 +1,30 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowLeft, ArrowRight, Loader2 } from "lucide-react";
-
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import {
-  ImprovementsList,
+  ArrowLeft,
+  ArrowRight,
+  AudioLines,
+  Pause,
+  Repeat2,
+  type LucideIcon,
+} from "lucide-react";
+
+import { AuroraBackground } from "@/components/reports/aurora-background";
+import {
+  InsightCarousel,
+  type InsightSlide,
+} from "@/components/reports/insight-carousel";
+import {
+  ImprovementCard,
+  priorityOrder,
   type Improvement,
 } from "@/components/reports/improvements-list";
-import { ScoreCard } from "@/components/reports/score-card";
+import { ScoreRing } from "@/components/reports/score-ring";
 import {
-  StrengthsList,
+  StrengthCard,
   type Strength,
 } from "@/components/reports/strengths-list";
+import { WpmGauge } from "@/components/reports/wpm-gauge";
 import { fetchSessionDetail } from "@/lib/api/sessions";
 
 export const Route = createFileRoute("/_authenticated/reports/$reportId")({
@@ -31,8 +45,8 @@ function ReportRoute() {
 
   if (query.isLoading) {
     return (
-      <div className="grid place-items-center py-24 text-sm text-gray-500">
-        <Loader2 className="h-6 w-6 animate-spin" />
+      <div className="grid place-items-center py-24 text-sm text-ink-soft">
+        <div className="h-6 w-6 animate-spin rounded-full border-2 border-line border-t-accent" />
       </div>
     );
   }
@@ -40,11 +54,11 @@ function ReportRoute() {
   if (query.isError || !query.data) {
     return (
       <div className="mx-auto max-w-md py-16 text-center">
-        <p className="text-sm text-gray-600">No encontramos este reporte.</p>
+        <p className="text-sm text-ink-soft">No encontramos este reporte.</p>
         <button
           type="button"
           onClick={() => navigate({ to: "/dashboard" })}
-          className="mt-4 inline-flex h-10 items-center gap-2 rounded-lg border border-gray-200 bg-white px-4 text-sm font-semibold text-[#0A0A0A] hover:border-gray-300"
+          className="mt-4 inline-flex h-10 items-center gap-2 rounded-lg border border-line px-4 text-sm font-semibold text-ink hover:border-line-strong"
         >
           <ArrowLeft className="h-4 w-4" />
           Volver al dashboard
@@ -57,13 +71,13 @@ function ReportRoute() {
   if (!session.report) {
     return (
       <div className="mx-auto max-w-md py-16 text-center">
-        <p className="text-sm text-gray-600">
+        <p className="text-sm text-ink-soft">
           Esta sesión todavía no tiene reporte (estado: {session.status}).
         </p>
         <button
           type="button"
           onClick={() => navigate({ to: "/dashboard" })}
-          className="mt-4 inline-flex h-10 items-center gap-2 rounded-lg border border-gray-200 bg-white px-4 text-sm font-semibold text-[#0A0A0A] hover:border-gray-300"
+          className="mt-4 inline-flex h-10 items-center gap-2 rounded-lg border border-line px-4 text-sm font-semibold text-ink hover:border-line-strong"
         >
           <ArrowLeft className="h-4 w-4" />
           Volver al dashboard
@@ -78,187 +92,305 @@ function ReportRoute() {
   const paraverbal = r.paraverbal_metrics as Record<string, unknown>;
   const nextSteps = r.next_steps ?? [];
 
+  const wpm = num(paraverbal.words_per_minute);
+  const fillers = num(paraverbal.filler_words_count);
+  const pauseRatio = num(paraverbal.pause_ratio);
+  const tone = num(paraverbal.tone_variance);
+
+  // One unified deck for the carousel: strengths first, then improvements
+  // sorted by priority. Each item is a single card shown one at a time.
+  const sortedImprovements = [...improvements].sort(
+    (a, b) => priorityOrder(a.priority) - priorityOrder(b.priority),
+  );
+  const slides: InsightSlide[] = [
+    ...strengths.map((s, idx) => ({
+      key: `s-${idx}`,
+      kind: "strength" as const,
+      node: <StrengthCard s={s} index={idx} />,
+    })),
+    ...sortedImprovements.map((m, idx) => ({
+      key: `m-${idx}`,
+      kind: "improvement" as const,
+      node: <ImprovementCard m={m} index={idx} />,
+    })),
+  ];
+
+  const formattedDate = new Date(session.created_at).toLocaleString("es", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+
   return (
-    <div className="mx-auto flex max-w-4xl flex-col gap-7 pb-10">
-      <header className="flex items-start justify-between gap-3">
-        <div className="flex items-center gap-3">
+    <div className="relative isolate -mx-5 -mt-8 overflow-hidden px-5 pb-16 pt-8 sm:-mx-7 sm:px-7 lg:-mx-8 lg:px-8 xl:-mx-12 xl:px-12 2xl:-mx-16 2xl:px-16">
+      <AuroraBackground />
+
+      <div className="relative z-10 mx-auto flex w-full max-w-7xl flex-col 2xl:max-w-[88rem]">
+        {/* ── Back link ── */}
+        <div className="mb-5">
           <button
             type="button"
             onClick={() => navigate({ to: "/dashboard" })}
-            aria-label="Volver"
-            className="grid h-9 w-9 place-items-center rounded-lg border border-gray-200 bg-white text-gray-700 transition-colors hover:bg-gray-50"
+            className="inline-flex items-center gap-1.5 text-sm text-ink-soft transition-colors hover:text-ink"
           >
-            <ArrowLeft className="h-4 w-4" strokeWidth={1.8} />
+            <ArrowLeft className="h-3.5 w-3.5" strokeWidth={2} />
+            Dashboard
           </button>
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight text-[#0A0A0A]">
-              Tu reporte
-            </h1>
-            <p className="mt-0.5 text-sm text-gray-600">
-              {new Date(session.created_at).toLocaleString("es", {
-                day: "numeric",
-                month: "long",
-                year: "numeric",
-                hour: "2-digit",
-                minute: "2-digit",
-              })}
-            </p>
-          </div>
         </div>
-      </header>
 
-      <section className="grid grid-cols-1 items-center gap-6 rounded-2xl border border-gray-200 bg-white p-6 md:grid-cols-[auto_1fr]">
-        <ScoreCard score={r.score} size="lg" />
-        <div>
-          <h2 className="text-base font-bold tracking-tight text-[#0A0A0A]">
-            Resumen
-          </h2>
-          <p className="mt-2 text-[15px] leading-relaxed text-gray-700">
-            {r.summary}
+        {/* ── Hero ── */}
+        <header className="border-b border-line pb-8">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-ink-faint">
+            Reporte · {formattedDate}
           </p>
+
+          <div className="mt-6 grid items-start gap-8 lg:grid-cols-[auto_1fr_auto] lg:gap-10">
+            {/* Left col: score ring */}
+            <div className="flex w-[220px] shrink-0 justify-center">
+              <ScoreRing score={r.score} />
+            </div>
+
+            {/* Center col: verdict + summary + stat cards */}
+            <div className="flex min-w-0 flex-col gap-4">
+              <h1 className="font-display text-2xl font-bold text-ink">
+                {scoreVerdict(r.score)}
+              </h1>
+              <p className="max-w-prose text-[14px] leading-relaxed text-ink-soft">
+                {r.summary}
+              </p>
+
+              {/* Compact stat cards: fillers, pause, tone */}
+              <div className="mt-2 grid grid-cols-3 gap-3">
+                <StatCard
+                  icon={Repeat2}
+                  label="Muletillas"
+                  value={fillers !== null ? String(Math.round(fillers)) : "—"}
+                  dotClass={fillersStatus(fillers).dot}
+                  statusWord={fillersStatus(fillers).word}
+                  statusClass={fillersStatus(fillers).text}
+                />
+                <StatCard
+                  icon={Pause}
+                  label="Pausas"
+                  value={
+                    pauseRatio !== null
+                      ? `${Math.round(pauseRatio * 100)}%`
+                      : "—"
+                  }
+                  dotClass={pauseStatus(pauseRatio).dot}
+                  statusWord={pauseStatus(pauseRatio).word}
+                  statusClass={pauseStatus(pauseRatio).text}
+                />
+                <StatCard
+                  icon={AudioLines}
+                  label="Modulación"
+                  value={tone !== null ? toneLabel(tone) : "—"}
+                  dotClass={toneStatus(tone).dot}
+                  statusWord={toneStatus(tone).word}
+                  statusClass={toneStatus(tone).text}
+                />
+              </div>
+            </div>
+
+            {/* Right col: WPM gauge */}
+            <div className="w-[260px] shrink-0">
+              <WpmGauge wpm={wpm} />
+            </div>
+          </div>
+        </header>
+
+        {/* ── Body: analysis carousel (one card at a time, never crowded) ── */}
+        {slides.length > 0 && (
+          <div className="mt-10">
+            <SectionHeading>
+              Análisis · deslizá para ver cada punto
+            </SectionHeading>
+            <InsightCarousel slides={slides} />
+          </div>
+        )}
+
+        {/* ── Next steps (compact, full-width row) ── */}
+        {nextSteps.length > 0 && (
+          <div className="mt-12">
+            <SectionHeading>Próximos pasos</SectionHeading>
+            <ol className="grid gap-3 sm:grid-cols-3">
+              {nextSteps.map((step, i) => (
+                <li
+                  key={i}
+                  className="flex items-start gap-3 rounded-xl border border-line bg-surface/70 px-4 py-3.5"
+                >
+                  <span className="mt-0.5 grid h-6 w-6 shrink-0 place-items-center rounded-full bg-lime text-[11px] font-bold text-on-lime">
+                    {i + 1}
+                  </span>
+                  <span className="flex-1 text-[13px] leading-relaxed text-ink-soft">
+                    {step}
+                  </span>
+                </li>
+              ))}
+            </ol>
+          </div>
+        )}
+
+        {/* ── Footer actions ── */}
+        <div className="mt-8 flex flex-wrap items-center justify-end gap-3 border-t border-line pt-5">
+          <button
+            type="button"
+            onClick={() => navigate({ to: "/dashboard" })}
+            className="inline-flex h-11 items-center gap-2 rounded-lg border border-line px-5 text-sm font-semibold text-ink-soft transition-colors hover:border-line-strong hover:text-ink"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Volver al dashboard
+          </button>
+          <button
+            type="button"
+            onClick={() => navigate({ to: "/practice/new" })}
+            className="inline-flex h-11 items-center gap-2 rounded-lg bg-lime px-5 text-sm font-bold text-on-lime transition-colors hover:bg-lime-dim"
+          >
+            Nueva práctica
+            <ArrowRight className="h-4 w-4" strokeWidth={2.5} />
+          </button>
         </div>
-      </section>
-
-      <section className="grid grid-cols-1 gap-5 lg:grid-cols-2">
-        <Section title="Fortalezas">
-          <StrengthsList items={strengths} />
-        </Section>
-        <Section title="Áreas de mejora">
-          <ImprovementsList items={improvements} />
-        </Section>
-      </section>
-
-      <Section title="Métricas paraverbales">
-        <ParaverbalGrid metrics={paraverbal} />
-      </Section>
-
-      {nextSteps.length > 0 && (
-        <Section title="Próximos pasos">
-          <ol className="flex flex-col gap-2 rounded-2xl border border-gray-200 bg-white p-5">
-            {nextSteps.map((step, i) => (
-              <li
-                key={i}
-                className="flex gap-3 text-[14px] leading-relaxed text-gray-700"
-              >
-                <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-[#C6FF3D] text-xs font-bold text-[#0A0A0A]">
-                  {i + 1}
-                </span>
-                <span>{step}</span>
-              </li>
-            ))}
-          </ol>
-        </Section>
-      )}
-
-      <div className="flex flex-wrap items-center justify-end gap-3 pt-2">
-        <button
-          type="button"
-          onClick={() => navigate({ to: "/dashboard" })}
-          className="inline-flex h-11 items-center gap-2 rounded-lg border border-gray-200 bg-white px-5 text-sm font-semibold text-[#0A0A0A] hover:border-gray-300"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          Volver al dashboard
-        </button>
-        <button
-          type="button"
-          onClick={() => navigate({ to: "/practice/new" })}
-          className="inline-flex h-11 items-center gap-2 rounded-lg bg-[#C6FF3D] px-5 text-sm font-bold text-[#0A0A0A] transition-all hover:-translate-y-0.5 hover:bg-[#D4FF7A]"
-        >
-          Nueva práctica
-          <ArrowRight className="h-4 w-4" strokeWidth={2.5} />
-        </button>
       </div>
     </div>
   );
 }
 
-function Section({
-  title,
-  children,
-}: {
-  title: string;
-  children: React.ReactNode;
-}) {
+// ── Section heading ──────────────────────────────────────────────────────────
+
+function SectionHeading({ children }: { children: React.ReactNode }) {
   return (
-    <section>
-      <h2 className="mb-3 text-base font-semibold text-[#0A0A0A]">{title}</h2>
+    <h2 className="mb-4 text-[11px] font-semibold uppercase tracking-[0.16em] text-ink-faint">
       {children}
-    </section>
+    </h2>
   );
 }
 
-interface ParaverbalGridProps {
-  metrics: Record<string, unknown>;
-}
+// ── Compact stat card ────────────────────────────────────────────────────────
 
-function ParaverbalGrid({ metrics }: ParaverbalGridProps) {
-  const wpm = num(metrics.words_per_minute);
-  const fillers = num(metrics.filler_words_count);
-  const pauseRatio = num(metrics.pause_ratio);
-  const tone = num(metrics.tone_variance);
-
-  return (
-    <div className="grid grid-cols-2 gap-3 rounded-2xl border border-gray-200 bg-white p-5 sm:grid-cols-4">
-      <MetricCard
-        label="Palabras / min"
-        value={wpm !== null ? wpm.toFixed(0) : "—"}
-        hint={wpmHint(wpm)}
-      />
-      <MetricCard
-        label="Muletillas"
-        value={fillers !== null ? String(fillers) : "—"}
-        hint={fillersHint(fillers)}
-      />
-      <MetricCard
-        label="Pausas"
-        value={pauseRatio !== null ? `${Math.round(pauseRatio * 100)}%` : "—"}
-        hint="Tiempo en silencio"
-      />
-      <MetricCard
-        label="Modulación"
-        value={tone !== null ? toneLabel(tone) : "—"}
-        hint="Variación tonal"
-      />
-    </div>
-  );
-}
-
-function MetricCard({
-  label,
-  value,
-  hint,
-}: {
+interface StatCardProps {
+  icon: LucideIcon;
   label: string;
   value: string;
-  hint: string;
-}) {
+  dotClass: string;
+  statusWord: string;
+  statusClass: string;
+}
+
+function StatCard({
+  icon: Icon,
+  label,
+  value,
+  dotClass,
+  statusWord,
+  statusClass,
+}: StatCardProps) {
   return (
-    <div className="rounded-xl bg-gray-50 p-3">
-      <div className="text-[10px] font-bold uppercase tracking-wider text-gray-500">
-        {label}
+    <div className="flex flex-col gap-1 rounded-xl border border-line bg-surface/80 p-3">
+      <div className="flex items-center gap-1.5 text-ink-faint">
+        <Icon className="h-3.5 w-3.5" strokeWidth={2} />
+        <span className="text-[10px] uppercase tracking-wider">{label}</span>
       </div>
-      <div className="mt-1 text-2xl font-bold tracking-tight text-[#0A0A0A] tabular-nums">
+      <div className="font-display text-lg font-bold tabular-nums text-ink">
         {value}
       </div>
-      <div className="mt-0.5 text-[11px] text-gray-500">{hint}</div>
+      <div className="mt-0.5 flex items-center gap-1.5">
+        <span className={`h-2 w-2 rounded-full ${dotClass}`} aria-hidden />
+        <span className={`text-[11px] font-semibold ${statusClass}`}>
+          {statusWord}
+        </span>
+      </div>
     </div>
   );
 }
 
-function wpmHint(wpm: number | null): string {
-  if (wpm === null) return "—";
-  if (wpm < 90) return "Lento";
-  if (wpm < 130) return "Moderado";
-  if (wpm < 170) return "Ágil";
-  return "Muy rápido";
+// ── Status helpers ───────────────────────────────────────────────────────────
+
+interface Status {
+  dot: string;
+  word: string;
+  text: string;
 }
 
-function fillersHint(n: number | null): string {
-  if (n === null) return "—";
-  if (n === 0) return "Excelente";
-  if (n <= 3) return "Bajo";
-  if (n <= 8) return "Moderado";
-  return "Alto";
+function fillersStatus(n: number | null): Status {
+  if (n === null) return { dot: "bg-line", word: "—", text: "text-ink-faint" };
+  if (n === 0)
+    return {
+      dot: "bg-emerald-500",
+      word: "Excelente",
+      text: "text-emerald-600 dark:text-emerald-400",
+    };
+  if (n <= 3)
+    return {
+      dot: "bg-emerald-400",
+      word: "Bajo",
+      text: "text-emerald-600 dark:text-emerald-400",
+    };
+  if (n <= 8)
+    return {
+      dot: "bg-amber-500",
+      word: "Moderado",
+      text: "text-amber-600 dark:text-amber-400",
+    };
+  return {
+    dot: "bg-red-500",
+    word: "Alto",
+    text: "text-red-600 dark:text-red-400",
+  };
+}
+
+function pauseStatus(ratio: number | null): Status {
+  if (ratio === null)
+    return { dot: "bg-line", word: "—", text: "text-ink-faint" };
+  if (ratio < 0.05)
+    return {
+      dot: "bg-amber-500",
+      word: "Escasas",
+      text: "text-amber-600 dark:text-amber-400",
+    };
+  if (ratio <= 0.2)
+    return {
+      dot: "bg-emerald-500",
+      word: "Óptimas",
+      text: "text-emerald-600 dark:text-emerald-400",
+    };
+  return {
+    dot: "bg-amber-500",
+    word: "Frecuentes",
+    text: "text-amber-600 dark:text-amber-400",
+  };
+}
+
+function toneStatus(variance: number | null): Status {
+  if (variance === null)
+    return { dot: "bg-line", word: "—", text: "text-ink-faint" };
+  if (variance < 200)
+    return {
+      dot: "bg-amber-500",
+      word: "Plana",
+      text: "text-amber-600 dark:text-amber-400",
+    };
+  if (variance < 800)
+    return {
+      dot: "bg-emerald-500",
+      word: "Equilibrada",
+      text: "text-emerald-600 dark:text-emerald-400",
+    };
+  return {
+    dot: "bg-emerald-500",
+    word: "Expresiva",
+    text: "text-emerald-600 dark:text-emerald-400",
+  };
+}
+
+// ── Helpers ──────────────────────────────────────────────────────────────────
+
+function scoreVerdict(score: number): string {
+  if (score >= 85) return "Excelente presentación";
+  if (score >= 70) return "Buena presentación";
+  if (score >= 50) return "Presentación en desarrollo";
+  return "Mucho margen de mejora";
 }
 
 function toneLabel(variance: number): string {
@@ -276,7 +408,7 @@ function num(v: unknown): number | null {
   return null;
 }
 
-// ============== Shape normalization (legacy + new) ==============
+// ── Shape normalization (legacy + new) ───────────────────────────────────────
 
 function normalizeStrength(raw: Record<string, unknown>): Strength {
   return {

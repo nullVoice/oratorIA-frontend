@@ -1,6 +1,5 @@
-import { Wrench } from "lucide-react";
-
-import type { Dimension } from "./strengths-list";
+import { GlassCard, type GlassTone } from "./glass-card";
+import { DIMENSION_META, DimensionTag, type Dimension } from "./strengths-list";
 
 export type Priority = "high" | "medium" | "low";
 
@@ -13,106 +12,142 @@ export interface Improvement {
   priority?: Priority | string;
 }
 
-const DIMENSION_LABEL: Record<string, string> = {
-  verbal: "Verbal",
-  paraverbal: "Paraverbal",
-  strategic: "Estratégica",
+const PRIORITY_TEXT: Record<string, string> = {
+  high: "Alta",
+  medium: "Media",
+  low: "Baja",
 };
 
-const PRIORITY_META: Record<
-  string,
-  { label: string; cls: string }
-> = {
-  high: {
-    label: "Prioridad alta",
-    cls: "bg-red-50 text-red-700 ring-red-200",
-  },
-  medium: {
-    label: "Prioridad media",
-    cls: "bg-amber-50 text-amber-700 ring-amber-200",
-  },
-  low: {
-    label: "Prioridad baja",
-    cls: "bg-gray-50 text-gray-600 ring-gray-200",
-  },
+const PRIORITY_ORDER: Record<string, number> = {
+  high: 0,
+  medium: 1,
+  low: 2,
 };
+
+export function priorityOrder(p: string | undefined): number {
+  return p !== undefined ? (PRIORITY_ORDER[p] ?? 3) : 3;
+}
+
+function blobTone(priority: string | undefined): GlassTone {
+  if (priority === "high") return "red";
+  if (priority === "medium") return "amber";
+  return "sky";
+}
+
+function iconBg(priority: string | undefined): string {
+  if (priority === "high") return "bg-red-500/10";
+  if (priority === "medium") return "bg-amber-500/10";
+  if (priority === "low") return "bg-sky-500/10";
+  return "bg-surface-2";
+}
+
+function pillClasses(priority: string | undefined): string {
+  if (priority === "high")
+    return "bg-red-500/10 text-red-600 dark:text-red-400";
+  if (priority === "medium")
+    return "bg-amber-500/10 text-amber-600 dark:text-amber-400";
+  if (priority === "low") return "bg-sky-500/10 text-sky-600 dark:text-sky-400";
+  return "bg-surface-2 text-ink-faint";
+}
 
 interface ImprovementsListProps {
   items: Improvement[];
 }
 
+/** Single improvement card (also used as a carousel slide). */
+export function ImprovementCard({
+  m,
+  index = 0,
+}: {
+  m: Improvement;
+  index?: number;
+}) {
+  const meta = m.dimension ? DIMENSION_META[m.dimension] : undefined;
+  const emoji = meta?.emoji ?? "📈";
+  const p = m.priority;
+
+  return (
+    <GlassCard tone={blobTone(p)} index={index}>
+      <div className="p-5 sm:p-6">
+        {/* Header row */}
+        <div className="flex flex-wrap items-center gap-3">
+          <span
+            className={`grid h-10 w-10 shrink-0 place-items-center rounded-full text-xl ${iconBg(p)}`}
+            aria-hidden
+          >
+            {emoji}
+          </span>
+
+          <h3 className="flex-1 text-[15px] font-semibold text-ink">
+            {m.title}
+          </h3>
+
+          {p && (
+            <span
+              className={`rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${pillClasses(p)}`}
+            >
+              {PRIORITY_TEXT[p] ?? p}
+            </span>
+          )}
+
+          {meta && <DimensionTag label={meta.label} />}
+        </div>
+
+        {m.description && (
+          <p className="mt-3 text-sm leading-relaxed text-ink-soft">
+            {m.description}
+          </p>
+        )}
+
+        {m.evidence && (
+          <blockquote className="mt-3 border-l-2 border-line pl-3 text-sm italic text-ink-faint">
+            {stripQuotes(m.evidence)}
+          </blockquote>
+        )}
+
+        {/* Suggestion callout */}
+        {m.suggestion && (
+          <div className="mt-4 flex items-start gap-2.5 rounded-xl border border-lime/30 bg-lime/10 p-3.5">
+            <span className="text-base leading-none" aria-hidden>
+              💡
+            </span>
+            <div>
+              <p className="mb-0.5 text-xs font-semibold text-accent">
+                Sugerencia
+              </p>
+              <p className="text-sm leading-relaxed text-ink-soft">
+                {m.suggestion}
+              </p>
+            </div>
+          </div>
+        )}
+      </div>
+    </GlassCard>
+  );
+}
+
 export function ImprovementsList({ items }: ImprovementsListProps) {
   if (items.length === 0) {
     return (
-      <p className="text-sm text-gray-500">
+      <p className="text-sm text-ink-soft">
         No detectamos mejoras prioritarias en esta sesión.
       </p>
     );
   }
+
+  const sorted = [...items].sort(
+    (a, b) => priorityOrder(a.priority) - priorityOrder(b.priority),
+  );
+
   return (
-    <ul className="flex flex-col gap-3">
-      {items.map((m, i) => (
-        <li
-          key={i}
-          className="flex gap-3 rounded-2xl border border-amber-100 bg-amber-50/30 p-4"
-        >
-          <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-amber-100 text-amber-700">
-            <Wrench className="h-5 w-5" strokeWidth={1.8} />
-          </span>
-          <div className="flex-1">
-            <div className="flex flex-wrap items-center gap-2">
-              <h3 className="text-sm font-bold tracking-tight text-[#0A0A0A]">
-                {m.title}
-              </h3>
-              {m.priority && <PriorityBadge priority={m.priority} />}
-              {m.dimension && <DimensionBadge dimension={m.dimension} />}
-            </div>
-            {m.description && (
-              <p className="mt-1 text-[13px] leading-relaxed text-gray-700">
-                {m.description}
-              </p>
-            )}
-            {m.evidence && (
-              <blockquote className="mt-2 border-l-2 border-amber-300 pl-3 text-[13px] italic text-gray-600">
-                “{stripQuotes(m.evidence)}”
-              </blockquote>
-            )}
-            {m.suggestion && (
-              <p className="mt-2 rounded-lg bg-white px-3 py-2 text-[13px] leading-relaxed text-[#0A0A0A] ring-1 ring-amber-100">
-                <span className="font-semibold text-amber-700">Sugerencia:</span>{" "}
-                {m.suggestion}
-              </p>
-            )}
-          </div>
-        </li>
+    <div className="flex flex-col gap-4">
+      {sorted.map((m, i) => (
+        <ImprovementCard key={i} m={m} index={i} />
       ))}
-    </ul>
-  );
-}
-
-function PriorityBadge({ priority }: { priority: string }) {
-  const meta = PRIORITY_META[priority] ?? {
-    label: priority,
-    cls: "bg-gray-50 text-gray-600 ring-gray-200",
-  };
-  return (
-    <span
-      className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ring-1 ${meta.cls}`}
-    >
-      {meta.label}
-    </span>
-  );
-}
-
-function DimensionBadge({ dimension }: { dimension: string }) {
-  const label = DIMENSION_LABEL[dimension] ?? dimension;
-  return (
-    <span className="inline-flex items-center rounded-full bg-white px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-gray-500 ring-1 ring-gray-200">
-      {label}
-    </span>
+    </div>
   );
 }
 
 function stripQuotes(text: string): string {
-  return text.replace(/^["“”'\s]+|["“”'\s]+$/g, "");
+  return text.replace(/^["""'\s]+|["""'\s]+$/g, "");
 }

@@ -1,7 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { ArrowRight } from "lucide-react";
-
-import { cn } from "@/lib/utils";
+import { ArrowUpRight } from "lucide-react";
 
 function greeting(now = new Date()) {
   const h = now.getHours();
@@ -18,71 +16,98 @@ interface HeroCardProps {
   weeklyGoal: number;
 }
 
+/** Expressive mood, driven by the user's momentum (reference-style). */
+function mood(streakDays: number, weeklyCount: number, weeklyGoal: number) {
+  if (weeklyGoal > 0 && weeklyCount >= weeklyGoal)
+    return { emoji: "🏆", label: "Meta cumplida" };
+  if (streakDays >= 5) return { emoji: "🔥", label: "En racha" };
+  if (weeklyCount > 0) return { emoji: "💪", label: "En forma" };
+  return { emoji: "🎯", label: "Listo para arrancar" };
+}
+
 export function HeroCard({
   firstName,
   streakDays,
-  weekDots,
   weeklyCount,
   weeklyGoal,
 }: HeroCardProps) {
-  const remainingThisWeek = Math.max(0, weeklyGoal - weeklyCount);
-  const subtitle = streakDays > 0
-    ? `Llevas ${streakDays} día${streakDays === 1 ? "" : "s"} seguidos practicando.`
-    : "Empieza tu próxima sesión cuando quieras.";
-  const goalLine = remainingThisWeek > 0
-    ? `Te falta${remainingThisWeek === 1 ? "" : "n"} ${remainingThisWeek} sesió${remainingThisWeek === 1 ? "n" : "nes"} para tu meta semanal.`
-    : "Ya cumpliste tu meta semanal — sigue así.";
+  const remaining = Math.max(0, weeklyGoal - weeklyCount);
+  const coachLine =
+    remaining > 0
+      ? `Vas ${weeklyCount} de ${weeklyGoal} sesiones esta semana. Entrá a una audiencia simulada que te escucha, te interrumpe y te exige en tiempo real.`
+      : "Cumpliste tu semana. Hoy entrenamos a presión: audiencia simulada que te escucha, te interrumpe y te exige en tiempo real.";
+  const m = mood(streakDays, weeklyCount, weeklyGoal);
 
   return (
-    <section className="grid grid-cols-1 items-center gap-8 rounded-2xl border border-gray-200 bg-white p-7 xl:grid-cols-[1fr_auto]">
-      <div>
-        <h1 className="text-2xl font-bold leading-tight tracking-tight text-[#0A0A0A] sm:text-3xl">
-          {greeting()}, {firstName}.
-        </h1>
-        <p className="mt-2 max-w-md text-[15px] text-gray-600">
-          {subtitle} {goalLine}
-        </p>
-        <div className="mt-5 flex flex-wrap items-center gap-2">
-          <Link
-            to="/practice/new"
-            className="inline-flex h-11 items-center gap-2 rounded-lg bg-[#0A0A0A] px-5 text-sm font-bold text-white transition-colors hover:bg-gray-800"
-          >
-            Empezar nueva sesión
-            <ArrowRight className="h-4 w-4" strokeWidth={2} />
-          </Link>
+    <section className="rounded-2xl bg-surface p-8 sm:p-10 lg:p-12">
+      <div className="flex items-start justify-between gap-6">
+        <p className="text-[15px] font-medium text-ink-soft">{greeting()},</p>
+        <div className="flex items-center gap-3 text-right">
+          <div>
+            <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-ink-faint">
+              Estado
+            </div>
+            <div className="text-sm font-semibold text-ink">{m.label}</div>
+          </div>
+          <span className="text-4xl leading-none sm:text-5xl" aria-hidden>
+            {m.emoji}
+          </span>
         </div>
       </div>
 
-      <StreakBadge days={streakDays} weekDots={weekDots} />
+      <h1 className="font-display -mt-1 text-6xl font-bold leading-[0.95] tracking-tight text-ink sm:text-7xl">
+        {firstName}
+      </h1>
+
+      <p className="mt-6 max-w-2xl text-[15px] leading-relaxed text-ink-soft">
+        {coachLine}
+      </p>
+
+      <div className="mt-8 flex flex-wrap items-center gap-5">
+        <Link
+          to="/practice/new"
+          className="group inline-flex h-12 items-center gap-2 rounded-lg bg-lime px-6 text-sm font-bold text-on-lime shadow-[0_0_30px_var(--color-lime-shadow)] transition-all hover:bg-lime-dim hover:shadow-[0_0_42px_var(--color-lime-shadow)]"
+        >
+          Iniciar sparring
+          <ArrowUpRight
+            className="h-4 w-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+            strokeWidth={2.4}
+          />
+        </Link>
+
+        <div className="flex items-center gap-2 text-sm text-ink-soft">
+          <span className="text-base" aria-hidden>
+            🔥
+          </span>
+          <span className="font-semibold text-ink">{streakDays}</span>
+          {streakDays === 1 ? "día seguido" : "días seguidos"}
+        </div>
+      </div>
+
+      <VoiceBand />
     </section>
   );
 }
 
-function StreakBadge({
-  days,
-  weekDots,
-}: {
-  days: number;
-  weekDots: Array<"done" | "today" | "future">;
-}) {
+/** Full-width voice signature — the only "extra" element, integrated as a
+ * band rather than a nested card. */
+function VoiceBand() {
+  const bars = Array.from({ length: 48 }, (_, i) => {
+    const wave = Math.sin(i * 0.5) * 0.3 + Math.sin(i * 1.7) * 0.18;
+    return Math.min(1, Math.max(0.16, 0.5 + wave));
+  });
   return (
-    <div className="flex flex-col items-center gap-3 rounded-2xl border border-gray-200 bg-gray-50 px-6 py-5">
-      <span className="text-5xl font-bold leading-none tracking-tight text-[#0A0A0A]">
-        {days}
-      </span>
-      <span className="text-xs text-gray-600">
-        {days === 1 ? "día seguido" : "días seguidos"}
-      </span>
-      <div className="flex gap-1">
-        {weekDots.map((s, i) => (
+    <div className="mt-9 border-t border-line pt-6">
+      <div className="flex h-16 items-end gap-[2px] sm:gap-1">
+        {bars.map((peak, i) => (
           <span
             key={i}
-            className={cn(
-              "h-2.5 w-2.5 rounded-sm",
-              s === "done" && "bg-[#C6FF3D]",
-              s === "today" && "bg-[#0A0A0A]",
-              s === "future" && "bg-gray-200",
-            )}
+            className="eq-bar flex-1 rounded-full bg-accent"
+            style={{
+              height: `${peak * 100}%`,
+              animationDelay: `${(i % 9) * 0.1}s`,
+              animationDuration: `${1 + (i % 4) * 0.22}s`,
+            }}
           />
         ))}
       </div>

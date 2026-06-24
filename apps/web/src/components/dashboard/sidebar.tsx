@@ -1,159 +1,343 @@
-import { Link } from "@tanstack/react-router";
-import { ChevronDown, Home, type LucideIcon } from "lucide-react";
-
+/**
+ * App sidebar — responsive, collapsible, accessible.
+ *
+ * - Desktop (lg+): static rail, collapsible to icons-only (preference
+ *   persisted). Mobile: off-canvas drawer toggled from the topbar, with
+ *   an overlay, Escape-to-close and `inert` background (handled by the
+ *   layout).
+ * - Active item derives from the router and is marked `aria-current`.
+ * - Real routes link; not-yet-built sections are shown disabled.
+ */
+import { Link, useRouterState } from "@tanstack/react-router";
 import {
-  navAccountPlaceholders,
-  navMainPlaceholders,
-} from "@/lib/dashboard/mock-data";
+  Clock,
+  Home,
+  Mic,
+  PanelLeft,
+  Settings,
+  Target,
+  Trophy,
+  X,
+  type LucideIcon,
+} from "lucide-react";
+import { useEffect } from "react";
+
 import { cn, initialsOf, namePartOfEmail } from "@/lib/utils";
+import { useUiStore } from "@/stores/ui-store";
 import type { User } from "@/lib/api/schemas";
 
-interface SidebarProps {
-  user: User;
+interface NavItem {
+  label: string;
+  icon: LucideIcon;
+  to?: string;
+  match?: (pathname: string) => boolean;
+  badge?: string;
+  soon?: boolean;
 }
 
-export function Sidebar({ user }: SidebarProps) {
+const MAIN_NAV: NavItem[] = [
+  { label: "Inicio", icon: Home, to: "/dashboard", match: (p) => p === "/dashboard" },
+  {
+    label: "Nueva sesión",
+    icon: Mic,
+    to: "/practice/new",
+    match: (p) => p.startsWith("/practice"),
+  },
+  { label: "Mi progreso", icon: Target, soon: true },
+  { label: "Histórico", icon: Clock, badge: "14", soon: true },
+  { label: "Logros", icon: Trophy, badge: "3", soon: true },
+];
+
+const ACCOUNT_NAV: NavItem[] = [
+  { label: "Configuración", icon: Settings, soon: true },
+];
+
+export function Sidebar({ user }: { user: User }) {
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const mobileNavOpen = useUiStore((s) => s.mobileNavOpen);
+  const closeMobileNav = useUiStore((s) => s.closeMobileNav);
+  const collapsed = useUiStore((s) => s.collapsed);
+  const toggleCollapsed = useUiStore((s) => s.toggleCollapsed);
+
+  // Escape closes the mobile drawer.
+  useEffect(() => {
+    if (!mobileNavOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") closeMobileNav();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [mobileNavOpen, closeMobileNav]);
+
   const displayName = user.full_name ?? namePartOfEmail(user.email);
 
   return (
-    <aside className="flex w-60 shrink-0 flex-col border-r border-gray-200 bg-white px-3.5 py-5">
-      <div className="px-2 pb-6 pt-1">
-        <img src="/OratorIA-lockup.svg" alt="OratorIA" className="h-7" />
-      </div>
+    <>
+      {/* Overlay (mobile only) */}
+      <div
+        aria-hidden
+        onClick={closeMobileNav}
+        className={cn(
+          "fixed inset-0 z-40 bg-black/50 backdrop-blur-sm transition-opacity duration-300 lg:hidden",
+          mobileNavOpen ? "opacity-100" : "pointer-events-none opacity-0",
+        )}
+      />
 
-      <UserPill name={displayName} plan={user.plan} />
+      <aside
+        id="app-sidebar"
+        aria-label="Navegación principal"
+        className={cn(
+          "fixed inset-y-0 left-0 z-50 flex w-72 -translate-x-full flex-col border-r border-line bg-stage transition-[transform,width] duration-300 ease-out",
+          mobileNavOpen && "translate-x-0",
+          "lg:static lg:translate-x-0",
+          collapsed ? "lg:w-[76px]" : "lg:w-64",
+        )}
+      >
+        {/* Header: brand + close (mobile) */}
+        <div className="flex h-16 shrink-0 items-center justify-between gap-2 px-4">
+          <Link
+            to="/dashboard"
+            onClick={closeMobileNav}
+            aria-label="OratorIA — Inicio"
+            className="flex items-center"
+          >
+            <img
+              src="/OratorIA-lockup.svg"
+              alt="OratorIA"
+              className={cn("h-7", collapsed && "lg:hidden")}
+            />
+            <img
+              src="/OratorIA-isotype.svg"
+              alt=""
+              className={cn("hidden h-8 w-8", collapsed && "lg:block")}
+            />
+          </Link>
+          <button
+            type="button"
+            onClick={closeMobileNav}
+            aria-label="Cerrar menú"
+            className="grid h-9 w-9 place-items-center rounded-lg text-ink-soft transition-colors hover:bg-surface hover:text-ink lg:hidden"
+          >
+            <X className="h-5 w-5" strokeWidth={1.8} aria-hidden />
+          </button>
+        </div>
 
-      <SidebarSection label="Principal">
-        <SidebarLink icon={Home} label="Inicio" active />
-        {navMainPlaceholders.map((link) => (
-          <SidebarLink
-            key={link.id}
-            icon={link.icon}
-            label={link.label}
-            badge={link.badge}
-            disabled
+        <div className="flex min-h-0 flex-1 flex-col gap-1 overflow-y-auto px-3 pb-4">
+          <UserPill name={displayName} plan={user.plan} collapsed={collapsed} />
+
+          <nav aria-label="Principal" className="mt-2">
+            <GroupLabel collapsed={collapsed}>Principal</GroupLabel>
+            <ul className="flex flex-col gap-0.5">
+              {MAIN_NAV.map((item) => (
+                <li key={item.label}>
+                  <NavLinkItem
+                    item={item}
+                    active={item.match?.(pathname) ?? false}
+                    collapsed={collapsed}
+                    onNavigate={closeMobileNav}
+                  />
+                </li>
+              ))}
+            </ul>
+          </nav>
+
+          <nav aria-label="Cuenta" className="mt-4">
+            <GroupLabel collapsed={collapsed}>Cuenta</GroupLabel>
+            <ul className="flex flex-col gap-0.5">
+              {ACCOUNT_NAV.map((item) => (
+                <li key={item.label}>
+                  <NavLinkItem
+                    item={item}
+                    active={false}
+                    collapsed={collapsed}
+                    onNavigate={closeMobileNav}
+                  />
+                </li>
+              ))}
+            </ul>
+          </nav>
+
+          <div className="mt-auto pt-4">
+            <UpgradeCard plan={user.plan} collapsed={collapsed} />
+          </div>
+        </div>
+
+        {/* Collapse toggle (desktop only) */}
+        <button
+          type="button"
+          onClick={toggleCollapsed}
+          aria-label={collapsed ? "Expandir barra lateral" : "Colapsar barra lateral"}
+          aria-expanded={!collapsed}
+          className={cn(
+            "hidden h-12 shrink-0 items-center gap-3 border-t border-line px-5 text-[13px] font-medium text-ink-soft transition-colors hover:text-ink lg:flex",
+            collapsed && "lg:justify-center lg:px-0",
+          )}
+        >
+          <PanelLeft
+            className={cn("h-5 w-5 shrink-0 transition-transform", collapsed && "rotate-180")}
+            strokeWidth={1.8}
+            aria-hidden
           />
-        ))}
-      </SidebarSection>
-
-      <SidebarSection label="Cuenta">
-        {navAccountPlaceholders.map((link) => (
-          <SidebarLink
-            key={link.id}
-            icon={link.icon}
-            label={link.label}
-            badge={link.badge}
-            disabled
-          />
-        ))}
-      </SidebarSection>
-
-      <UpgradeCard plan={user.plan} />
-    </aside>
+          <span className={cn(collapsed && "lg:hidden")}>Colapsar</span>
+        </button>
+      </aside>
+    </>
   );
 }
 
-function UserPill({ name, plan }: { name: string; plan: User["plan"] }) {
-  return (
-    <button
-      type="button"
-      className="mb-5 flex w-full items-center gap-2.5 rounded-[10px] bg-gray-50 p-2.5 text-left transition-colors hover:bg-gray-100"
-    >
-      <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-gray-200 text-xs font-bold text-[#0A0A0A]">
-        {initialsOf(name)}
-      </span>
-      <span className="min-w-0 flex-1">
-        <span className="block truncate text-[13px] font-semibold text-[#0A0A0A]">
-          {name}
-        </span>
-        <span className="block text-[11px] capitalize text-gray-500">
-          Plan {plan}
-        </span>
-      </span>
-      <ChevronDown className="h-3.5 w-3.5 text-gray-400" />
-    </button>
-  );
-}
-
-function SidebarSection({
-  label,
+function GroupLabel({
+  collapsed,
   children,
 }: {
-  label: string;
+  collapsed: boolean;
   children: React.ReactNode;
 }) {
   return (
-    <div className="mb-4">
-      <div className="px-2 pb-2 text-xs font-semibold text-gray-400">{label}</div>
+    <div
+      className={cn(
+        "px-3 pb-2 pt-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-ink-faint",
+        collapsed && "lg:hidden",
+      )}
+    >
       {children}
     </div>
   );
 }
 
-function SidebarLink({
-  icon: Icon,
-  label,
-  badge,
-  active = false,
-  disabled = false,
+function NavLinkItem({
+  item,
+  active,
+  collapsed,
+  onNavigate,
 }: {
-  icon: LucideIcon;
-  label: string;
-  badge?: string;
-  active?: boolean;
-  disabled?: boolean;
+  item: NavItem;
+  active: boolean;
+  collapsed: boolean;
+  onNavigate: () => void;
 }) {
+  const Icon = item.icon;
   const className = cn(
-    "mb-0.5 flex items-center gap-3 rounded-lg px-2.5 py-2.5 text-[13px] font-medium transition-colors",
-    active && "bg-[#0A0A0A] text-[#C6FF3D] font-semibold",
-    !active && !disabled && "text-gray-700 hover:bg-gray-100 hover:text-[#0A0A0A]",
-    disabled && "cursor-not-allowed text-gray-400",
+    "group flex min-h-[44px] items-center gap-3 rounded-lg px-3 text-[14px] font-medium transition-colors",
+    collapsed && "lg:justify-center lg:px-0",
+    active && "bg-surface font-semibold text-ink ring-1 ring-line",
+    !active && !item.soon && "text-ink-soft hover:bg-surface hover:text-ink",
+    item.soon && "cursor-not-allowed text-ink-faint/70",
   );
 
-  const content = (
+  const inner = (
     <>
-      <Icon className="h-5 w-5 shrink-0" strokeWidth={1.8} />
-      <span className="flex-1">{label}</span>
-      {badge && (
+      <Icon
+        className={cn("h-5 w-5 shrink-0", active && "text-accent")}
+        strokeWidth={1.8}
+        aria-hidden
+      />
+      <span className={cn("flex-1 truncate", collapsed && "lg:hidden")}>
+        {item.label}
+      </span>
+      {item.badge && (
         <span
           className={cn(
-            "rounded-md px-1.5 py-0.5 text-[10px] font-semibold",
-            active ? "bg-[#C6FF3D] text-[#0A0A0A]" : "bg-gray-100 text-gray-600",
+            "rounded-md bg-surface-2 px-1.5 py-0.5 text-[10px] font-semibold text-ink-soft",
+            active && "bg-lime text-on-lime",
+            collapsed && "lg:hidden",
           )}
         >
-          {badge}
+          {item.badge}
+        </span>
+      )}
+      {item.soon && (
+        <span
+          className={cn(
+            "rounded-full bg-surface-2 px-2 py-0.5 text-[9px] font-semibold uppercase tracking-wider text-ink-faint",
+            collapsed && "lg:hidden",
+          )}
+        >
+          Pronto
         </span>
       )}
     </>
   );
 
-  if (disabled) {
+  if (item.soon || !item.to) {
     return (
-      <span className={className} title="Próximamente">
-        {content}
+      <span
+        className={className}
+        aria-disabled="true"
+        title={collapsed ? `${item.label} (próximamente)` : undefined}
+      >
+        {inner}
       </span>
     );
   }
+
   return (
-    <Link to="/dashboard" className={className}>
-      {content}
+    <Link
+      to={item.to}
+      onClick={onNavigate}
+      aria-current={active ? "page" : undefined}
+      title={collapsed ? item.label : undefined}
+      className={className}
+    >
+      {inner}
     </Link>
   );
 }
 
-function UpgradeCard({ plan }: { plan: User["plan"] }) {
+function UserPill({
+  name,
+  plan,
+  collapsed,
+}: {
+  name: string;
+  plan: User["plan"];
+  collapsed: boolean;
+}) {
+  return (
+    <div
+      className={cn(
+        "flex items-center gap-2.5 rounded-xl border border-line bg-surface p-2.5",
+        collapsed && "lg:justify-center lg:border-0 lg:bg-transparent lg:p-1",
+      )}
+    >
+      <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-lime text-xs font-bold text-on-lime">
+        {initialsOf(name)}
+      </span>
+      <span className={cn("min-w-0 flex-1", collapsed && "lg:hidden")}>
+        <span className="block truncate text-[13px] font-semibold text-ink">
+          {name}
+        </span>
+        <span className="block text-[11px] capitalize text-ink-faint">
+          Plan {plan}
+        </span>
+      </span>
+    </div>
+  );
+}
+
+function UpgradeCard({
+  plan,
+  collapsed,
+}: {
+  plan: User["plan"];
+  collapsed: boolean;
+}) {
   if (plan !== "free") return null;
   return (
-    <div className="mt-auto rounded-xl border border-gray-200 bg-gray-50 p-4">
-      <p className="text-xs text-gray-600">2 de 3 sesiones usadas este mes.</p>
-      <h4 className="mt-1.5 text-sm font-bold text-[#0A0A0A]">
+    <div
+      className={cn(
+        "overflow-hidden rounded-xl border border-line bg-surface p-4",
+        collapsed && "lg:hidden",
+      )}
+    >
+      <p className="text-xs text-ink-soft">2 de 3 sesiones usadas este mes.</p>
+      <h4 className="mt-1.5 text-sm font-semibold text-ink">
         Sesiones ilimitadas con Pro
       </h4>
       <button
         type="button"
-        className="mt-3 w-full rounded-lg bg-[#0A0A0A] px-3 py-2 text-xs font-bold text-white transition-colors hover:bg-gray-800"
+        className="mt-3 w-full rounded-lg bg-lime px-3 py-2 text-xs font-bold text-on-lime transition-colors hover:bg-lime-dim"
       >
-        Cambiar a Pro
+        Mejorar a Pro
       </button>
     </div>
   );

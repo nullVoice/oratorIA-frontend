@@ -6,6 +6,7 @@
 import { useQuery } from "@tanstack/react-query";
 
 import { fetchSessions, type SessionSummary } from "@/lib/api/sessions";
+import { buildMockSessions } from "@/lib/dashboard/mock-sessions";
 
 export interface DashboardData {
   loading: boolean;
@@ -73,7 +74,12 @@ export function useDashboardData(): DashboardData {
     staleTime: 30_000,
   });
 
-  const sessions = query.data ?? [];
+  // Demo fallback: when the account has no real sessions yet, surface a
+  // mocked dataset so the dashboard showcases the product instead of an
+  // empty state. Real sessions always take precedence.
+  const fetched = query.data ?? [];
+  const sessions =
+    !query.isLoading && fetched.length === 0 ? buildMockSessions() : fetched;
   const completed = sessions.filter(
     (s) => s.status === "completed" && s.score !== null,
   );

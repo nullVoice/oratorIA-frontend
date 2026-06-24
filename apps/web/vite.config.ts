@@ -8,5 +8,12 @@ export default defineConfig({
   plugins: [tsconfigPaths(), tailwindcss(), tanstackStart(), viteReact()],
   server: {
     port: 3001,
+    // Windows file-watching with tool-based writes (editors/agents) frequently
+    // misses chokidar fs events, so Vite keeps serving a stale module. Polling
+    // guarantees every change is picked up. ~300ms feels instant in dev.
+    watch: {
+      usePolling: true,
+      interval: 300,
+    },
   },
 });

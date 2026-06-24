@@ -1,6 +1,8 @@
 import { Mic, Square } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 
+import { cn } from "@/lib/utils";
+
 export type RecorderState =
   | "idle"
   | "starting"
@@ -206,32 +208,56 @@ export function Recorder({
   const stopping = state === "stopping";
 
   return (
-    <div className="flex flex-col items-center gap-3">
-      <button
-        type="button"
-        onClick={recording ? onStop : onStart}
-        disabled={disabled || starting || stopping}
-        aria-label={recording ? "Detener grabación" : "Empezar grabación"}
-        className={`grid h-20 w-20 place-items-center rounded-full text-white shadow-md transition-all hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-70 ${
-          recording
-            ? "bg-red-500 hover:bg-red-600"
-            : "bg-[#0A0A0A] hover:bg-gray-800"
-        }`}
-      >
-        {recording ? (
-          <Square className="h-8 w-8" fill="currentColor" />
-        ) : (
-          <Mic className="h-8 w-8" strokeWidth={1.8} />
+    <div className="flex flex-col items-center gap-4">
+      <div className="relative grid h-28 w-28 place-items-center">
+        {/* Emanating ripples while recording */}
+        {recording && (
+          <>
+            <span className="absolute h-20 w-20 animate-ping rounded-full bg-lime/30 [animation-duration:1.6s]" />
+            <span className="absolute h-20 w-20 animate-ping rounded-full bg-lime/20 [animation-delay:0.5s] [animation-duration:1.6s]" />
+          </>
         )}
-      </button>
-      <span className="font-mono text-sm text-gray-700 tabular-nums">
+        {/* Gentle breathing glow while idle */}
+        {!recording && !starting && !stopping && (
+          <span className="absolute h-20 w-20 animate-pulse rounded-full bg-lime/15 blur-md" />
+        )}
+
+        <button
+          type="button"
+          onClick={recording ? onStop : onStart}
+          disabled={disabled || starting || stopping}
+          aria-label={recording ? "Detener grabación" : "Empezar grabación"}
+          className={cn(
+            "relative grid h-20 w-20 place-items-center rounded-full transition-all hover:scale-105 disabled:cursor-not-allowed disabled:opacity-70",
+            recording
+              ? "bg-lime text-on-lime shadow-[0_0_44px_var(--color-lime-shadow)]"
+              : "bg-ink text-stage shadow-lg shadow-black/20",
+          )}
+        >
+          {recording ? (
+            <Square className="h-7 w-7" fill="currentColor" />
+          ) : (
+            <Mic className="h-8 w-8" strokeWidth={1.8} />
+          )}
+        </button>
+      </div>
+
+      <span className="font-display text-3xl font-bold tabular-nums text-ink">
         {formatDuration(duration)}
       </span>
-      {starting && (
-        <span className="text-xs text-gray-500">Solicitando micrófono…</span>
+
+      {recording && (
+        <span className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-ink-soft">
+          <span className="h-2 w-2 animate-pulse rounded-full bg-red-500" />
+          Grabando
+        </span>
       )}
-      {stopping && (
-        <span className="text-xs text-gray-500">Finalizando…</span>
+      {starting && (
+        <span className="text-xs text-ink-soft">Solicitando micrófono…</span>
+      )}
+      {stopping && <span className="text-xs text-ink-soft">Finalizando…</span>}
+      {!recording && !starting && !stopping && duration === 0 && (
+        <span className="text-xs text-ink-faint">Tocá para empezar a grabar</span>
       )}
     </div>
   );

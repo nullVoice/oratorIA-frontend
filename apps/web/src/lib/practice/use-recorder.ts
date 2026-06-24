@@ -26,6 +26,8 @@ export interface UseRecorderOptions {
 
 export interface UseRecorderReturn {
   state: RecorderState;
+  /** Live mic stream (for audio-reactive visualizers); null when idle. */
+  stream: MediaStream | null;
   /** Seconds elapsed since recording started. */
   elapsedSeconds: number;
   /** Latest cumulative transcript text from Whisper. */
@@ -56,6 +58,7 @@ export function useRecorder(options: UseRecorderOptions = {}): UseRecorderReturn
   const { transcribeIntervalMs = 4000, onTranscriptUpdate, onError } = options;
 
   const [state, setState] = useState<RecorderState>("idle");
+  const [stream, setStream] = useState<MediaStream | null>(null);
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const [transcript, setTranscript] = useState("");
   const [isTranscribing, setIsTranscribing] = useState(false);
@@ -98,6 +101,7 @@ export function useRecorder(options: UseRecorderOptions = {}): UseRecorderReturn
     recorderRef.current = null;
     chunksRef.current = [];
     startedAtRef.current = null;
+    setStream(null);
     setElapsedSeconds(0);
     setTranscript("");
     setState("idle");
@@ -135,6 +139,7 @@ export function useRecorder(options: UseRecorderOptions = {}): UseRecorderReturn
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       streamRef.current = stream;
+      setStream(stream);
       const mime = MediaRecorder.isTypeSupported("audio/webm;codecs=opus")
         ? "audio/webm;codecs=opus"
         : MediaRecorder.isTypeSupported("audio/webm")
@@ -154,10 +159,14 @@ export function useRecorder(options: UseRecorderOptions = {}): UseRecorderReturn
         if (startedAtRef.current === null) return;
         setElapsedSeconds((Date.now() - startedAtRef.current) / 1000);
       }, 200);
-      // First transcribe after the interval — gives Whisper enough audio.
-      transcribeTimerRef.current = window.setInterval(() => {
-        void transcribeCumulative();
-      }, transcribeIntervalMs);
+      // Periodic Whisper re-transcription — only when a finite interval is
+      // configured. Pass Infinity to disable it (e.g. when Deepgram streaming
+      // owns the live transcript instead).
+      if (Number.isFinite(transcribeIntervalMs)) {
+        transcribeTimerRef.current = window.setInterval(() => {
+          void transcribeCumulative();
+        }, transcribeIntervalMs);
+      }
     } catch (err) {
       stopStream();
       setState("idle");
@@ -184,15 +193,18 @@ export function useRecorder(options: UseRecorderOptions = {}): UseRecorderReturn
     });
 
     stopStream();
-    // One last transcription pass for whatever audio was captured after the
-    // last interval tick.
-    await transcribeCumulative();
+    setStream(null);
+    // One last transcription pass — skip when polling is disabled (Infinity).
+    if (Number.isFinite(transcribeIntervalMs)) {
+      await transcribeCumulative();
+    }
     setState("idle");
     return blob;
   }, [cleanupTimers, state, stopStream, transcribeCumulative]);
 
   return {
     state,
+    stream,
     elapsedSeconds,
     transcript,
     isTranscribing,

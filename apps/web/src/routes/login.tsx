@@ -7,6 +7,7 @@ import { z } from "zod";
 import { AuthDivider } from "@/components/auth/auth-divider";
 import { AuthVisualLogin } from "@/components/auth/auth-visual-login";
 import { OAuthButtons } from "@/components/auth/oauth-buttons";
+import { getApiErrorMessage } from "@/lib/api/errors";
 import { useAuthStore } from "@/stores/auth-store";
 
 const LoginSchema = z.object({
@@ -23,10 +24,14 @@ function LoginRoute() {
   const login = useAuthStore((s) => s.login);
   const isLoading = useAuthStore((s) => s.isLoading);
   const [showPassword, setShowPassword] = useState(false);
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  // Demo credentials prefilled so the value proposition can be shown
+  // without typing. Backend has this seeded user (segment: business).
+  const [email, setEmail] = useState("maria@oratoria.app");
+  const [password, setPassword] = useState("oratoria123");
   const [remember, setRemember] = useState(true);
-  const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
+  const [errors, setErrors] = useState<{ email?: string; password?: string }>(
+    {},
+  );
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -48,11 +53,16 @@ function LoginRoute() {
       toast.success("Sesión iniciada correctamente");
       navigate({ to: "/dashboard" });
     } catch (err) {
-      const message = err instanceof Error ? err.message : "Error al iniciar sesión";
+      const raw = await getApiErrorMessage(
+        err,
+        "No pudimos iniciar sesión. Revisá tu conexión e intentá de nuevo.",
+      );
       const friendly =
-        message.includes("401") || message.includes("Unauthorized")
-          ? "Email o contraseña incorrectos"
-          : message;
+        raw.includes("BAD_CREDENTIALS") ||
+        raw.includes("401") ||
+        raw.includes("Unauthorized")
+          ? "Email o contraseña incorrectos."
+          : raw;
       toast.error(friendly);
     }
   };
@@ -282,7 +292,13 @@ function Checkbox({
         }`}
       >
         {checked && (
-          <svg viewBox="0 0 24 24" className="h-3 w-3" fill="none" stroke="#0A0A0A" strokeWidth={3}>
+          <svg
+            viewBox="0 0 24 24"
+            className="h-3 w-3"
+            fill="none"
+            stroke="#0A0A0A"
+            strokeWidth={3}
+          >
             <polyline points="20 6 9 17 4 12" />
           </svg>
         )}

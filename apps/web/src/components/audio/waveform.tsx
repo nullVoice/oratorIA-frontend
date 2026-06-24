@@ -1,11 +1,12 @@
 /**
  * Waveform visualizer.
  *
- * Two modes:
- *   - Live: pass a MediaStream while recording → renders a real-time
- *     amplitude trace using Web Audio API + canvas.
- *   - Playback: pass an audioBlob → wavesurfer.js renders the full
- *     waveform with click-to-seek.
+ * - Live: a MediaStream → real-time frequency spectrum drawn as mirrored
+ *   lime bars on canvas (Web Audio AnalyserNode).
+ * - Playback: an audioBlob → wavesurfer.js renders the full waveform.
+ * - Idle: a calm, faint equalizer hint.
+ *
+ * Colors resolve from the active theme tokens so it adapts to light/dark.
  */
 import { useEffect, useRef } from "react";
 import WaveSurfer from "wavesurfer.js";
@@ -16,12 +17,20 @@ interface WaveformProps {
   height?: number;
 }
 
-export function Waveform({ stream, audioBlob, height = 80 }: WaveformProps) {
+function themeColor(name: string, fallback: string): string {
+  if (typeof document === "undefined") return fallback;
+  const v = getComputedStyle(document.documentElement)
+    .getPropertyValue(name)
+    .trim();
+  return v || fallback;
+}
+
+export function Waveform({ stream, audioBlob, height = 96 }: WaveformProps) {
   const liveCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const playbackContainerRef = useRef<HTMLDivElement | null>(null);
   const wavesurferRef = useRef<WaveSurfer | null>(null);
 
-  // Live mode: draw amplitude from AnalyserNode → canvas.
+  // Live mode: mirrored frequency bars.
   useEffect(() => {
     if (!stream || !liveCanvasRef.current) return;
 
@@ -36,31 +45,40 @@ export function Waveform({ stream, audioBlob, height = 80 }: WaveformProps) {
     const audioCtx = new AudioCtor();
     const source = audioCtx.createMediaStreamSource(stream);
     const analyser = audioCtx.createAnalyser();
-    analyser.fftSize = 2048;
+    analyser.fftSize = 512;
+    analyser.smoothingTimeConstant = 0.78;
     source.connect(analyser);
 
-    const bufferLen = analyser.fftSize;
-    const data = new Uint8Array(bufferLen);
+    const bins = analyser.frequencyBinCount;
+    const data = new Uint8Array(bins);
     let raf = 0;
 
     const draw = () => {
-      analyser.getByteTimeDomainData(data);
+      analyser.getByteFrequencyData(data);
       const { width, height: h } = canvas;
       ctx2d.clearRect(0, 0, width, h);
-      ctx2d.lineWidth = 2;
-      ctx2d.strokeStyle = "#0A0A0A";
-      ctx2d.beginPath();
-      const slice = width / bufferLen;
-      let x = 0;
-      for (let i = 0; i < bufferLen; i++) {
-        const v = data[i] / 128.0;
-        const y = (v * h) / 2;
-        if (i === 0) ctx2d.moveTo(x, y);
-        else ctx2d.lineTo(x, y);
-        x += slice;
+      const accent = themeColor("--c-accent", "#C6FF3D");
+
+      const barCount = 56;
+      const usable = Math.floor(bins * 0.66);
+      const gap = 3;
+      const barW = Math.max(2, (width - gap * (barCount - 1)) / barCount);
+      ctx2d.fillStyle = accent;
+
+      for (let i = 0; i < barCount; i++) {
+        const idx = Math.floor((i / barCount) * usable);
+        const v = data[idx] / 255;
+        const barH = Math.max(barW, v * v * h * 0.95);
+        const x = i * (barW + gap);
+        const y = (h - barH) / 2;
+        ctx2d.beginPath();
+        if (ctx2d.roundRect) {
+          ctx2d.roundRect(x, y, barW, barH, barW / 2);
+        } else {
+          ctx2d.rect(x, y, barW, barH);
+        }
+        ctx2d.fill();
       }
-      ctx2d.lineTo(width, h / 2);
-      ctx2d.stroke();
       raf = requestAnimationFrame(draw);
     };
     draw();
@@ -73,18 +91,18 @@ export function Waveform({ stream, audioBlob, height = 80 }: WaveformProps) {
     };
   }, [stream]);
 
-  // Playback mode: wavesurfer.js renders the recorded blob.
+  // Playback mode.
   useEffect(() => {
     if (!audioBlob || !playbackContainerRef.current) return;
 
     const ws = WaveSurfer.create({
       container: playbackContainerRef.current,
-      waveColor: "#0A0A0A",
-      progressColor: "#C6FF3D",
-      cursorColor: "#0A0A0A",
+      waveColor: themeColor("--c-ink-faint", "#6d6d65"),
+      progressColor: themeColor("--c-accent", "#C6FF3D"),
+      cursorColor: themeColor("--c-ink-soft", "#a4a39a"),
       height,
-      barWidth: 2,
-      barRadius: 2,
+      barWidth: 3,
+      barRadius: 3,
       barGap: 2,
       normalize: true,
     });
@@ -106,20 +124,33 @@ export function Waveform({ stream, audioBlob, height = 80 }: WaveformProps) {
         ref={liveCanvasRef}
         width={800}
         height={height}
-        className="w-full rounded-lg bg-gray-50"
+        className="w-full rounded-xl bg-stage/40 ring-1 ring-line"
         style={{ height }}
       />
     );
   }
   if (audioBlob) {
-    return <div ref={playbackContainerRef} className="w-full rounded-lg" />;
+    return (
+      <div
+        ref={playbackContainerRef}
+        className="w-full rounded-xl bg-stage/40 px-3 ring-1 ring-line"
+      />
+    );
   }
   return (
     <div
-      className="grid w-full place-items-center rounded-lg bg-gray-50 text-xs text-gray-400"
+      className="grid w-full place-items-center rounded-xl bg-stage/40 ring-1 ring-line"
       style={{ height }}
     >
-      Sin audio
+      <div className="flex items-end gap-1.5 opacity-40">
+        {[10, 20, 13, 26, 16, 22, 11, 18, 9].map((b, i) => (
+          <span
+            key={i}
+            className="w-1.5 rounded-full bg-accent"
+            style={{ height: `${b}px` }}
+          />
+        ))}
+      </div>
     </div>
   );
 }

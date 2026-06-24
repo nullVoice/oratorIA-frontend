@@ -48,3 +48,7 @@ coverage
 .cache
 tmp
 temp
+
+# AI assistant files (not part of the project)
+.claude/
+CLAUDE.md
