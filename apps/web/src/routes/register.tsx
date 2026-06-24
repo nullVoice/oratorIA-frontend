@@ -117,7 +117,7 @@ function RegisterRoute() {
 
   const strengthClass =
     password.length === 0
-      ? "bg-gray-200"
+      ? "bg-line"
       : strength <= 1
         ? "bg-red-500"
         : strength === 2
@@ -127,18 +127,29 @@ function RegisterRoute() {
             : "bg-emerald-500";
 
   return (
-    <main className="grid min-h-svh grid-cols-1 bg-white lg:grid-cols-2">
+    <main className="grid min-h-svh grid-cols-1 bg-surface lg:grid-cols-2">
       {/* Form side */}
       <section className="relative flex flex-col justify-center px-6 py-10 sm:px-10 lg:px-14 lg:py-14">
         <div className="mx-auto w-full max-w-md">
-          <Link to="/" aria-label="OratorIA" className="inline-block">
-            <img src="/OratorIA-lockup.svg" alt="OratorIA" className="h-8" />
+          <Link
+            to="/"
+            aria-label="OratorIA"
+            className="inline-flex items-center gap-3"
+          >
+            <img
+              src="/OratorIA-isotype.svg"
+              alt=""
+              className="h-11 w-11 shrink-0"
+            />
+            <span className="text-[26px] font-bold leading-none tracking-tight text-ink">
+              Orator<span className="text-accent">IA</span>
+            </span>
           </Link>
 
-          <h2 className="mt-8 text-3xl font-bold leading-tight tracking-tight text-[#0A0A0A]">
+          <h2 className="mt-8 text-3xl font-bold leading-tight tracking-tight text-ink">
             Empieza a hablar mejor hoy
           </h2>
-          <p className="mb-8 mt-2 text-[15px] text-gray-600">
+          <p className="mb-8 mt-2 text-[15px] text-ink-soft">
             Crea tu cuenta gratis. No requiere tarjeta.
           </p>
 
@@ -186,12 +197,12 @@ function RegisterRoute() {
                         <span
                           key={level}
                           className={`h-1 flex-1 rounded-sm transition-colors ${
-                            level <= strength ? strengthClass : "bg-gray-200"
+                            level <= strength ? strengthClass : "bg-line"
                           }`}
                         />
                       ))}
                     </div>
-                    <span className="mt-1 block text-xs text-gray-500">
+                    <span className="mt-1 block text-xs text-ink-faint">
                       {STRENGTH_HINT[strength]}
                     </span>
                   </>
@@ -200,7 +211,7 @@ function RegisterRoute() {
             />
 
             <fieldset className="mb-5 flex flex-col gap-2">
-              <legend className="mb-1 text-[13px] font-semibold text-gray-700">
+              <legend className="mb-1 text-[13px] font-semibold text-ink-soft">
                 ¿En qué contexto te ves?
               </legend>
               <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
@@ -210,7 +221,7 @@ function RegisterRoute() {
                     className={`flex cursor-pointer flex-col gap-0.5 rounded-lg border p-3 transition-colors ${
                       segment === opt.value
                         ? "border-[#C6FF3D] bg-[#F7FFE0]"
-                        : "border-gray-200 hover:border-gray-300"
+                        : "border-line hover:border-line-strong"
                     }`}
                   >
                     <input
@@ -221,10 +232,10 @@ function RegisterRoute() {
                       onChange={() => setSegment(opt.value)}
                       className="sr-only"
                     />
-                    <span className="text-sm font-semibold text-[#0A0A0A]">
+                    <span className="text-sm font-semibold text-ink">
                       {opt.label}
                     </span>
-                    <span className="text-xs text-gray-500">
+                    <span className="text-xs text-ink-faint">
                       {opt.description}
                     </span>
                   </label>
@@ -245,14 +256,14 @@ function RegisterRoute() {
                   Acepto los{" "}
                   <a
                     href="#"
-                    className="font-semibold text-[#0A0A0A] underline decoration-gray-300 underline-offset-[2px] hover:decoration-[#C6FF3D]"
+                    className="font-semibold text-ink underline decoration-line underline-offset-[2px] hover:decoration-[#C6FF3D]"
                   >
                     Términos de servicio
                   </a>{" "}
                   y la{" "}
                   <a
                     href="#"
-                    className="font-semibold text-[#0A0A0A] underline decoration-gray-300 underline-offset-[2px] hover:decoration-[#C6FF3D]"
+                    className="font-semibold text-ink underline decoration-line underline-offset-[2px] hover:decoration-[#C6FF3D]"
                   >
                     Política de privacidad
                   </a>{" "}
@@ -277,11 +288,11 @@ function RegisterRoute() {
               )}
             </button>
 
-            <p className="mt-6 text-center text-sm text-gray-600">
+            <p className="mt-6 text-center text-sm text-ink-soft">
               ¿Ya tienes cuenta?{" "}
               <Link
                 to="/login"
-                className="font-bold text-[#0A0A0A] underline decoration-[#C6FF3D] underline-offset-[3px]"
+                className="font-bold text-ink underline decoration-[#C6FF3D] underline-offset-[3px]"
               >
                 Iniciar sesión
               </Link>
@@ -318,7 +329,7 @@ function Field({
 }: FieldProps) {
   return (
     <div className="mb-4 flex flex-col gap-1.5">
-      <label htmlFor={id} className="text-[13px] font-semibold text-gray-700">
+      <label htmlFor={id} className="text-[13px] font-semibold text-ink-soft">
         {label}
       </label>
       <input
@@ -329,10 +340,10 @@ function Field({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         aria-invalid={!!error}
-        className={`h-11 w-full rounded-lg border px-4 text-[15px] outline-none transition-all focus:ring-3 ${
+        className={`h-11 w-full rounded-lg border bg-surface px-4 text-[15px] text-ink outline-none transition-all placeholder:text-ink-faint focus:ring-3 ${
           error
             ? "border-red-500 focus:ring-red-500/15"
-            : "border-gray-200 focus:border-[#C6FF3D] focus:ring-[#C6FF3D]/25"
+            : "border-line focus:border-[#C6FF3D] focus:ring-[#C6FF3D]/25"
         }`}
       />
       {error && (
@@ -369,7 +380,7 @@ function PasswordField({
 }: PasswordFieldProps) {
   return (
     <div className="mb-4 flex flex-col gap-1.5">
-      <label htmlFor={id} className="text-[13px] font-semibold text-gray-700">
+      <label htmlFor={id} className="text-[13px] font-semibold text-ink-soft">
         {label}
       </label>
       <div className="relative">
@@ -381,17 +392,17 @@ function PasswordField({
           value={value}
           onChange={(e) => onChange(e.target.value)}
           aria-invalid={!!error}
-          className={`h-11 w-full rounded-lg border px-4 pr-11 text-[15px] outline-none transition-all focus:ring-3 ${
+          className={`h-11 w-full rounded-lg border bg-surface px-4 pr-11 text-[15px] text-ink outline-none transition-all placeholder:text-ink-faint focus:ring-3 ${
             error
               ? "border-red-500 focus:ring-red-500/15"
-              : "border-gray-200 focus:border-[#C6FF3D] focus:ring-[#C6FF3D]/25"
+              : "border-line focus:border-[#C6FF3D] focus:ring-[#C6FF3D]/25"
           }`}
         />
         <button
           type="button"
           onClick={onToggleShow}
           aria-label={show ? "Ocultar contraseña" : "Mostrar contraseña"}
-          className="absolute right-3 top-1/2 grid h-6 w-6 -translate-y-1/2 place-items-center rounded text-gray-400 transition-colors hover:text-gray-700"
+          className="absolute right-3 top-1/2 grid h-6 w-6 -translate-y-1/2 place-items-center rounded text-ink-faint transition-colors hover:text-ink"
         >
           {show ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
         </button>
@@ -429,7 +440,7 @@ function Checkbox({
           className={`mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-md border transition-colors ${
             checked
               ? "border-[#C6FF3D] bg-[#C6FF3D]"
-              : "border-gray-300 bg-white"
+              : "border-line-strong bg-surface"
           }`}
         >
           {checked && (
@@ -444,7 +455,7 @@ function Checkbox({
             </svg>
           )}
         </span>
-        <span className="text-[13px] leading-relaxed text-gray-700">
+        <span className="text-[13px] leading-relaxed text-ink-soft">
           {label}
         </span>
       </label>
