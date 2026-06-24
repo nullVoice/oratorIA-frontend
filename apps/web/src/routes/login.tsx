@@ -71,18 +71,29 @@ function LoginRoute() {
   };
 
   return (
-    <main className="grid min-h-svh grid-cols-1 bg-white lg:grid-cols-2">
+    <main className="grid min-h-svh grid-cols-1 bg-surface lg:grid-cols-2">
       {/* Form side */}
       <section className="relative flex flex-col justify-center px-6 py-10 sm:px-10 lg:px-14 lg:py-14">
         <div className="mx-auto w-full max-w-md">
-          <Link to="/" aria-label="OratorIA" className="inline-block">
-            <img src="/OratorIA-lockup.svg" alt="OratorIA" className="h-8" />
+          <Link
+            to="/"
+            aria-label="OratorIA"
+            className="inline-flex items-center gap-3"
+          >
+            <img
+              src="/OratorIA-isotype.svg"
+              alt=""
+              className="h-11 w-11 shrink-0"
+            />
+            <span className="text-[26px] font-bold leading-none tracking-tight text-ink">
+              Orator<span className="text-accent">IA</span>
+            </span>
           </Link>
 
-          <h2 className="mt-8 text-3xl font-bold leading-tight tracking-tight text-[#0A0A0A]">
+          <h2 className="mt-10 text-3xl font-bold leading-tight tracking-tight text-ink">
             Bienvenido de vuelta
           </h2>
-          <p className="mb-8 mt-2 text-[15px] text-gray-600">
+          <p className="mb-8 mt-2 text-[15px] text-ink-soft">
             Continúa tu camino de orador.
           </p>
 
