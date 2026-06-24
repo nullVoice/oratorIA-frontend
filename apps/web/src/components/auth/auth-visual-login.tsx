@@ -62,62 +62,48 @@ function ProgressMockup() {
   const score = useCountUp(87);
   return (
     <div
-      className="glow-border card-hover card-rise relative rounded-2xl"
+      className="glow-border card-hover card-rise relative rounded-[18px]"
       style={{ animationDelay: "0.1s" }}
     >
-      <div className="relative z-[1] overflow-hidden rounded-2xl bg-white shadow-[0_30px_60px_-20px_rgba(10,10,10,0.18)]">
-        <div className="flex items-center gap-2 border-b border-gray-100 bg-gray-50 px-4 py-3.5">
-          <span className="flex gap-1">
-            <span className="h-2.5 w-2.5 rounded-full bg-gray-300" />
-            <span className="h-2.5 w-2.5 rounded-full bg-gray-300" />
-            <span className="h-2.5 w-2.5 rounded-full bg-gray-300" />
-          </span>
-          <span className="ml-2 font-mono text-[11px] text-gray-500">
-            tu progreso
-          </span>
-        </div>
-        <div className="p-6">
-          <div className="mb-4 flex items-center gap-3">
-            <div className="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-[#C6FF3D]">
-              <Equalizer scale={0.7} />
-            </div>
-            <div>
-              <div className="text-[13px] font-bold text-[#0A0A0A]">
-                Hola, María
-              </div>
-              <div className="text-[11px] text-gray-500">
-                14 sesiones · racha de 6 días
-              </div>
+      <div className="auth-card relative z-[1] p-6">
+        <div className="flex items-center gap-3">
+          <div className="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-[#C6FF3D] shadow-[0_0_22px_rgba(57,255,20,0.55)]">
+            <Equalizer scale={0.7} />
+          </div>
+          <div className="min-w-0">
+            <div className="text-[14px] font-bold text-white">Hola, María</div>
+            <div className="text-[12px] text-white/50">
+              14 sesiones · racha de 6 días
             </div>
           </div>
-
-          <div className="rounded-xl bg-gray-50 p-3.5">
-            <div className="mb-2 flex justify-between text-xs text-gray-500">
-              <span>Score global</span>
-              <span className="font-semibold text-emerald-600">+8 pts</span>
-            </div>
-            <div className="flex items-baseline gap-1.5">
-              <span className="text-3xl font-bold tracking-tight text-[#0A0A0A] tabular-nums">
-                {score}
-              </span>
-              <span className="text-[13px] text-gray-500">/ 100</span>
-            </div>
-            <div className="relative mt-2.5 h-1.5 overflow-hidden rounded-sm bg-gray-200">
-              <div
-                className="progress-fill h-full rounded-sm bg-[#C6FF3D]"
-                style={{ width: "87%" }}
-              />
-              <span aria-hidden className="progress-sheen" />
-            </div>
-          </div>
-
-          <p className="mt-3 text-center text-xs text-gray-600">
-            Continúa:{" "}
-            <strong className="text-[#0A0A0A]">
-              Pausas intencionales · 4 de 7
-            </strong>
-          </p>
         </div>
+
+        <div className="mt-5 rounded-2xl border border-white/10 bg-white/[0.04] p-4">
+          <div className="mb-1.5 flex items-center justify-between text-[12px] text-white/55">
+            <span>Score global</span>
+            <span className="font-semibold text-[#39FF14]">+8 pts</span>
+          </div>
+          <div className="flex items-baseline gap-1.5">
+            <span className="font-display text-4xl font-bold tabular-nums text-white">
+              {score}
+            </span>
+            <span className="text-[13px] text-white/40">/ 100</span>
+          </div>
+          <div className="relative mt-3 h-2 overflow-hidden rounded-full bg-white/10">
+            <div
+              className="progress-fill h-full rounded-full bg-gradient-to-r from-[#99FF33] to-[#39FF14] shadow-[0_0_12px_rgba(57,255,20,0.7)]"
+              style={{ width: "87%" }}
+            />
+            <span aria-hidden className="progress-sheen" />
+          </div>
+        </div>
+
+        <p className="mt-4 text-center text-[12px] text-white/45">
+          Continúa:{" "}
+          <strong className="font-semibold text-white">
+            Pausas intencionales · 4 de 7
+          </strong>
+        </p>
       </div>
     </div>
   );
@@ -144,22 +130,26 @@ function Equalizer({ scale = 1 }: { scale?: number }) {
 function QuoteCard() {
   return (
     <blockquote
-      className="card-hover card-rise rounded-2xl bg-white/85 p-6 shadow-[0_8px_24px_-8px_rgba(10,10,10,0.10)] backdrop-blur"
+      className="auth-card card-hover card-rise p-6"
       style={{ animationDelay: "0.25s" }}
     >
-      <p className="text-[15px] font-medium leading-relaxed text-[#0A0A0A]">
+      <span
+        aria-hidden
+        className="font-display block text-3xl leading-none text-[#C6FF3D]"
+      >
+        &ldquo;
+      </span>
+      <p className="-mt-2 text-[15px] font-medium leading-relaxed text-white/90">
         Pasé de tartamudear en mis pitches a cerrar mi primera ronda de
         inversión.
       </p>
       <footer className="mt-4 flex items-center gap-3">
-        <div className="grid h-10 w-10 place-items-center rounded-full bg-gray-100 text-sm font-bold text-[#0A0A0A]">
+        <div className="grid h-10 w-10 place-items-center rounded-full bg-white/10 text-sm font-bold text-white">
           MG
         </div>
         <div>
-          <div className="text-[13px] font-bold text-[#0A0A0A]">
-            María González
-          </div>
-          <div className="text-xs text-gray-600">CEO · Fintech LATAM</div>
+          <div className="text-[13px] font-bold text-white">María González</div>
+          <div className="text-xs text-white/50">CEO · Fintech LATAM</div>
         </div>
       </footer>
     </blockquote>

@@ -280,9 +280,9 @@
   background: conic-gradient(
     from var(--auth-angle),
     transparent 0deg,
-    #c6ff3d 60deg,
-    #aee029 110deg,
-    transparent 190deg,
+    #39ff14 55deg,
+    #ccff00 105deg,
+    transparent 185deg,
     transparent 360deg
   );
   -webkit-mask:
@@ -419,4 +419,18 @@
   .auth-blade {
     animation: none;
   }
+}
+
+/* Dark frosted card for the auth panel — sits natively on the neon-dark stage
+ * (white cards looked pasted-on). Light text + lime accents go on top. */
+.auth-card {
+  position: relative;
+  border-radius: 18px;
+  background: rgb(10 14 8 / 0.62);
+  backdrop-filter: blur(22px) saturate(1.1);
+  -webkit-backdrop-filter: blur(22px) saturate(1.1);
+  border: 1px solid rgb(198 255 61 / 0.16);
+  box-shadow:
+    0 24px 60px -28px rgb(0 0 0 / 0.8),
+    inset 0 1px 0 rgb(255 255 255 / 0.07);
 }

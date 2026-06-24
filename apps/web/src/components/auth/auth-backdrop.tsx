@@ -1,12 +1,11 @@
-/** Raycast-style dark backdrop for the auth panels: diagonal green light
- * "blades" drifting slowly over a green-tinted dark stage, plus film grain.
- * Purely decorative and animated; the cards on top stay static. */
+/** Raycast-style dark backdrop for the auth panels: bright neon-green light
+ * "blades" plus a few crisp streaks, drifting over a near-black stage with film
+ * grain. Purely decorative and animated; the cards on top stay static. */
 import type { CSSProperties } from "react";
 
 type Blade = {
   left: string;
   width: string;
-  rot: string;
   blur: string;
   dur: string;
   dx: string;
@@ -15,76 +14,121 @@ type Blade = {
   color: string;
 };
 
-// Brightest blades cluster slightly right-of-centre (Raycast's hot zone),
-// fading to thin, dim edges. Varied durations keep the drift organic.
+const ROT = "-31deg";
+
+// Phosphorescent greens (#39FF14 / #CCFF00 / #99FF33). The hottest, widest
+// blade sits centre; thin crisp streaks add Raycast's sharp bright edges.
+// Generous drift so the field clearly moves.
 const BLADES: Blade[] = [
   {
     left: "14%",
-    width: "7%",
-    rot: "-31deg",
-    blur: "46px",
-    dur: "17s",
-    dx: "4%",
-    dy: "-3%",
-    opacity: 0.35,
-    color: "rgba(174,224,41,0.9)",
+    width: "6%",
+    blur: "30px",
+    dur: "13s",
+    dx: "8%",
+    dy: "-6%",
+    opacity: 0.55,
+    color: "#99FF33",
   },
   {
-    left: "30%",
-    width: "12%",
-    rot: "-31deg",
-    blur: "40px",
-    dur: "14s",
-    dx: "5%",
-    dy: "-4%",
-    opacity: 0.6,
-    color: "rgba(198,255,61,0.95)",
-  },
-  {
-    left: "46%",
-    width: "16%",
-    rot: "-31deg",
-    blur: "38px",
-    dur: "19s",
-    dx: "-4%",
-    dy: "3%",
-    opacity: 0.85,
-    color: "rgba(214,255,122,1)",
-  },
-  {
-    left: "63%",
+    left: "29%",
     width: "11%",
-    rot: "-31deg",
-    blur: "42px",
-    dur: "15s",
-    dx: "5%",
-    dy: "-3%",
-    opacity: 0.65,
-    color: "rgba(198,255,61,0.95)",
+    blur: "34px",
+    dur: "11s",
+    dx: "10%",
+    dy: "-7%",
+    opacity: 0.85,
+    color: "#39FF14",
   },
   {
-    left: "77%",
-    width: "8%",
-    rot: "-31deg",
-    blur: "48px",
-    dur: "21s",
-    dx: "-3%",
-    dy: "4%",
-    opacity: 0.4,
-    color: "rgba(120,170,30,0.85)",
+    left: "45%",
+    width: "15%",
+    blur: "30px",
+    dur: "16s",
+    dx: "-8%",
+    dy: "6%",
+    opacity: 1,
+    color: "#CCFF00",
+  },
+  {
+    left: "61%",
+    width: "10%",
+    blur: "34px",
+    dur: "12s",
+    dx: "9%",
+    dy: "-6%",
+    opacity: 0.85,
+    color: "#39FF14",
+  },
+  {
+    left: "76%",
+    width: "7%",
+    blur: "38px",
+    dur: "18s",
+    dx: "-7%",
+    dy: "7%",
+    opacity: 0.55,
+    color: "#19A80B",
   },
   {
     left: "88%",
-    width: "5%",
-    rot: "-31deg",
-    blur: "54px",
-    dur: "18s",
-    dx: "4%",
-    dy: "-2%",
-    opacity: 0.25,
-    color: "rgba(174,224,41,0.7)",
+    width: "4%",
+    blur: "44px",
+    dur: "15s",
+    dx: "8%",
+    dy: "-5%",
+    opacity: 0.4,
+    color: "#99FF14",
   },
 ];
+
+// Thin, low-blur streaks = the crisp bright edges in Raycast's hero.
+const STREAKS: Blade[] = [
+  {
+    left: "37%",
+    width: "1.4%",
+    blur: "5px",
+    dur: "14s",
+    dx: "9%",
+    dy: "-6%",
+    opacity: 0.9,
+    color: "#E7FF8A",
+  },
+  {
+    left: "55%",
+    width: "1.1%",
+    blur: "4px",
+    dur: "12s",
+    dx: "-7%",
+    dy: "5%",
+    opacity: 0.8,
+    color: "#CCFF00",
+  },
+  {
+    left: "69%",
+    width: "1.6%",
+    blur: "6px",
+    dur: "17s",
+    dx: "8%",
+    dy: "-5%",
+    opacity: 0.7,
+    color: "#39FF14",
+  },
+];
+
+function bladeStyle(b: Blade): CSSProperties {
+  return {
+    left: b.left,
+    width: b.width,
+    opacity: b.opacity,
+    background: `linear-gradient(180deg, transparent 0%, ${b.color} 42%, ${b.color} 60%, transparent 100%)`,
+    "--blade-rot": ROT,
+    "--blade-blur": b.blur,
+    "--blade-dur": b.dur,
+    "--blade-dx": b.dx,
+    "--blade-dy": b.dy,
+  } as CSSProperties;
+}
 
 export function AuthBackdrop() {
   return (
@@ -93,34 +137,21 @@ export function AuthBackdrop() {
       className="absolute inset-0 overflow-hidden"
       style={{
         background:
-          "radial-gradient(130% 90% at 64% 28%, #16210d 0%, #0b0f07 46%, #060704 100%)",
+          "radial-gradient(135% 95% at 62% 22%, #15240b 0%, #0a0f06 44%, #030502 100%)",
       }}
     >
       {BLADES.map((b, i) => (
-        <div
-          key={i}
-          className="auth-blade"
-          style={
-            {
-              left: b.left,
-              width: b.width,
-              opacity: b.opacity,
-              background: `linear-gradient(180deg, transparent 0%, ${b.color} 45%, ${b.color} 60%, transparent 100%)`,
-              "--blade-rot": b.rot,
-              "--blade-blur": b.blur,
-              "--blade-dur": b.dur,
-              "--blade-dx": b.dx,
-              "--blade-dy": b.dy,
-            } as CSSProperties
-          }
-        />
+        <div key={`b${i}`} className="auth-blade" style={bladeStyle(b)} />
       ))}
-      {/* Soft top-right bloom + bottom vignette for depth. */}
+      {STREAKS.map((s, i) => (
+        <div key={`s${i}`} className="auth-blade" style={bladeStyle(s)} />
+      ))}
+      {/* Bright neon bloom top-right + bottom vignette for depth. */}
       <div
         className="pointer-events-none absolute inset-0"
         style={{
           background:
-            "radial-gradient(60% 40% at 70% 18%, rgba(198,255,61,0.18), transparent 70%), linear-gradient(to bottom, transparent 55%, rgba(0,0,0,0.45) 100%)",
+            "radial-gradient(55% 38% at 66% 16%, rgba(57,255,20,0.28), transparent 70%), linear-gradient(to bottom, transparent 50%, rgba(0,0,0,0.5) 100%)",
         }}
       />
       <div className="auth-grain" />
