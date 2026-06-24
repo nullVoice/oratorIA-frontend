@@ -5,13 +5,23 @@ import {
   createRootRouteWithContext,
   useRouterState,
 } from "@tanstack/react-router";
-import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 import type { QueryClient } from "@tanstack/react-query";
+import { Suspense, lazy } from "react";
 
 import { Toaster } from "@/components/ui/sonner";
 
 import Header from "../components/header";
 import appCss from "../index.css?url";
+
+// Devtools must never reach the production bundle (it leaks the full route tree
+// and inflates the SSR output). Tree-shaken out when PROD is true.
+const RouterDevtools = import.meta.env.PROD
+  ? () => null
+  : lazy(() =>
+      import("@tanstack/react-router-devtools").then((m) => ({
+        default: m.TanStackRouterDevtools,
+      })),
+    );
 
 export interface RouterAppContext {
   queryClient: QueryClient;
@@ -96,7 +106,9 @@ function RootDocument() {
         </div>
         <Toaster richColors />
 
-        <TanStackRouterDevtools position="bottom-left" />
+        <Suspense fallback={null}>
+          <RouterDevtools position="bottom-left" />
+        </Suspense>
         <Scripts />
       </body>
     </html>

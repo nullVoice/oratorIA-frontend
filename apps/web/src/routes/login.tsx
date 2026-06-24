@@ -24,10 +24,13 @@ function LoginRoute() {
   const login = useAuthStore((s) => s.login);
   const isLoading = useAuthStore((s) => s.isLoading);
   const [showPassword, setShowPassword] = useState(false);
-  // Demo credentials prefilled so the value proposition can be shown
-  // without typing. Backend has this seeded user (segment: business).
-  const [email, setEmail] = useState("maria@oratoria.app");
-  const [password, setPassword] = useState("oratoria123");
+  // Never hardcode credentials here — anything in this component ships in the
+  // public client bundle. Optional dev-only prefill via .env.local (gitignored,
+  // VITE_* so they're build-time public — use throwaway values only).
+  const [email, setEmail] = useState(import.meta.env.VITE_DEMO_EMAIL ?? "");
+  const [password, setPassword] = useState(
+    import.meta.env.VITE_DEMO_PASSWORD ?? "",
+  );
   const [remember, setRemember] = useState(true);
   const [errors, setErrors] = useState<{ email?: string; password?: string }>(
     {},
