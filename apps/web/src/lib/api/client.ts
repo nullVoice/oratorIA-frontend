@@ -15,11 +15,16 @@ export const AUTH_TOKEN_STORAGE_KEY = "oratoria.auth.token";
 
 // In local dev we always target the local backend. The committed
 // .env(.local) points VITE_API_URL at a Cloudflare tunnel that may be
-// down, so dev must not depend on it. Production builds still honor the
-// configured VITE_API_URL.
+// down, so dev must not depend on it. Production builds honor the
+// configured VITE_API_URL when present; otherwise they fall back to the
+// public Render backend (NOT localhost — `.env` files are gitignored, so a
+// Vercel build with no VITE_API_URL would otherwise call localhost:8000 and
+// every request would fail CORS in the browser).
+const PRODUCTION_API_URL = "https://oratoria-backend.onrender.com";
+const configuredApiUrl = import.meta.env.VITE_API_URL?.trim();
 const API_BASE_URL = import.meta.env.DEV
   ? "http://localhost:8000"
-  : (import.meta.env.VITE_API_URL ?? "http://localhost:8000");
+  : configuredApiUrl || PRODUCTION_API_URL;
 
 function readToken(): string | null {
   if (typeof window === "undefined") return null;
@@ -58,7 +63,10 @@ export const api = ky.create({
         // user's bad credentials, not an expired session — don't bounce.
         if (request.url.includes("/api/v1/auth/login")) return response;
         clearToken();
-        if (typeof window !== "undefined" && window.location.pathname !== "/login") {
+        if (
+          typeof window !== "undefined" &&
+          window.location.pathname !== "/login"
+        ) {
           window.location.href = "/login";
         }
         return response;
