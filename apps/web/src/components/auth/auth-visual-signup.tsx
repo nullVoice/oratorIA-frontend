@@ -17,8 +17,12 @@ export function AuthVisualSignup() {
       />
 
       <div className="relative z-10 mx-auto flex w-full max-w-sm flex-col gap-8">
-        <SignupMockup />
-        <QuoteCard />
+        <div className="float-soft">
+          <SignupMockup />
+        </div>
+        <div className="float-soft--delayed">
+          <QuoteCard />
+        </div>
       </div>
     </aside>
   );
@@ -26,37 +30,42 @@ export function AuthVisualSignup() {
 
 function SignupMockup() {
   return (
-    <div className="overflow-hidden rounded-2xl bg-white shadow-[0_30px_60px_-20px_rgba(10,10,10,0.18)]">
-      <div className="flex items-center gap-2 border-b border-gray-100 bg-gray-50 px-4 py-3.5">
-        <span className="flex gap-1">
-          <span className="h-2.5 w-2.5 rounded-full bg-gray-300" />
-          <span className="h-2.5 w-2.5 rounded-full bg-gray-300" />
-          <span className="h-2.5 w-2.5 rounded-full bg-gray-300" />
-        </span>
-        <span className="ml-2 font-mono text-[11px] text-gray-500">
-          app.oratoria.io
-        </span>
-      </div>
-      <div className="p-6">
-        <div
-          className="mx-auto mb-4 grid h-16 w-16 place-items-center rounded-full bg-[#C6FF3D]"
-          style={{
-            boxShadow:
-              "0 0 0 8px rgba(198,255,61,0.18), 0 0 0 16px rgba(198,255,61,0.08)",
-          }}
-        >
-          <Equalizer />
+    <div
+      className="glow-border card-hover card-rise relative rounded-2xl"
+      style={{ animationDelay: "0.1s" }}
+    >
+      <div className="relative z-[1] overflow-hidden rounded-2xl bg-white shadow-[0_30px_60px_-20px_rgba(10,10,10,0.18)]">
+        <div className="flex items-center gap-2 border-b border-gray-100 bg-gray-50 px-4 py-3.5">
+          <span className="flex gap-1">
+            <span className="h-2.5 w-2.5 rounded-full bg-gray-300" />
+            <span className="h-2.5 w-2.5 rounded-full bg-gray-300" />
+            <span className="h-2.5 w-2.5 rounded-full bg-gray-300" />
+          </span>
+          <span className="ml-2 font-mono text-[11px] text-gray-500">
+            app.oratoria.io
+          </span>
         </div>
-        <p className="text-center text-sm font-semibold text-[#0A0A0A]">
-          Tu primera sesión
-        </p>
-        <p className="mt-0.5 text-center text-xs text-gray-500">
-          Pitch de dos minutos · análisis al final
-        </p>
-        <div className="mt-4 grid grid-cols-3 gap-2">
-          <MiniStat value="5" label="minutos" />
-          <MiniStat value="3" label="métricas" />
-          <MiniStat value="∞" label="retomas" />
+        <div className="p-6">
+          <div
+            className="mx-auto mb-4 grid h-16 w-16 place-items-center rounded-full bg-[#C6FF3D]"
+            style={{
+              boxShadow:
+                "0 0 0 8px rgba(198,255,61,0.18), 0 0 0 16px rgba(198,255,61,0.08)",
+            }}
+          >
+            <Equalizer />
+          </div>
+          <p className="text-center text-sm font-semibold text-[#0A0A0A]">
+            Tu primera sesión
+          </p>
+          <p className="mt-0.5 text-center text-xs text-gray-500">
+            Pitch de dos minutos · análisis al final
+          </p>
+          <div className="mt-4 grid grid-cols-3 gap-2">
+            <MiniStat value="5" label="minutos" />
+            <MiniStat value="3" label="métricas" />
+            <MiniStat value="∞" label="retomas" />
+          </div>
         </div>
       </div>
     </div>
@@ -81,8 +90,8 @@ function Equalizer() {
       {heights.map((h, i) => (
         <span
           key={i}
-          className="w-1 rounded-sm bg-[#0A0A0A]"
-          style={{ height: `${h}px` }}
+          className="eq-bar w-1 rounded-sm bg-[#0A0A0A]"
+          style={{ height: `${h}px`, animationDelay: `${i * 0.13}s` }}
         />
       ))}
     </div>
@@ -91,7 +100,10 @@ function Equalizer() {
 
 function QuoteCard() {
   return (
-    <blockquote className="rounded-2xl bg-white/85 p-6 shadow-[0_8px_24px_-8px_rgba(10,10,10,0.10)] backdrop-blur">
+    <blockquote
+      className="card-hover card-rise rounded-2xl bg-white/85 p-6 shadow-[0_8px_24px_-8px_rgba(10,10,10,0.10)] backdrop-blur"
+      style={{ animationDelay: "0.25s" }}
+    >
       <p className="text-[15px] font-medium leading-relaxed text-[#0A0A0A]">
         Pasé de tartamudear en mis pitches a cerrar mi primera ronda de
         inversión.

@@ -251,3 +251,132 @@
     animation: none;
   }
 }
+
+/* ── Auth showcase motion ──────────────────────────────────────────────────
+ * Brand-coherent micro-interactions for the login/sign-up showcase cards:
+ * a slow rotating lime glow border, a self-filling progress bar with a moving
+ * sheen, a staggered entrance and a gentle idle float. Lime tones only (no
+ * rainbow) to stay on-brand; all motion is disabled under reduced-motion. */
+
+/* Houdini angle drives the conic border on the compositor thread (no repaint). */
+@property --auth-angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+@keyframes auth-spin {
+  to {
+    --auth-angle: 360deg;
+  }
+}
+
+.glow-border::before {
+  content: "";
+  position: absolute;
+  inset: -1.5px;
+  z-index: 0;
+  border-radius: inherit;
+  padding: 1.5px;
+  background: conic-gradient(
+    from var(--auth-angle),
+    transparent 0deg,
+    #c6ff3d 60deg,
+    #aee029 110deg,
+    transparent 190deg,
+    transparent 360deg
+  );
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  animation: auth-spin 6s linear infinite;
+  pointer-events: none;
+}
+
+/* Self-filling progress bar + a sheen that sweeps across after it fills. */
+@keyframes progress-grow {
+  from {
+    width: 0;
+  }
+}
+@keyframes progress-sheen {
+  0% {
+    transform: translateX(-140%);
+  }
+  55%,
+  100% {
+    transform: translateX(320%);
+  }
+}
+.progress-fill {
+  animation: progress-grow 1.3s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+}
+.progress-sheen {
+  position: absolute;
+  inset: 0;
+  width: 35%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgb(255 255 255 / 0.7),
+    transparent
+  );
+  animation: progress-sheen 2.8s ease-in-out 1.1s infinite;
+}
+
+/* Entrance (staggered via inline animation-delay) + idle float. */
+@keyframes card-rise {
+  from {
+    opacity: 0;
+    transform: translateY(24px) scale(0.985);
+  }
+}
+@keyframes float-soft {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-7px);
+  }
+}
+.card-rise {
+  /* `backwards` only: holds the hidden state during the stagger delay, then
+   * releases after playing so :hover transforms aren't pinned. */
+  animation: card-rise 0.7s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+}
+.float-soft {
+  animation: float-soft 6s ease-in-out infinite;
+}
+.float-soft--delayed {
+  animation: float-soft 7.5s ease-in-out 0.9s infinite;
+}
+
+/* Hover lift + lime glow for the showcase cards. */
+.card-hover {
+  transition:
+    transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.35s ease;
+}
+.card-hover:hover {
+  transform: translateY(-4px);
+  box-shadow:
+    0 30px 60px -22px rgb(10 10 10 / 0.28),
+    0 0 0 1px rgb(198 255 61 / 0.4),
+    0 0 30px rgb(198 255 61 / 0.3);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .glow-border::before,
+  .progress-fill,
+  .progress-sheen,
+  .card-rise,
+  .float-soft,
+  .float-soft--delayed {
+    animation: none;
+  }
+}
