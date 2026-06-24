@@ -51,6 +51,7 @@
     "@vitest/coverage-v8": "^4.1.5",
     "@vitest/ui": "^4.1.5",
     "jsdom": "^29.1.0",
+    "nitro": "^3.0.260610-beta",
     "typescript": "catalog:",
     "vite": "^8.0.10",
     "vitest": "^4.1.5",

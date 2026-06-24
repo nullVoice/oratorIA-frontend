@@ -1,13 +1,22 @@
 import tailwindcss from "@tailwindcss/vite";
 import { tanstackStart } from "@tanstack/react-start/plugin/vite";
 import viteReact from "@vitejs/plugin-react";
+import { nitro } from "nitro/vite";
 import { defineConfig } from "vite";
 import tsconfigPaths from "vite-tsconfig-paths";
 
-// Deploy target (Vercel/Nitro `.vercel/output`) is auto-detected from the
-// VERCEL env at build time — no explicit preset needed.
+// The Nitro plugin is REQUIRED for production hosting: it auto-detects the
+// platform (Vercel sets VERCEL=1 → emits `.vercel/output`). Without it, the
+// build falls back to a plain node-server (dist/server) that Vercel can't
+// serve → 404 on every route.
 export default defineConfig({
-  plugins: [tsconfigPaths(), tailwindcss(), tanstackStart(), viteReact()],
+  plugins: [
+    tsconfigPaths(),
+    tailwindcss(),
+    tanstackStart(),
+    nitro(),
+    viteReact(),
+  ],
   server: {
     port: 3001,
     // Windows file-watching with tool-based writes (editors/agents) frequently
