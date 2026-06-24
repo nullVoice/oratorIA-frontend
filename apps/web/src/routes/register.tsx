@@ -7,6 +7,7 @@ import { z } from "zod";
 import { AuthDivider } from "@/components/auth/auth-divider";
 import { AuthVisualSignup } from "@/components/auth/auth-visual-signup";
 import { OAuthButtons } from "@/components/auth/oauth-buttons";
+import { getApiErrorMessage } from "@/lib/api/errors";
 import { UserSegmentSchema } from "@/lib/api/schemas";
 import { useAuthStore } from "@/stores/auth-store";
 
@@ -17,7 +18,9 @@ const RegisterSchema = z.object({
   segment: UserSegmentSchema,
 });
 
-type FormErrors = Partial<Record<keyof z.infer<typeof RegisterSchema> | "terms", string>>;
+type FormErrors = Partial<
+  Record<keyof z.infer<typeof RegisterSchema> | "terms", string>
+>;
 
 const SEGMENT_OPTIONS: Array<{
   value: z.infer<typeof UserSegmentSchema>;
@@ -25,8 +28,16 @@ const SEGMENT_OPTIONS: Array<{
   description: string;
 }> = [
   { value: "education", label: "Educación", description: "Estudio o enseño" },
-  { value: "business", label: "Empresa", description: "Trabajo en una organización" },
-  { value: "hr", label: "RRHH", description: "Busco entrevistas / nuevo empleo" },
+  {
+    value: "business",
+    label: "Empresa",
+    description: "Trabajo en una organización",
+  },
+  {
+    value: "hr",
+    label: "RRHH",
+    description: "Busco entrevistas / nuevo empleo",
+  },
 ];
 
 export const Route = createFileRoute("/register")({
@@ -58,7 +69,9 @@ function RegisterRoute() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
-  const [segment, setSegment] = useState<z.infer<typeof UserSegmentSchema> | "">("");
+  const [segment, setSegment] = useState<
+    z.infer<typeof UserSegmentSchema> | ""
+  >("");
   const [acceptedTerms, setAcceptedTerms] = useState(true);
   const [errors, setErrors] = useState<FormErrors>({});
 
@@ -94,12 +107,11 @@ function RegisterRoute() {
       toast.success("Cuenta creada correctamente");
       navigate({ to: "/dashboard" });
     } catch (err) {
-      const message = err instanceof Error ? err.message : "Error al crear cuenta";
-      const friendly =
-        message.includes("400") || message.includes("REGISTER_USER_ALREADY_EXISTS")
-          ? "Ya existe una cuenta con ese email"
-          : message;
-      toast.error(friendly);
+      const message = await getApiErrorMessage(
+        err,
+        "No pudimos crear la cuenta. Probá de nuevo.",
+      );
+      toast.error(message);
     }
   };
 
@@ -209,13 +221,19 @@ function RegisterRoute() {
                       onChange={() => setSegment(opt.value)}
                       className="sr-only"
                     />
-                    <span className="text-sm font-semibold text-[#0A0A0A]">{opt.label}</span>
-                    <span className="text-xs text-gray-500">{opt.description}</span>
+                    <span className="text-sm font-semibold text-[#0A0A0A]">
+                      {opt.label}
+                    </span>
+                    <span className="text-xs text-gray-500">
+                      {opt.description}
+                    </span>
                   </label>
                 ))}
               </div>
               {errors.segment && (
-                <span className="text-xs font-medium text-red-500">{errors.segment}</span>
+                <span className="text-xs font-medium text-red-500">
+                  {errors.segment}
+                </span>
               )}
             </fieldset>
 
@@ -409,19 +427,31 @@ function Checkbox({
         <span
           aria-hidden
           className={`mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-md border transition-colors ${
-            checked ? "border-[#C6FF3D] bg-[#C6FF3D]" : "border-gray-300 bg-white"
+            checked
+              ? "border-[#C6FF3D] bg-[#C6FF3D]"
+              : "border-gray-300 bg-white"
           }`}
         >
           {checked && (
-            <svg viewBox="0 0 24 24" className="h-3 w-3" fill="none" stroke="#0A0A0A" strokeWidth={3}>
+            <svg
+              viewBox="0 0 24 24"
+              className="h-3 w-3"
+              fill="none"
+              stroke="#0A0A0A"
+              strokeWidth={3}
+            >
               <polyline points="20 6 9 17 4 12" />
             </svg>
           )}
         </span>
-        <span className="text-[13px] leading-relaxed text-gray-700">{label}</span>
+        <span className="text-[13px] leading-relaxed text-gray-700">
+          {label}
+        </span>
       </label>
       {error && (
-        <span className="ml-7 mt-1 block text-xs font-medium text-red-500">{error}</span>
+        <span className="ml-7 mt-1 block text-xs font-medium text-red-500">
+          {error}
+        </span>
       )}
     </div>
   );
