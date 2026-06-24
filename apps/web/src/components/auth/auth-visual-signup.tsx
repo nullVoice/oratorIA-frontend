@@ -24,31 +24,26 @@ export function AuthVisualSignup() {
 
 function SignupMockup() {
   return (
-    <div
-      className="glow-border card-hover card-rise relative rounded-[18px]"
-      style={{ animationDelay: "0.1s" }}
-    >
-      <div className="auth-card relative z-[1] p-6">
-        <div
-          className="mx-auto mb-4 grid h-16 w-16 place-items-center rounded-full bg-[#C6FF3D]"
-          style={{
-            boxShadow:
-              "0 0 24px rgba(57,255,20,0.6), 0 0 0 8px rgba(198,255,61,0.12)",
-          }}
-        >
-          <Equalizer />
-        </div>
-        <p className="text-center text-sm font-semibold text-white">
-          Tu primera sesión
-        </p>
-        <p className="mt-0.5 text-center text-xs text-white/50">
-          Pitch de dos minutos · análisis al final
-        </p>
-        <div className="mt-4 grid grid-cols-3 gap-2">
-          <MiniStat value="5" label="minutos" />
-          <MiniStat value="3" label="métricas" />
-          <MiniStat value="∞" label="retomas" />
-        </div>
+    <div className="auth-card p-6">
+      <div
+        className="mx-auto mb-4 grid h-16 w-16 place-items-center rounded-full bg-[#C6FF3D]"
+        style={{
+          boxShadow:
+            "0 0 24px rgba(57,255,20,0.6), 0 0 0 8px rgba(198,255,61,0.12)",
+        }}
+      >
+        <Equalizer />
+      </div>
+      <p className="text-center text-sm font-semibold text-white">
+        Tu primera sesión
+      </p>
+      <p className="mt-0.5 text-center text-xs text-white/50">
+        Pitch de dos minutos · análisis al final
+      </p>
+      <div className="mt-4 grid grid-cols-3 gap-2">
+        <MiniStat value="5" label="minutos" />
+        <MiniStat value="3" label="métricas" />
+        <MiniStat value="∞" label="retomas" />
       </div>
     </div>
   );
@@ -82,29 +77,24 @@ function Equalizer() {
 
 function QuoteCard() {
   return (
-    <blockquote
-      className="auth-card card-hover card-rise p-6"
-      style={{ animationDelay: "0.25s" }}
-    >
+    <figure className="relative pl-5">
       <span
         aria-hidden
-        className="font-display block text-3xl leading-none text-[#C6FF3D]"
-      >
-        &ldquo;
-      </span>
-      <p className="-mt-2 text-[15px] font-medium leading-relaxed text-white/90">
+        className="absolute bottom-1.5 left-0 top-1.5 w-[3px] rounded-full bg-gradient-to-b from-[#39FF14] to-[#39FF14]/0"
+      />
+      <p className="text-[15px] font-medium leading-relaxed text-white/90">
         Pasé de tartamudear en mis pitches a cerrar mi primera ronda de
         inversión.
       </p>
-      <footer className="mt-4 flex items-center gap-3">
-        <div className="grid h-10 w-10 place-items-center rounded-full bg-white/10 text-sm font-bold text-white">
+      <figcaption className="mt-3 flex items-center gap-2.5">
+        <div className="grid h-9 w-9 place-items-center rounded-full bg-white/10 text-xs font-bold text-white">
           MG
         </div>
         <div>
           <div className="text-[13px] font-bold text-white">María González</div>
-          <div className="text-xs text-white/50">CEO · Fintech LATAM</div>
+          <div className="text-[11px] text-white/45">CEO · Fintech LATAM</div>
         </div>
-      </footer>
-    </blockquote>
+      </figcaption>
+    </figure>
   );
 }
