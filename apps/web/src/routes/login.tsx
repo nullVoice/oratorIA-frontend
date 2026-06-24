@@ -183,7 +183,7 @@ function Field({
 }: FieldProps) {
   return (
     <div className="mb-4 flex flex-col gap-1.5">
-      <label htmlFor={id} className="text-[13px] font-semibold text-gray-700">
+      <label htmlFor={id} className="text-[13px] font-semibold text-ink-soft">
         {label}
       </label>
       <input
@@ -194,10 +194,10 @@ function Field({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         aria-invalid={!!error}
-        className={`h-11 w-full rounded-lg border px-4 text-[15px] outline-none transition-all focus:ring-3 ${
+        className={`h-11 w-full rounded-lg border bg-surface px-4 text-[15px] text-ink outline-none transition-all placeholder:text-ink-faint focus:ring-3 ${
           error
             ? "border-red-500 focus:ring-red-500/15"
-            : "border-gray-200 focus:border-[#C6FF3D] focus:ring-[#C6FF3D]/25"
+            : "border-line focus:border-[#C6FF3D] focus:ring-[#C6FF3D]/25"
         }`}
       />
       {error && (
@@ -235,7 +235,7 @@ function PasswordField({
   return (
     <div className="mb-4 flex flex-col gap-1.5">
       <div className="flex items-center justify-between">
-        <label htmlFor={id} className="text-[13px] font-semibold text-gray-700">
+        <label htmlFor={id} className="text-[13px] font-semibold text-ink-soft">
           {label}
         </label>
         {labelExtra}
@@ -248,17 +248,17 @@ function PasswordField({
           value={value}
           onChange={(e) => onChange(e.target.value)}
           aria-invalid={!!error}
-          className={`h-11 w-full rounded-lg border px-4 pr-11 text-[15px] outline-none transition-all focus:ring-3 ${
+          className={`h-11 w-full rounded-lg border bg-surface px-4 pr-11 text-[15px] text-ink outline-none transition-all placeholder:text-ink-faint focus:ring-3 ${
             error
               ? "border-red-500 focus:ring-red-500/15"
-              : "border-gray-200 focus:border-[#C6FF3D] focus:ring-[#C6FF3D]/25"
+              : "border-line focus:border-[#C6FF3D] focus:ring-[#C6FF3D]/25"
           }`}
         />
         <button
           type="button"
           onClick={onToggleShow}
           aria-label={show ? "Ocultar contraseña" : "Mostrar contraseña"}
-          className="absolute right-3 top-1/2 grid h-6 w-6 -translate-y-1/2 place-items-center rounded text-gray-400 transition-colors hover:text-gray-700"
+          className="absolute right-3 top-1/2 grid h-6 w-6 -translate-y-1/2 place-items-center rounded text-ink-faint transition-colors hover:text-ink"
         >
           {show ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
         </button>
@@ -291,7 +291,9 @@ function Checkbox({
       <span
         aria-hidden
         className={`mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-md border transition-colors ${
-          checked ? "border-[#C6FF3D] bg-[#C6FF3D]" : "border-gray-300 bg-white"
+          checked
+            ? "border-[#C6FF3D] bg-[#C6FF3D]"
+            : "border-line-strong bg-surface"
         }`}
       >
         {checked && (
