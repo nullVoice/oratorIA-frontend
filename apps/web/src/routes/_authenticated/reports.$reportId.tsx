@@ -1,13 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import {
-  ArrowLeft,
-  ArrowRight,
-  AudioLines,
-  Pause,
-  Repeat2,
-  type LucideIcon,
-} from "lucide-react";
+import { ArrowLeft, ArrowRight } from "lucide-react";
 
 import { AuroraBackground } from "@/components/reports/aurora-background";
 import {
@@ -164,32 +157,23 @@ function ReportRoute() {
               {/* Compact stat cards: fillers, pause, tone */}
               <div className="mt-2 grid grid-cols-3 gap-3">
                 <StatCard
-                  icon={Repeat2}
                   label="Muletillas"
                   value={fillers !== null ? String(Math.round(fillers)) : "—"}
-                  dotClass={fillersStatus(fillers).dot}
-                  statusWord={fillersStatus(fillers).word}
-                  statusClass={fillersStatus(fillers).text}
+                  status={fillersStatus(fillers)}
                 />
                 <StatCard
-                  icon={Pause}
                   label="Pausas"
                   value={
                     pauseRatio !== null
                       ? `${Math.round(pauseRatio * 100)}%`
                       : "—"
                   }
-                  dotClass={pauseStatus(pauseRatio).dot}
-                  statusWord={pauseStatus(pauseRatio).word}
-                  statusClass={pauseStatus(pauseRatio).text}
+                  status={pauseStatus(pauseRatio)}
                 />
                 <StatCard
-                  icon={AudioLines}
                   label="Modulación"
                   value={tone !== null ? toneLabel(tone) : "—"}
-                  dotClass={toneStatus(tone).dot}
-                  statusWord={toneStatus(tone).word}
-                  statusClass={toneStatus(tone).text}
+                  status={toneStatus(tone)}
                 />
               </div>
             </div>
@@ -270,37 +254,34 @@ function SectionHeading({ children }: { children: React.ReactNode }) {
 // ── Compact stat card ────────────────────────────────────────────────────────
 
 interface StatCardProps {
-  icon: LucideIcon;
   label: string;
   value: string;
-  dotClass: string;
-  statusWord: string;
-  statusClass: string;
+  status: Status;
 }
 
-function StatCard({
-  icon: Icon,
-  label,
-  value,
-  dotClass,
-  statusWord,
-  statusClass,
-}: StatCardProps) {
+function StatCard({ label, value, status }: StatCardProps) {
   return (
-    <div className="flex flex-col gap-1 rounded-xl border border-line bg-surface/80 p-3">
-      <div className="flex items-center gap-1.5 text-ink-faint">
-        <Icon className="h-3.5 w-3.5" strokeWidth={2} />
-        <span className="text-[10px] uppercase tracking-wider">{label}</span>
-      </div>
-      <div className="font-display text-lg font-bold tabular-nums text-ink">
+    <div className="rounded-lg border border-line bg-surface p-4">
+      <p className="font-mono text-[10px] font-medium uppercase tracking-[0.18em] text-ink-faint">
+        {label}
+      </p>
+      <p className="font-display mt-1.5 text-[32px] font-extrabold leading-none tabular-nums text-ink">
         {value}
+      </p>
+      {/* range bar: lime when the metric sits in the healthy zone */}
+      <div className="mt-3.5 h-1 w-full overflow-hidden rounded-full bg-line">
+        <div
+          className={`h-full rounded-full ${status.good ? "bg-lime" : "bg-ink-faint/50"}`}
+          style={{ width: status.good ? "100%" : "42%" }}
+        />
       </div>
-      <div className="mt-0.5 flex items-center gap-1.5">
-        <span className={`h-2 w-2 rounded-full ${dotClass}`} aria-hidden />
-        <span className={`text-[11px] font-semibold ${statusClass}`}>
-          {statusWord}
-        </span>
-      </div>
+      <p
+        className={`font-mono mt-2 text-[10px] font-semibold uppercase tracking-[0.12em] ${
+          status.good ? "text-accent" : "text-ink-soft"
+        }`}
+      >
+        {status.word}
+      </p>
     </div>
   );
 }
@@ -308,80 +289,30 @@ function StatCard({
 // ── Status helpers ───────────────────────────────────────────────────────────
 
 interface Status {
-  dot: string;
   word: string;
-  text: string;
+  good: boolean;
 }
 
 function fillersStatus(n: number | null): Status {
-  if (n === null) return { dot: "bg-line", word: "—", text: "text-ink-faint" };
-  if (n === 0)
-    return {
-      dot: "bg-emerald-500",
-      word: "Excelente",
-      text: "text-emerald-600 dark:text-emerald-400",
-    };
-  if (n <= 3)
-    return {
-      dot: "bg-emerald-400",
-      word: "Bajo",
-      text: "text-emerald-600 dark:text-emerald-400",
-    };
-  if (n <= 8)
-    return {
-      dot: "bg-amber-500",
-      word: "Moderado",
-      text: "text-amber-600 dark:text-amber-400",
-    };
-  return {
-    dot: "bg-red-500",
-    word: "Alto",
-    text: "text-red-600 dark:text-red-400",
-  };
+  if (n === null) return { word: "—", good: false };
+  if (n === 0) return { word: "Excelente", good: true };
+  if (n <= 3) return { word: "Bajo", good: true };
+  if (n <= 8) return { word: "Moderado", good: false };
+  return { word: "Alto", good: false };
 }
 
 function pauseStatus(ratio: number | null): Status {
-  if (ratio === null)
-    return { dot: "bg-line", word: "—", text: "text-ink-faint" };
-  if (ratio < 0.05)
-    return {
-      dot: "bg-amber-500",
-      word: "Escasas",
-      text: "text-amber-600 dark:text-amber-400",
-    };
-  if (ratio <= 0.2)
-    return {
-      dot: "bg-emerald-500",
-      word: "Óptimas",
-      text: "text-emerald-600 dark:text-emerald-400",
-    };
-  return {
-    dot: "bg-amber-500",
-    word: "Frecuentes",
-    text: "text-amber-600 dark:text-amber-400",
-  };
+  if (ratio === null) return { word: "—", good: false };
+  if (ratio < 0.05) return { word: "Escasas", good: false };
+  if (ratio <= 0.2) return { word: "Óptimas", good: true };
+  return { word: "Frecuentes", good: false };
 }
 
 function toneStatus(variance: number | null): Status {
-  if (variance === null)
-    return { dot: "bg-line", word: "—", text: "text-ink-faint" };
-  if (variance < 200)
-    return {
-      dot: "bg-amber-500",
-      word: "Plana",
-      text: "text-amber-600 dark:text-amber-400",
-    };
-  if (variance < 800)
-    return {
-      dot: "bg-emerald-500",
-      word: "Equilibrada",
-      text: "text-emerald-600 dark:text-emerald-400",
-    };
-  return {
-    dot: "bg-emerald-500",
-    word: "Expresiva",
-    text: "text-emerald-600 dark:text-emerald-400",
-  };
+  if (variance === null) return { word: "—", good: false };
+  if (variance < 200) return { word: "Plana", good: false };
+  if (variance < 800) return { word: "Equilibrada", good: true };
+  return { word: "Expresiva", good: true };
 }
 
 // ── Helpers ──────────────────────────────────────────────────────────────────

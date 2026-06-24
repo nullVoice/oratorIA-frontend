@@ -1,5 +1,6 @@
-import { GlassCard, type GlassTone } from "./glass-card";
-import { DIMENSION_META, DimensionTag, type Dimension } from "./strengths-list";
+import { humanizeEvidence } from "@/lib/reports/format";
+
+import { DIMENSION_META, type Dimension } from "./strengths-list";
 
 export type Priority = "high" | "medium" | "low";
 
@@ -13,48 +14,26 @@ export interface Improvement {
 }
 
 const PRIORITY_TEXT: Record<string, string> = {
-  high: "Alta",
-  medium: "Media",
-  low: "Baja",
+  high: "Prioridad alta",
+  medium: "Prioridad media",
+  low: "Prioridad baja",
 };
 
-const PRIORITY_ORDER: Record<string, number> = {
-  high: 0,
-  medium: 1,
-  low: 2,
-};
+const PRIORITY_ORDER: Record<string, number> = { high: 0, medium: 1, low: 2 };
 
 export function priorityOrder(p: string | undefined): number {
   return p !== undefined ? (PRIORITY_ORDER[p] ?? 3) : 3;
-}
-
-function blobTone(priority: string | undefined): GlassTone {
-  if (priority === "high") return "red";
-  if (priority === "medium") return "amber";
-  return "sky";
-}
-
-function iconBg(priority: string | undefined): string {
-  if (priority === "high") return "bg-red-500/10";
-  if (priority === "medium") return "bg-amber-500/10";
-  if (priority === "low") return "bg-sky-500/10";
-  return "bg-surface-2";
-}
-
-function pillClasses(priority: string | undefined): string {
-  if (priority === "high")
-    return "bg-red-500/10 text-red-600 dark:text-red-400";
-  if (priority === "medium")
-    return "bg-amber-500/10 text-amber-600 dark:text-amber-400";
-  if (priority === "low") return "bg-sky-500/10 text-sky-600 dark:text-sky-400";
-  return "bg-surface-2 text-ink-faint";
 }
 
 interface ImprovementsListProps {
   items: Improvement[];
 }
 
-/** Single improvement card (also used as a carousel slide). */
+/**
+ * Same editorial card as StrengthCard. The actionable takeaway ("Cómo
+ * mejorarlo") gets a stronger lime treatment — it is the one thing the user
+ * should do next. Priority is signalled by ORDER + a monospace eyebrow.
+ */
 export function ImprovementCard({
   m,
   index = 0,
@@ -63,66 +42,77 @@ export function ImprovementCard({
   index?: number;
 }) {
   const meta = m.dimension ? DIMENSION_META[m.dimension] : undefined;
-  const emoji = meta?.emoji ?? "📈";
-  const p = m.priority;
+  const num = String(index + 1).padStart(2, "0");
+  const prio = m.priority ? PRIORITY_TEXT[m.priority] : undefined;
 
   return (
-    <GlassCard tone={blobTone(p)} index={index}>
-      <div className="p-5 sm:p-6">
-        {/* Header row */}
-        <div className="flex flex-wrap items-center gap-3">
-          <span
-            className={`grid h-10 w-10 shrink-0 place-items-center rounded-full text-xl ${iconBg(p)}`}
-            aria-hidden
+    <article className="relative isolate overflow-hidden rounded-lg border border-line bg-surface p-6 sm:p-8">
+      {/* Layered brand "target" motif in the corner — crisp concentric rings. */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute right-0 top-0 -z-10"
+      >
+        <span className="absolute -right-16 -top-16 h-44 w-44 rounded-full bg-lime/[0.08]" />
+        <span className="absolute -right-9 -top-9 h-28 w-28 rounded-full bg-lime/[0.16]" />
+        <span className="absolute -right-2 -top-2 h-16 w-16 rounded-full bg-lime/[0.24]" />
+      </div>
+
+      <span
+        aria-hidden
+        className="font-display pointer-events-none absolute right-5 top-2 z-[1] select-none text-7xl font-black leading-none tracking-tighter text-accent/70"
+      >
+        {num}
+      </span>
+
+      <div className="h-[3px] w-9 rounded-full bg-lime" />
+
+      <div className="mt-3 flex flex-wrap items-baseline gap-x-2.5 gap-y-1">
+        <p className="font-mono text-[10px] font-medium uppercase tracking-[0.24em] text-ink-faint">
+          Área de mejora{meta ? ` · ${meta.label}` : ""}
+        </p>
+        {prio && (
+          <p
+            className={`font-mono text-[10px] font-semibold uppercase tracking-[0.24em] ${
+              m.priority === "high" ? "text-ink" : "text-ink-faint"
+            }`}
           >
-            {emoji}
-          </span>
-
-          <h3 className="flex-1 text-[15px] font-semibold text-ink">
-            {m.title}
-          </h3>
-
-          {p && (
-            <span
-              className={`rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${pillClasses(p)}`}
-            >
-              {PRIORITY_TEXT[p] ?? p}
-            </span>
-          )}
-
-          {meta && <DimensionTag label={meta.label} />}
-        </div>
-
-        {m.description && (
-          <p className="mt-3 text-sm leading-relaxed text-ink-soft">
-            {m.description}
+            · {prio}
           </p>
         )}
-
-        {m.evidence && (
-          <blockquote className="mt-3 border-l-2 border-line pl-3 text-sm italic text-ink-faint">
-            {stripQuotes(m.evidence)}
-          </blockquote>
-        )}
-
-        {/* Suggestion callout */}
-        {m.suggestion && (
-          <div className="mt-4 flex items-start gap-2.5 rounded-xl border border-lime/30 bg-lime/10 p-3.5">
-            <span className="text-base leading-none" aria-hidden>
-              💡
-            </span>
-            <div>
-              <p className="mb-0.5 text-xs font-semibold text-accent">
-                Sugerencia
-              </p>
-              <p className="text-sm leading-relaxed text-ink-soft">
-                {m.suggestion}
-              </p>
-            </div>
-          </div>
-        )}
       </div>
-    </GlassCard>
+
+      <h3 className="font-display mt-2 max-w-[28ch] text-2xl font-bold leading-[1.12] tracking-tight text-ink sm:text-[26px]">
+        {m.title}
+      </h3>
+
+      {m.description && (
+        <p className="mt-3.5 max-w-prose text-[15px] leading-relaxed text-ink-soft">
+          {m.description}
+        </p>
+      )}
+
+      {m.evidence && (
+        <div className="mt-6 border-l-2 border-line pl-4">
+          <p className="font-mono text-[10px] font-medium uppercase tracking-[0.2em] text-ink-faint">
+            Evidencia
+          </p>
+          <p className="mt-1.5 text-[15px] italic leading-relaxed text-ink-soft">
+            {humanizeEvidence(m.evidence)}
+          </p>
+        </div>
+      )}
+
+      {m.suggestion && (
+        <div className="mt-6 rounded-r-md border-l-[3px] border-lime bg-lime/[0.06] py-3 pl-4 pr-3">
+          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-accent">
+            Cómo mejorarlo
+          </p>
+          <p className="mt-1.5 text-[15px] font-semibold leading-relaxed text-ink">
+            {m.suggestion}
+          </p>
+        </div>
+      )}
+    </article>
   );
 }
 
@@ -146,8 +136,4 @@ export function ImprovementsList({ items }: ImprovementsListProps) {
       ))}
     </div>
   );
-}
-
-function stripQuotes(text: string): string {
-  return text.replace(/^["""'\s]+|["""'\s]+$/g, "");
 }

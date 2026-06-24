@@ -70,26 +70,14 @@ export function InsightCarousel({ slides }: { slides: InsightSlide[] }) {
   }
 
   const slide = slides[i];
-  const isStrength = slide.kind === "strength";
 
   return (
     <div className="mx-auto w-full max-w-2xl">
-      {/* Controls bar */}
+      {/* Controls bar — a plain monospace counter, no coloured pill */}
       <div className="mb-4 flex items-center justify-between gap-3">
-        <div className="flex items-center gap-2.5">
-          <span
-            className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold ${
-              isStrength
-                ? "bg-emerald-500/12 text-emerald-600 dark:text-emerald-400"
-                : "bg-amber-500/12 text-amber-600 dark:text-amber-400"
-            }`}
-          >
-            {isStrength ? "✨ Fortaleza" : "🛠️ Área de mejora"}
-          </span>
-          <span className="text-xs tabular-nums text-ink-faint">
-            {i + 1} / {n}
-          </span>
-        </div>
+        <span className="font-mono text-xs tabular-nums tracking-[0.18em] text-ink-faint">
+          {String(i + 1).padStart(2, "0")} / {String(n).padStart(2, "0")}
+        </span>
 
         <div className="flex items-center gap-2">
           <NavBtn label="Anterior" onClick={() => go(-1)}>

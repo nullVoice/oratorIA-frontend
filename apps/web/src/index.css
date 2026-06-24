@@ -16,9 +16,12 @@
  * through `@theme inline`, so toggling the class re-themes everything.
  */
 @theme inline {
-  /* Single typeface across the whole product: Inter with optical sizing. */
+  /* Inter for titles/body; a monospace for data, labels and eyebrows — gives
+     the report an engineered, editorial voice instead of "Inter everything". */
   --font-sans: "Inter", system-ui, sans-serif;
   --font-display: "Inter", system-ui, sans-serif;
+  --font-mono:
+    "JetBrains Mono", ui-monospace, "SF Mono", "Cascadia Mono", monospace;
 
   --color-stage: var(--c-stage);
   --color-surface: var(--c-surface);

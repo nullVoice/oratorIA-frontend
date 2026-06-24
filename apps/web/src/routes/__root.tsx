@@ -1,4 +1,10 @@
-import { HeadContent, Outlet, Scripts, createRootRouteWithContext, useRouterState } from "@tanstack/react-router";
+import {
+  HeadContent,
+  Outlet,
+  Scripts,
+  createRootRouteWithContext,
+  useRouterState,
+} from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 import type { QueryClient } from "@tanstack/react-query";
 
@@ -22,10 +28,17 @@ export const Route = createRootRouteWithContext<RouterAppContext>()({
         content: "width=device-width, initial-scale=1",
       },
       {
-        title: "My App",
+        title: "OratorIA — tu coach de oratoria con IA",
+      },
+      {
+        name: "description",
+        content:
+          "OratorIA: practicá tus presentaciones con una audiencia digital y recibí feedback inmediato.",
       },
     ],
     links: [
+      { rel: "icon", type: "image/png", href: "/OratorIA-favicon-32.png" },
+      { rel: "apple-touch-icon", href: "/OratorIA-app-icon-1024.png" },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       {
         rel: "preconnect",
@@ -34,7 +47,7 @@ export const Route = createRootRouteWithContext<RouterAppContext>()({
       },
       {
         rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0&display=swap",
+        href: "https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&family=JetBrains+Mono:wght@400;500;600&family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0&display=swap",
       },
       {
         rel: "stylesheet",
@@ -63,7 +76,7 @@ function RootDocument() {
     pathname.startsWith("/sessions/");
 
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="es" suppressHydrationWarning>
       <head>
         {/* No-flash theme: apply stored/default theme before first paint. */}
         <script
@@ -75,7 +88,9 @@ function RootDocument() {
         <HeadContent />
       </head>
       <body>
-        <div className={ownsChrome ? "h-svh" : "grid h-svh grid-rows-[auto_1fr]"}>
+        <div
+          className={ownsChrome ? "h-svh" : "grid h-svh grid-rows-[auto_1fr]"}
+        >
           {!ownsChrome && <Header />}
           <Outlet />
         </div>
