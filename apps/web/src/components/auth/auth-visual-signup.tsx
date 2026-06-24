@@ -44,31 +44,33 @@ function SignupMockup() {
         Tu primera sesión
       </p>
       <p className="mt-0.5 text-center text-xs text-white/65">
-        Pitch de dos minutos · análisis al final
+        Así de simple, en 3 pasos
       </p>
-      <div className="mt-5 flex items-stretch rounded-2xl border border-white/10 bg-white/[0.03]">
-        <Spec value="5" label="min" />
-        <span aria-hidden className="my-3 w-px bg-white/10" />
-        <Spec value="3" label="métricas" />
-        <span aria-hidden className="my-3 w-px bg-white/10" />
-        <Spec value="∞" label="retomas" />
-      </div>
+      <ol className="relative mt-5 space-y-3.5">
+        <span
+          aria-hidden
+          className="absolute bottom-3 left-3 top-3 w-px bg-gradient-to-b from-[#39FF14]/50 to-[#39FF14]/10"
+        />
+        {SESSION_STEPS.map((step, i) => (
+          <li key={step} className="relative flex items-center gap-3">
+            <span className="z-10 grid h-6 w-6 shrink-0 place-items-center rounded-full bg-[#0e140a] text-[11px] font-bold text-[#39FF14] ring-1 ring-[#39FF14]/40">
+              {i + 1}
+            </span>
+            <span className="text-[13px] leading-snug text-white/85">
+              {step}
+            </span>
+          </li>
+        ))}
+      </ol>
     </div>
   );
 }
 
-function Spec({ value, label }: { value: string; label: string }) {
-  return (
-    <div className="flex-1 px-2 py-3 text-center">
-      <div className="font-display text-2xl font-bold leading-none text-[#39FF14]">
-        {value}
-      </div>
-      <div className="mt-1 text-[10px] font-medium uppercase tracking-[0.12em] text-white/55">
-        {label}
-      </div>
-    </div>
-  );
-}
+const SESSION_STEPS = [
+  "Grabás un pitch de 2 minutos",
+  "La IA analiza tu voz y tu discurso",
+  "Recibís tu score y tu próximo paso",
+];
 
 function Equalizer() {
   const heights = [14, 22, 30, 22, 14];
