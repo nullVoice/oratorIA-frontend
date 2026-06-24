@@ -53,7 +53,7 @@ const SEEDS: MockSeed[] = [
     durationSeconds: 428,
     score: 88,
     summary:
-      "Análisis de video: presentación de resultados trimestrales. Buen ritmo y pausas intencionales; mejorá el contacto visual en los datos clave.",
+      "Análisis de video: presentación de resultados trimestrales. Buen ritmo y pausas intencionales; mejora el contacto visual en los datos clave.",
     context: {
       presentation_type: "Reporte ejecutivo",
       audience: "Directorio",

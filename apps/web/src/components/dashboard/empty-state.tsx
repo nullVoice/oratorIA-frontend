@@ -20,8 +20,8 @@ export function EmptyState({ firstName }: EmptyStateProps) {
           Listo para entrenar, {firstName}.
         </h1>
         <p className="relative mx-auto mt-3 max-w-md text-[15px] leading-relaxed text-ink-soft">
-          Todavía no tenés sesiones. Hablá unos minutos frente a una audiencia
-          simulada y recibí tu primer reporte con score, una fortaleza y una
+          Todavía no tienes sesiones. Habla unos minutos frente a una audiencia
+          simulada y recibe tu primer reporte con score, una fortaleza y una
           mejora accionable.
         </p>
         <div className="relative mt-7 flex justify-center">
@@ -41,13 +41,13 @@ export function EmptyState({ firstName }: EmptyStateProps) {
       <section className="grid grid-cols-1 gap-3 sm:grid-cols-3">
         <Step
           n={1}
-          title="Hablá con naturalidad"
+          title="Habla con naturalidad"
           body="Sobre lo que prefieras: un pitch, una clase, una entrevista."
         />
         <Step
           n={2}
           title="Feedback en vivo"
-          body="Detectamos muletillas, ritmo y duración mientras hablás."
+          body="Detectamos muletillas, ritmo y duración mientras hablas."
         />
         <Step
           n={3}

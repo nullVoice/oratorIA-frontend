@@ -13,7 +13,10 @@ import {
   uploadSessionAudio,
 } from "@/lib/api/sessions";
 import { calculateWpm, paceLabel } from "@/lib/practice/fillers";
-import { useDeepgram, countFillersFromTranscript } from "@/lib/practice/use-deepgram";
+import {
+  useDeepgram,
+  countFillersFromTranscript,
+} from "@/lib/practice/use-deepgram";
 import { useRecorder } from "@/lib/practice/use-recorder";
 import { cn } from "@/lib/utils";
 
@@ -95,7 +98,7 @@ function ActivePracticeRoute() {
 
   const handleFinalize = async () => {
     if (!audioBlob) {
-      toast.error("Aún no hay audio. Grabá algo antes de evaluar.");
+      toast.error("Aún no hay audio. Graba algo antes de evaluar.");
       return;
     }
     setSubmitting(true);

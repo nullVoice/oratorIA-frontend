@@ -6,7 +6,7 @@ export function QuickActions() {
     <div className="flex flex-col gap-3">
       <ActionRow
         title="Práctica libre"
-        description="Hablá sin guion y recibí tu reporte."
+        description="Habla sin guion y recibe tu reporte."
         href="/practice/new"
       />
       <ActionRow
@@ -25,7 +25,12 @@ interface ActionRowProps {
   disabled?: boolean;
 }
 
-function ActionRow({ title, description, href, disabled = false }: ActionRowProps) {
+function ActionRow({
+  title,
+  description,
+  href,
+  disabled = false,
+}: ActionRowProps) {
   const body = (
     <div
       className={`group flex items-center justify-between gap-4 rounded-xl bg-surface p-4 transition-colors ${
@@ -36,7 +41,9 @@ function ActionRow({ title, description, href, disabled = false }: ActionRowProp
         <h3 className="text-[15px] font-semibold tracking-tight text-ink">
           {title}
         </h3>
-        <p className="mt-0.5 truncate text-[13px] text-ink-soft">{description}</p>
+        <p className="mt-0.5 truncate text-[13px] text-ink-soft">
+          {description}
+        </p>
       </div>
       {disabled ? (
         <span className="shrink-0 rounded-full bg-surface-2 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-ink-faint">

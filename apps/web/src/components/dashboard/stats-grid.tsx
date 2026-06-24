@@ -85,7 +85,9 @@ export function StatsGrid({
       <StatCard
         label="Total de sesiones"
         value={<CountUp value={totalSessions} />}
-        meta={totalSessions === 0 ? "Empezá la primera" : "Tu historial completo"}
+        meta={
+          totalSessions === 0 ? "Empieza la primera" : "Tu historial completo"
+        }
       />
     </div>
   );

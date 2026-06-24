@@ -70,7 +70,7 @@ function AvatarPracticeRoute() {
       } catch (err) {
         const msg = await getApiErrorMessage(
           err,
-          "No pudimos iniciar la audiencia digital. Probá de nuevo o usá la Práctica simple.",
+          "No pudimos iniciar la audiencia digital. Prueba de nuevo o usa la Práctica simple.",
         );
         setErrorMsg(msg);
         setPhase("error");
@@ -254,7 +254,7 @@ function AvatarPracticeRoute() {
           </h1>
           <p className="text-sm text-gray-600">
             Tu sesión se guardó. El análisis puede demorar unos minutos en
-            aparecer; revisá tu historial más tarde.
+            aparecer; revisa tu historial más tarde.
           </p>
           <div className="flex justify-center gap-2 pt-2">
             <button

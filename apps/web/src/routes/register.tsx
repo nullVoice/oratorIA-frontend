@@ -109,7 +109,7 @@ function RegisterRoute() {
     } catch (err) {
       const message = await getApiErrorMessage(
         err,
-        "No pudimos crear la cuenta. Probá de nuevo.",
+        "No pudimos crear la cuenta. Prueba de nuevo.",
       );
       toast.error(message);
     }

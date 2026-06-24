@@ -53,7 +53,7 @@ export function AuthVisualLogin() {
             <span className="text-[#C6FF3D]">hablar mejor</span>
           </h2>
           <p className="mx-auto mt-3 max-w-xs text-[14px] leading-relaxed text-white/75">
-            Practicá, medí tu progreso y ganá confianza con un coach de IA que
+            Practica, mide tu progreso y gana confianza con un coach de IA que
             te escucha 24/7.
           </p>
         </header>

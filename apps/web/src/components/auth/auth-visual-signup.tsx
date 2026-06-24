@@ -15,10 +15,10 @@ export function AuthVisualSignup() {
       <div className="relative z-10 mx-auto flex w-full max-w-sm flex-col gap-8">
         <header className="text-center">
           <h2 className="text-balance text-[32px] font-bold leading-[1.12] tracking-tight text-white drop-shadow-[0_2px_12px_rgba(0,0,0,0.55)]">
-            Empezá a <span className="text-[#C6FF3D]">hablar mejor</span> hoy
+            Empieza a <span className="text-[#C6FF3D]">hablar mejor</span> hoy
           </h2>
           <p className="mx-auto mt-3 max-w-xs text-[14px] leading-relaxed text-white/75">
-            Creá tu cuenta y hacé tu primera sesión en minutos. Sin tarjeta.
+            Crea tu cuenta y haz tu primera sesión en minutos. Sin tarjeta.
           </p>
         </header>
         <SignupMockup />
@@ -67,9 +67,9 @@ function SignupMockup() {
 }
 
 const SESSION_STEPS = [
-  "Grabás un pitch de 2 minutos",
+  "Grabas un pitch de 2 minutos",
   "La IA analiza tu voz y tu discurso",
-  "Recibís tu score y tu próximo paso",
+  "Recibes tu score y tu próximo paso",
 ];
 
 function Equalizer() {

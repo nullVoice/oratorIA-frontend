@@ -1,5 +1,12 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { ArrowRight, Check, Loader2, Mic, Users, type LucideIcon } from "lucide-react";
+import {
+  ArrowRight,
+  Check,
+  Loader2,
+  Mic,
+  Users,
+  type LucideIcon,
+} from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -52,7 +59,9 @@ function NewPracticeRoute() {
   );
   const [audience, setAudience] = useState("");
   const [objective, setObjective] = useState("");
-  const [formality, setFormality] = useState<"alta" | "media" | "baja">("media");
+  const [formality, setFormality] = useState<"alta" | "media" | "baja">(
+    "media",
+  );
   const [durationTarget, setDurationTarget] = useState<number | "">(5);
   const [errors, setErrors] = useState<FormErrors>({});
   const [submitting, setSubmitting] = useState(false);
@@ -127,7 +136,7 @@ function NewPracticeRoute() {
           práctica
         </h1>
         <p className="mt-5 max-w-sm text-[15px] leading-relaxed text-ink-soft">
-          Elegí el modo y contanos el contexto. Con esa información el coach
+          Elige el modo y cuéntanos el contexto. Con esa información el coach
           evalúa tu presentación con más precisión.
         </p>
 
@@ -148,7 +157,7 @@ function NewPracticeRoute() {
               onClick={() => setMode("simple")}
               icon={Mic}
               title="Práctica simple"
-              description="Grabá audio y recibí un reporte con score, fortalezas y mejoras."
+              description="Graba audio y recibe un reporte con score, fortalezas y mejoras."
             />
             <ModeCard
               selected={mode === "avatar"}
@@ -173,8 +182,9 @@ function NewPracticeRoute() {
                   Permitir que el avatar me interrumpa con preguntas
                 </span>
                 <span className="text-xs leading-relaxed text-ink-soft">
-                  Si está activado, el avatar puede interrumpir 1–2 veces durante
-                  tu presentación. Si no, solo escucha y pregunta al final.
+                  Si está activado, el avatar puede interrumpir 1–2 veces
+                  durante tu presentación. Si no, solo escucha y pregunta al
+                  final.
                 </span>
               </span>
             </label>
@@ -280,16 +290,16 @@ function NewPracticeRoute() {
             disabled={submitting}
             className="inline-flex h-12 items-center justify-center gap-2 rounded-lg bg-lime px-7 text-[15px] font-bold text-on-lime shadow-[0_0_28px_var(--color-lime-shadow)] transition-colors hover:bg-lime-dim disabled:cursor-not-allowed disabled:opacity-70"
           >
-          {submitting ? (
-            <Loader2 className="h-5 w-5 animate-spin" />
-          ) : (
-            <>
-              {mode === "avatar"
-                ? "Empezar con audiencia digital"
-                : "Empezar práctica"}
-              <ArrowRight className="h-4 w-4" strokeWidth={2.4} />
-            </>
-          )}
+            {submitting ? (
+              <Loader2 className="h-5 w-5 animate-spin" />
+            ) : (
+              <>
+                {mode === "avatar"
+                  ? "Empezar con audiencia digital"
+                  : "Empezar práctica"}
+                <ArrowRight className="h-4 w-4" strokeWidth={2.4} />
+              </>
+            )}
           </button>
         </div>
       </form>

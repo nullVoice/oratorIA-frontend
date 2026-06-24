@@ -19,7 +19,7 @@ const AUTH_CODE_MESSAGES: Record<string, string> = {
  */
 export async function getApiErrorMessage(
   err: unknown,
-  fallback = "Algo no salió como esperábamos. Probá de nuevo en un momento.",
+  fallback = "Algo no salió como esperábamos. Prueba de nuevo en un momento.",
 ): Promise<string> {
   if (err instanceof HTTPError) {
     try {

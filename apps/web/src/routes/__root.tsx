@@ -43,7 +43,7 @@ export const Route = createRootRouteWithContext<RouterAppContext>()({
       {
         name: "description",
         content:
-          "OratorIA: practicá tus presentaciones con una audiencia digital y recibí feedback inmediato.",
+          "OratorIA: practica tus presentaciones con una audiencia digital y recibe feedback inmediato.",
       },
     ],
     links: [
