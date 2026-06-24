@@ -4,6 +4,8 @@ import viteReact from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
 import tsconfigPaths from "vite-tsconfig-paths";
 
+// Deploy target (Vercel/Nitro `.vercel/output`) is auto-detected from the
+// VERCEL env at build time — no explicit preset needed.
 export default defineConfig({
   plugins: [tsconfigPaths(), tailwindcss(), tanstackStart(), viteReact()],
   server: {
