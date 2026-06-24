@@ -2,6 +2,8 @@
  * showcase cards (live equalizer, self-filling score, rotating lime glow). */
 import { useEffect, useState } from "react";
 
+import { AuthBackdrop } from "./auth-backdrop";
+
 function prefersReducedMotion() {
   return (
     typeof window !== "undefined" &&
@@ -36,26 +38,21 @@ function useCountUp(target: number, duration = 1300) {
 export function AuthVisualLogin() {
   return (
     <aside className="relative hidden flex-col justify-center overflow-hidden p-12 lg:flex">
-      <img
-        src="/auth-visual.png"
-        alt=""
-        aria-hidden
-        className="absolute inset-0 h-full w-full object-cover object-center"
-      />
-      {/* Soft scrim: lifts the floating cards' legibility over the artwork
-          without washing out the lime energy at the edges. */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 bg-gradient-to-br from-white/35 via-white/5 to-transparent"
-      />
+      <AuthBackdrop />
 
-      <div className="relative z-10 mx-auto flex w-full max-w-sm flex-col gap-8">
-        <div className="float-soft">
-          <ProgressMockup />
-        </div>
-        <div className="float-soft--delayed">
-          <QuoteCard />
-        </div>
+      <div className="relative z-10 mx-auto flex w-full max-w-sm flex-col gap-7">
+        <header className="px-1">
+          <h2 className="text-balance text-[28px] font-bold leading-[1.15] tracking-tight text-white">
+            Tu escenario para{" "}
+            <span className="text-[#C6FF3D]">hablar mejor</span>
+          </h2>
+          <p className="mt-2.5 text-[14px] leading-relaxed text-white/55">
+            Practicá, medí tu progreso y ganá confianza con un coach de IA que
+            te escucha 24/7.
+          </p>
+        </header>
+        <ProgressMockup />
+        <QuoteCard />
       </div>
     </aside>
   );

@@ -380,3 +380,43 @@
     animation: none;
   }
 }
+
+/* ── Raycast-style auth backdrop ───────────────────────────────────────────
+ * A dark stage crossed by diagonal green light "blades" that drift slowly,
+ * topped with a film-grain overlay. The cards sit STATIC on top — only the
+ * backdrop moves, for a premium, alive-but-calm feel. */
+@keyframes blade-drift {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) rotate(var(--blade-rot, -30deg))
+      scaleY(var(--blade-scale, 1));
+  }
+  50% {
+    transform: translate3d(var(--blade-dx, 4%), var(--blade-dy, -3%), 0)
+      rotate(var(--blade-rot, -30deg))
+      scaleY(calc(var(--blade-scale, 1) * 1.06));
+  }
+}
+.auth-blade {
+  position: absolute;
+  top: -28%;
+  height: 156%;
+  border-radius: 999px;
+  filter: blur(var(--blade-blur, 42px));
+  mix-blend-mode: screen;
+  will-change: transform;
+  animation: blade-drift var(--blade-dur, 16s) ease-in-out infinite;
+}
+.auth-grain {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.5;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+@media (prefers-reduced-motion: reduce) {
+  .auth-blade {
+    animation: none;
+  }
+}
