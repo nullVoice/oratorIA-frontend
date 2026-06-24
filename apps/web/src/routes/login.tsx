@@ -125,7 +125,7 @@ function LoginRoute() {
               labelExtra={
                 <a
                   href="#"
-                  className="text-[13px] font-semibold text-[#0A0A0A] underline decoration-gray-300 underline-offset-[3px] hover:decoration-[#C6FF3D]"
+                  className="text-[13px] font-semibold text-ink-soft underline decoration-line underline-offset-[3px] transition-colors hover:text-ink hover:decoration-accent"
                 >
                   Olvidé mi contraseña
                 </a>
@@ -153,11 +153,11 @@ function LoginRoute() {
               )}
             </button>
 
-            <p className="mt-6 text-center text-sm text-gray-600">
+            <p className="mt-6 text-center text-sm text-ink-soft">
               ¿Nuevo en OratorIA?{" "}
               <Link
                 to="/register"
-                className="font-bold text-[#0A0A0A] underline decoration-[#C6FF3D] underline-offset-[3px]"
+                className="font-bold text-ink underline decoration-accent decoration-2 underline-offset-[3px] transition-colors hover:text-accent"
               >
                 Crear cuenta
               </Link>
@@ -319,7 +319,7 @@ function Checkbox({
           </svg>
         )}
       </span>
-      <span className="text-[13px] leading-relaxed text-gray-700">{label}</span>
+      <span className="text-[13px] leading-relaxed text-ink-soft">{label}</span>
     </label>
   );
 }
