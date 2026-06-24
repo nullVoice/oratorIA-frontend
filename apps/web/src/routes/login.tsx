@@ -78,7 +78,7 @@ function LoginRoute() {
           <Link
             to="/"
             aria-label="OratorIA"
-            className="inline-flex items-center gap-3"
+            className="mx-auto flex w-fit items-center gap-3"
           >
             <img
               src="/OratorIA-isotype.svg"

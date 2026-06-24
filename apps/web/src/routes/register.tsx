@@ -134,7 +134,7 @@ function RegisterRoute() {
           <Link
             to="/"
             aria-label="OratorIA"
-            className="inline-flex items-center gap-3"
+            className="mx-auto flex w-fit items-center gap-3"
           >
             <img
               src="/OratorIA-isotype.svg"
@@ -220,7 +220,7 @@ function RegisterRoute() {
                     key={opt.value}
                     className={`flex cursor-pointer flex-col gap-0.5 rounded-lg border p-3 transition-colors ${
                       segment === opt.value
-                        ? "border-[#C6FF3D] bg-[#F7FFE0]"
+                        ? "border-accent bg-accent/10"
                         : "border-line hover:border-line-strong"
                     }`}
                   >

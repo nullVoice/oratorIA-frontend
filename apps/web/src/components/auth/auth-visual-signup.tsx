@@ -46,22 +46,26 @@ function SignupMockup() {
       <p className="mt-0.5 text-center text-xs text-white/65">
         Pitch de dos minutos · análisis al final
       </p>
-      <div className="mt-4 grid grid-cols-3 gap-2">
-        <MiniStat value="5" label="minutos" />
-        <MiniStat value="3" label="métricas" />
-        <MiniStat value="∞" label="retomas" />
+      <div className="mt-5 flex items-stretch rounded-2xl border border-white/10 bg-white/[0.03]">
+        <Spec value="5" label="min" />
+        <span aria-hidden className="my-3 w-px bg-white/10" />
+        <Spec value="3" label="métricas" />
+        <span aria-hidden className="my-3 w-px bg-white/10" />
+        <Spec value="∞" label="retomas" />
       </div>
     </div>
   );
 }
 
-function MiniStat({ value, label }: { value: string; label: string }) {
+function Spec({ value, label }: { value: string; label: string }) {
   return (
-    <div className="rounded-xl border border-white/10 bg-white/[0.04] px-2 py-2.5 text-center">
-      <div className="font-display text-lg font-bold text-[#39FF14]">
+    <div className="flex-1 px-2 py-3 text-center">
+      <div className="font-display text-2xl font-bold leading-none text-[#39FF14]">
         {value}
       </div>
-      <div className="mt-0.5 text-[11px] text-white/60">{label}</div>
+      <div className="mt-1 text-[10px] font-medium uppercase tracking-[0.12em] text-white/55">
+        {label}
+      </div>
     </div>
   );
 }
@@ -93,9 +97,11 @@ function QuoteCard() {
         inversión.
       </p>
       <figcaption className="mt-3 flex items-center gap-2.5">
-        <div className="grid h-9 w-9 place-items-center rounded-full bg-white/10 text-xs font-bold text-white">
-          MG
-        </div>
+        <img
+          src="/testimonial-maria.jpg"
+          alt="María González"
+          className="h-9 w-9 shrink-0 rounded-full object-cover ring-1 ring-white/15"
+        />
         <div>
           <div className="text-[13px] font-bold text-white">María González</div>
           <div className="text-[11px] text-white/55">CEO · Fintech LATAM</div>

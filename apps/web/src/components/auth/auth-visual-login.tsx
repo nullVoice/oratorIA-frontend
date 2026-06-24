@@ -89,21 +89,16 @@ function ProgressMockup() {
         </div>
       </div>
 
-      <div className="mt-6 flex items-end justify-between">
-        <div>
-          <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-white/55">
-            Score global
-          </div>
-          <div className="mt-1 flex items-baseline gap-1.5">
-            <span className="font-display text-[46px] font-bold leading-none tabular-nums text-white">
-              {score}
-            </span>
-            <span className="text-sm text-white/45">/ 100</span>
-          </div>
+      <div className="mt-6">
+        <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-white/55">
+          Score global
         </div>
-        <span className="rounded-full border border-[#39FF14]/30 bg-[#39FF14]/10 px-2.5 py-1 text-[11px] font-bold text-[#39FF14]">
-          ▲ +8
-        </span>
+        <div className="mt-1 flex items-baseline gap-1.5">
+          <span className="font-display text-[46px] font-bold leading-none tabular-nums text-white">
+            {score}
+          </span>
+          <span className="text-sm text-white/45">/ 100</span>
+        </div>
       </div>
 
       <div className="mt-4 flex h-12 items-center gap-[3px]">
@@ -163,9 +158,11 @@ function QuoteCard() {
         inversión.
       </p>
       <figcaption className="mt-3 flex items-center gap-2.5">
-        <div className="grid h-9 w-9 place-items-center rounded-full bg-white/10 text-xs font-bold text-white">
-          MG
-        </div>
+        <img
+          src="/testimonial-maria.jpg"
+          alt="María González"
+          className="h-9 w-9 shrink-0 rounded-full object-cover ring-1 ring-white/15"
+        />
         <div>
           <div className="text-[13px] font-bold text-white">María González</div>
           <div className="text-[11px] text-white/55">CEO · Fintech LATAM</div>
