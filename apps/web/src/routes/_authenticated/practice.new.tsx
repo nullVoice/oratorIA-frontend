@@ -1,12 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import {
-  ArrowRight,
-  Check,
-  Loader2,
-  Mic,
-  Users,
-  type LucideIcon,
-} from "lucide-react";
+import { ArrowRight, Loader2, Mic, Users, type LucideIcon } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -121,16 +114,16 @@ function NewPracticeRoute() {
   };
 
   return (
-    <div className="grid w-full gap-10 lg:grid-cols-[clamp(260px,24%,340px)_1fr] lg:gap-14">
+    <div className="grid w-full gap-10 lg:grid-cols-[clamp(260px,24%,340px)_1fr] lg:gap-16">
       {/* Intro pane (sticky on desktop) */}
       <header className="lg:sticky lg:top-8 lg:self-start">
         <Link
           to="/dashboard"
-          className="text-[13px] font-medium text-ink-soft underline-offset-4 transition-colors hover:text-ink hover:underline"
+          className="font-mono text-[12px] uppercase tracking-[0.14em] text-ink-soft underline-offset-4 transition-colors hover:text-ink hover:underline"
         >
           ← Volver
         </Link>
-        <h1 className="font-display mt-4 text-4xl font-bold leading-[0.95] tracking-tight text-ink sm:text-5xl">
+        <h1 className="font-display mt-5 text-4xl font-bold leading-[0.95] tracking-tight text-ink sm:text-5xl">
           Nueva
           <br />
           práctica
@@ -143,76 +136,80 @@ function NewPracticeRoute() {
         <dl className="mt-10 border-t border-line">
           <SummaryRow label="Modo" value={modeLabel} />
           <SummaryRow label="Tipo" value={typeLabel} />
+          <SummaryRow label="Audiencia" value={truncate(audience)} />
+          <SummaryRow label="Objetivo" value={truncate(objective)} />
           <SummaryRow label="Formalidad" value={formalityLabel} />
           <SummaryRow label="Duración" value={durationLabel} />
         </dl>
       </header>
 
-      <form onSubmit={handleSubmit} className="flex flex-col gap-9" noValidate>
-        {/* Modo */}
-        <Field legend="Modo de práctica">
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            <ModeCard
-              selected={mode === "simple"}
-              onClick={() => setMode("simple")}
-              icon={Mic}
-              title="Práctica simple"
-              description="Graba audio y recibe un reporte con score, fortalezas y mejoras."
-            />
-            <ModeCard
-              selected={mode === "avatar"}
-              onClick={() => setMode("avatar")}
-              icon={Users}
-              title="Audiencia digital"
-              description="Presentá frente a un avatar que escucha y reacciona en tiempo real."
-              badge="Nuevo"
-            />
-          </div>
-
-          {mode === "avatar" && (
-            <label className="mt-3 flex cursor-pointer items-start gap-3 rounded-xl bg-surface p-4 ring-1 ring-line transition-colors hover:ring-line-strong">
-              <input
-                type="checkbox"
-                checked={interactive}
-                onChange={(e) => setInteractive(e.target.checked)}
-                className="mt-0.5 h-4 w-4 accent-lime"
+      <form onSubmit={handleSubmit} className="flex flex-col gap-14" noValidate>
+        {/* ── Zona 1 — Qué tipo de práctica ─────────────────────────────── */}
+        <section className="flex flex-col gap-8">
+          <Field legend="Modo de práctica">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <ModeCard
+                selected={mode === "simple"}
+                onClick={() => setMode("simple")}
+                icon={Mic}
+                title="Práctica simple"
+                description="Graba audio y recibe un reporte con score, fortalezas y mejoras."
               />
-              <span className="flex flex-col gap-0.5">
-                <span className="text-sm font-semibold text-ink">
-                  Permitir que el avatar me interrumpa con preguntas
-                </span>
-                <span className="text-xs leading-relaxed text-ink-soft">
-                  Si está activado, el avatar puede interrumpir 1–2 veces
-                  durante tu presentación. Si no, solo escucha y pregunta al
-                  final.
-                </span>
-              </span>
-            </label>
-          )}
-        </Field>
+              <ModeCard
+                selected={mode === "avatar"}
+                onClick={() => setMode("avatar")}
+                icon={Users}
+                title="Audiencia digital"
+                description="Preséntate ante un avatar que escucha y reacciona en tiempo real."
+                badge="Nuevo"
+              />
+            </div>
 
-        {/* Tipo */}
-        <Field legend="Tipo de presentación">
-          <div className="flex flex-wrap gap-2">
-            {PRESENTATION_TYPES.map((opt) => (
-              <PillRadio
-                key={opt.value}
-                name="presentation_type"
-                value={opt.value}
-                checked={presentationType === opt.value}
-                onChange={() => setPresentationType(opt.value)}
-              >
-                {opt.label}
-              </PillRadio>
-            ))}
-          </div>
-        </Field>
+            {mode === "avatar" && (
+              <label className="flex cursor-pointer items-start gap-3 rounded-xl bg-surface p-4 ring-1 ring-line transition-colors focus-within:ring-2 focus-within:ring-accent hover:ring-line-strong">
+                <input
+                  type="checkbox"
+                  checked={interactive}
+                  onChange={(e) => setInteractive(e.target.checked)}
+                  className="mt-0.5 h-4 w-4 accent-lime"
+                />
+                <span className="flex flex-col gap-0.5">
+                  <span className="text-sm font-semibold text-ink">
+                    Permitir que el avatar me interrumpa con preguntas
+                  </span>
+                  <span className="text-xs leading-relaxed text-ink-soft">
+                    Si está activado, el avatar puede interrumpir 1–2 veces
+                    durante tu presentación. Si no, solo escucha y pregunta al
+                    final.
+                  </span>
+                </span>
+              </label>
+            )}
+          </Field>
 
-        <div className="grid gap-6 lg:grid-cols-2">
+          <Field legend="Tipo de presentación">
+            <div className="flex flex-wrap gap-2">
+              {PRESENTATION_TYPES.map((opt) => (
+                <PillRadio
+                  key={opt.value}
+                  name="presentation_type"
+                  value={opt.value}
+                  checked={presentationType === opt.value}
+                  onChange={() => setPresentationType(opt.value)}
+                >
+                  {opt.label}
+                </PillRadio>
+              ))}
+            </div>
+          </Field>
+        </section>
+
+        {/* ── Zona 2 — Contexto ─────────────────────────────────────────── */}
+        <section className="flex flex-col gap-6">
           <TextareaField
             id="audience"
             label="¿Quién es tu audiencia?"
-            placeholder="Ej: comité de tesis de cinco profesores"
+            hint="Ej: comité de tesis de cinco profesores"
             value={audience}
             onChange={setAudience}
             error={errors.audience}
@@ -221,43 +218,54 @@ function NewPracticeRoute() {
           <TextareaField
             id="objective"
             label="¿Cuál es tu objetivo?"
-            placeholder="Ej: convencer al jurado de la viabilidad de mi proyecto"
+            hint="Ej: convencer al jurado de la viabilidad de mi proyecto"
             value={objective}
             onChange={setObjective}
             error={errors.objective}
           />
-        </div>
+        </section>
 
-        {/* Formalidad */}
-        <Field legend="Nivel de formalidad">
-          <div className="grid grid-cols-3 gap-2">
-            {FORMALITY_OPTIONS.map((opt) => (
-              <SelectTile
-                key={opt.value}
-                name="formality"
-                value={opt.value}
-                checked={formality === opt.value}
-                onChange={() => setFormality(opt.value)}
-                column
-              >
-                <span className="text-sm font-semibold text-ink">
-                  {opt.label}
-                </span>
-                <span className="text-xs text-ink-soft">{opt.description}</span>
-              </SelectTile>
-            ))}
-          </div>
-        </Field>
+        {/* ── Zona 3 — Ajustes + acción ─────────────────────────────────── */}
+        <section className="flex flex-col gap-8">
+          <Field legend="Nivel de formalidad">
+            <div className="grid grid-cols-3 gap-2">
+              {FORMALITY_OPTIONS.map((opt) => (
+                <SelectTile
+                  key={opt.value}
+                  name="formality"
+                  value={opt.value}
+                  checked={formality === opt.value}
+                  onChange={() => setFormality(opt.value)}
+                >
+                  <span
+                    className={cn(
+                      "text-sm font-semibold",
+                      formality === opt.value ? "text-accent" : "text-ink",
+                    )}
+                  >
+                    {opt.label}
+                  </span>
+                  <span className="text-xs text-ink-soft">
+                    {opt.description}
+                  </span>
+                </SelectTile>
+              ))}
+            </div>
+          </Field>
 
-        <div className="flex flex-wrap items-end justify-between gap-6 border-t border-line pt-7">
-          {/* Duración */}
           <div className="flex flex-col gap-1.5">
             <label
               htmlFor="duration_target"
-              className="text-[13px] font-semibold text-ink"
+              className="font-display text-[17px] font-semibold leading-tight tracking-tight text-ink"
             >
-              Duración objetivo (minutos)
+              Duración objetivo
             </label>
+            <p
+              id="duration-hint"
+              className="font-mono text-[11px] tracking-wide text-ink-faint"
+            >
+              1 a 60 minutos
+            </p>
             <input
               id="duration_target"
               type="number"
@@ -271,15 +279,24 @@ function NewPracticeRoute() {
                 )
               }
               aria-invalid={!!errors.duration_target}
+              aria-describedby={
+                errors.duration_target
+                  ? "duration-hint duration-error"
+                  : "duration-hint"
+              }
               className={cn(
-                "h-11 w-full max-w-[160px] rounded-lg bg-surface px-4 text-[15px] text-ink outline-none ring-1 transition-all focus:ring-2",
+                "mt-1 h-11 w-full max-w-[160px] rounded-lg bg-surface px-4 text-[15px] text-ink outline-none ring-1 transition-all focus:ring-2",
                 errors.duration_target
                   ? "ring-red-500/60 focus:ring-red-500/40"
                   : "ring-line focus:ring-lime/50",
               )}
             />
             {errors.duration_target && (
-              <span className="text-xs font-medium text-red-400">
+              <span
+                id="duration-error"
+                role="alert"
+                className="text-xs font-medium text-red-400"
+              >
                 {errors.duration_target}
               </span>
             )}
@@ -288,7 +305,7 @@ function NewPracticeRoute() {
           <button
             type="submit"
             disabled={submitting}
-            className="inline-flex h-12 items-center justify-center gap-2 rounded-lg bg-lime px-7 text-[15px] font-bold text-on-lime shadow-[0_0_28px_var(--color-lime-shadow)] transition-colors hover:bg-lime-dim disabled:cursor-not-allowed disabled:opacity-70"
+            className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-lime px-7 text-[15px] font-bold text-on-lime shadow-[0_0_28px_var(--color-lime-shadow)] transition-colors hover:bg-lime-dim focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-stage disabled:cursor-not-allowed disabled:opacity-70"
           >
             {submitting ? (
               <Loader2 className="h-5 w-5 animate-spin" />
@@ -301,19 +318,34 @@ function NewPracticeRoute() {
               </>
             )}
           </button>
-        </div>
+        </section>
       </form>
     </div>
   );
 }
 
+/** First ~32 chars of a free-text field, or em dash when empty. */
+function truncate(value: string): string {
+  const trimmed = value.trim();
+  if (!trimmed) return "—";
+  return trimmed.length > 32 ? `${trimmed.slice(0, 32)}…` : trimmed;
+}
+
 function SummaryRow({ label, value }: { label: string; value: string }) {
+  const empty = value === "—";
   return (
     <div className="flex items-center justify-between gap-4 border-b border-line py-2.5">
-      <dt className="text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-faint">
+      <dt className="font-mono text-[10px] font-medium uppercase tracking-[0.18em] text-ink-faint">
         {label}
       </dt>
-      <dd className="text-right text-sm font-medium text-ink">{value}</dd>
+      <dd
+        className={cn(
+          "max-w-[60%] truncate text-right text-sm font-medium",
+          empty ? "text-ink-faint" : "text-ink",
+        )}
+      >
+        {value}
+      </dd>
     </div>
   );
 }
@@ -326,8 +358,8 @@ function Field({
   children: React.ReactNode;
 }) {
   return (
-    <fieldset className="flex flex-col">
-      <legend className="mb-4 text-[11px] font-semibold uppercase tracking-[0.16em] text-ink-faint">
+    <fieldset className="flex flex-col gap-3">
+      <legend className="mb-5 font-mono text-[11px] font-semibold uppercase tracking-[0.22em] text-ink-soft">
         {legend}
       </legend>
       {children}
@@ -358,23 +390,23 @@ function ModeCard({
       onClick={onClick}
       aria-pressed={selected}
       className={cn(
-        "relative flex items-start gap-3 rounded-2xl p-5 text-left transition-colors",
+        "relative flex items-start gap-3 rounded-2xl p-5 text-left transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent",
         selected
-          ? "bg-lime/10 ring-1 ring-lime/55"
+          ? "bg-surface-2 ring-2 ring-accent"
           : "bg-surface ring-1 ring-line hover:ring-line-strong",
       )}
     >
       <Icon
         className={cn(
-          "mt-0.5 h-5 w-5 shrink-0",
-          selected ? "text-ink" : "text-ink-soft",
+          "mt-0.5 h-5 w-5 shrink-0 transition-colors",
+          selected ? "text-accent" : "text-ink-faint",
         )}
         strokeWidth={1.8}
         aria-hidden
       />
       <span className="flex-1">
         <span className="flex items-center gap-2">
-          <span className="text-sm font-semibold text-ink">{title}</span>
+          <span className="text-[15px] font-semibold text-ink">{title}</span>
           {badge && (
             <span className="rounded-full bg-lime px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-on-lime">
               {badge}
@@ -385,14 +417,6 @@ function ModeCard({
           {description}
         </span>
       </span>
-      {selected && (
-        <span
-          className="grid h-5 w-5 shrink-0 place-items-center rounded-full bg-lime text-on-lime"
-          aria-hidden
-        >
-          <Check className="h-3 w-3" strokeWidth={3.2} />
-        </span>
-      )}
     </button>
   );
 }
@@ -402,23 +426,20 @@ function SelectTile({
   value,
   checked,
   onChange,
-  column = false,
   children,
 }: {
   name: string;
   value: string;
   checked: boolean;
   onChange: () => void;
-  column?: boolean;
   children: React.ReactNode;
 }) {
   return (
     <label
       className={cn(
-        "flex cursor-pointer rounded-lg p-3.5 transition-colors",
-        column ? "flex-col gap-0.5" : "items-center",
+        "flex cursor-pointer flex-col gap-0.5 rounded-lg p-3.5 transition-all focus-within:ring-2 focus-within:ring-accent",
         checked
-          ? "bg-lime/10 ring-1 ring-lime/55"
+          ? "bg-surface-2 ring-2 ring-accent"
           : "bg-surface ring-1 ring-line hover:ring-line-strong",
       )}
     >
@@ -451,7 +472,7 @@ function PillRadio({
   return (
     <label
       className={cn(
-        "cursor-pointer rounded-full px-4 py-2.5 text-sm font-medium transition-colors",
+        "cursor-pointer rounded-full px-4 py-2.5 text-sm font-medium transition-colors focus-within:ring-2 focus-within:ring-lime focus-within:ring-offset-1 focus-within:ring-offset-stage",
         checked
           ? "bg-lime text-on-lime"
           : "bg-surface text-ink-soft ring-1 ring-line hover:text-ink hover:ring-line-strong",
@@ -473,7 +494,7 @@ function PillRadio({
 interface TextareaFieldProps {
   id: string;
   label: string;
-  placeholder?: string;
+  hint?: string;
   value: string;
   onChange: (v: string) => void;
   error?: string;
@@ -482,32 +503,53 @@ interface TextareaFieldProps {
 function TextareaField({
   id,
   label,
-  placeholder,
+  hint,
   value,
   onChange,
   error,
 }: TextareaFieldProps) {
+  const describedBy =
+    [hint ? `${id}-hint` : null, error ? `${id}-error` : null]
+      .filter(Boolean)
+      .join(" ") || undefined;
   return (
     <div className="flex flex-col gap-1.5">
-      <label htmlFor={id} className="text-[13px] font-semibold text-ink">
+      <label
+        htmlFor={id}
+        className="font-display text-[17px] font-semibold leading-tight tracking-tight text-ink"
+      >
         {label}
       </label>
+      {hint && (
+        <p
+          id={`${id}-hint`}
+          className="text-[13px] leading-snug text-ink-faint"
+        >
+          {hint}
+        </p>
+      )}
       <textarea
         id={id}
-        placeholder={placeholder}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        rows={2}
+        rows={3}
         aria-invalid={!!error}
+        aria-describedby={describedBy}
         className={cn(
-          "w-full resize-none rounded-lg bg-surface px-4 py-3 text-[15px] text-ink placeholder:text-ink-faint outline-none ring-1 transition-all focus:ring-2",
+          "mt-1 w-full resize-none rounded-lg bg-surface px-4 py-3 text-[15px] text-ink outline-none ring-1 transition-all focus:ring-2",
           error
             ? "ring-red-500/60 focus:ring-red-500/40"
             : "ring-line focus:ring-lime/50",
         )}
       />
       {error && (
-        <span className="text-xs font-medium text-red-400">{error}</span>
+        <span
+          id={`${id}-error`}
+          role="alert"
+          className="text-xs font-medium text-red-400"
+        >
+          {error}
+        </span>
       )}
     </div>
   );
