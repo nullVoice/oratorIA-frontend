@@ -103,13 +103,20 @@ export function countFillersFromTranscript(transcript: string): FillerSummary {
 interface TokenPayload {
   token: string;
   expires_in: number;
+  /** WS subprotocol: "bearer" for a grant-token JWT, "token" for a raw key. */
+  scheme?: string;
 }
 
-async function fetchDeepgramToken(): Promise<string> {
+interface DeepgramCredential {
+  token: string;
+  scheme: string;
+}
+
+async function fetchDeepgramToken(): Promise<DeepgramCredential> {
   const payload = await api
     .post("api/v1/practice/deepgram-token")
     .json<TokenPayload>();
-  return payload.token;
+  return { token: payload.token, scheme: payload.scheme ?? "token" };
 }
 
 // ---------------------------------------------------------------------------
@@ -173,9 +180,7 @@ function countProlongedInWords(words: DgWord[] | undefined): number {
   if (!words || words.length === 0) return 0;
   let n = 0;
   for (const w of words) {
-    const token = (w.word ?? "")
-      .toLowerCase()
-      .replace(/[^a-záéíóúñü]/g, "");
+    const token = (w.word ?? "").toLowerCase().replace(/[^a-záéíóúñü]/g, "");
     if (!token) continue;
     const dur = (w.end ?? 0) - (w.start ?? 0);
     if (REPEATED_VOWEL.test(token)) {
@@ -238,9 +243,7 @@ export function useDeepgram(
   // gap (dropping chunks instead would corrupt the container).
   useEffect(() => {
     pausedRef.current = paused;
-    dgStreamRef.current
-      ?.getAudioTracks()
-      .forEach((t) => (t.enabled = !paused));
+    dgStreamRef.current?.getAudioTracks().forEach((t) => (t.enabled = !paused));
   }, [paused]);
 
   const cleanup = useCallback(() => {
@@ -296,9 +299,9 @@ export function useDeepgram(
     }
 
     async function connect() {
-      let token: string;
+      let credential: DeepgramCredential;
       try {
-        token = await fetchDeepgramToken();
+        credential = await fetchDeepgramToken();
       } catch (err) {
         if (!cancelled && mountedRef.current) {
           setError(
@@ -312,8 +315,12 @@ export function useDeepgram(
 
       if (cancelled || !stream) return;
 
-      // Open WS with token auth via subprotocol trick.
-      const ws = new WebSocket(buildDgUrl(), ["token", token]);
+      // Open WS with auth via subprotocol trick. The scheme ("bearer" for a
+      // grant-token JWT, "token" for a raw API key) is dictated by the backend.
+      const ws = new WebSocket(buildDgUrl(), [
+        credential.scheme,
+        credential.token,
+      ]);
       ws.binaryType = "arraybuffer";
       wsRef.current = ws;
 
