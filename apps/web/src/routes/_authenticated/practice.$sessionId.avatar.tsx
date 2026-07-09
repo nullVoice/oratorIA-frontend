@@ -57,6 +57,9 @@ function AvatarPracticeRoute() {
   const [micStream, setMicStream] = useState<MediaStream | null>(null);
   const [avatarSpeaking, setAvatarSpeaking] = useState(false);
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
+  // Latest Raven-1 reading of the user's camera (from Tavus utterance events),
+  // surfaced live in the self-view so the analysis is visible, not just logged.
+  const [visualInsight, setVisualInsight] = useState<string | null>(null);
 
   // 1) Start the avatar conversation exactly once.
   useEffect(() => {
@@ -110,6 +113,8 @@ function AvatarPracticeRoute() {
   const handleEvent = (ev: TavusEvent) => {
     eventsRef.current.push(ev);
     setAvatarSpeaking((prev) => deriveAvatarSpeaking(prev, ev));
+    const visual = extractVisualAnalysis(ev);
+    if (visual) setVisualInsight(visual);
   };
 
   // 3) While "evaluating", poll GET /sessions/:id until the report appears
@@ -321,6 +326,7 @@ function AvatarPracticeRoute() {
             <AvatarCall
               conversationUrl={conversation.conversation_url}
               userName={presenterName}
+              visualInsight={visualInsight}
               onEnd={handleEnd}
               onEvent={handleEvent}
               onError={(err) => {
@@ -347,4 +353,18 @@ function AvatarPracticeRoute() {
   return typeof document !== "undefined"
     ? createPortal(liveView, document.body)
     : null;
+}
+
+/**
+ * Pull the Raven-1 visual analysis of the USER out of a Tavus utterance event.
+ * Only user turns carry `user_visual_analysis`; replica turns don't. Returns
+ * null when the event isn't a user utterance with a visual reading.
+ */
+function extractVisualAnalysis(ev: TavusEvent): string | null {
+  if (ev.event_type !== "conversation.utterance") return null;
+  const props = ev.properties ?? {};
+  const role = String(props.role ?? props.speaker ?? "").toLowerCase();
+  if (role && !["user", "participant", "human"].includes(role)) return null;
+  const visual = props.user_visual_analysis;
+  return typeof visual === "string" && visual.trim() ? visual.trim() : null;
 }

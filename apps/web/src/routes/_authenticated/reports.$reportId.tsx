@@ -13,6 +13,7 @@ import {
   type Improvement,
 } from "@/components/reports/improvements-list";
 import { ScoreRing } from "@/components/reports/score-ring";
+import { StructuredPitchSection } from "@/components/reports/structured-pitch";
 import {
   StrengthCard,
   type Strength,
@@ -192,6 +193,14 @@ function ReportRoute() {
               Análisis · deslizá para ver cada punto
             </SectionHeading>
             <InsightCarousel slides={slides} />
+          </div>
+        )}
+
+        {/* ── Structured pitch: "así te habría quedado mejor" ── */}
+        {r.structured_pitch && (
+          <div className="mt-12">
+            <SectionHeading>Tu pitch reestructurado</SectionHeading>
+            <StructuredPitchSection pitch={r.structured_pitch} />
           </div>
         )}
 

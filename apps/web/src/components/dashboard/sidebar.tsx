@@ -23,6 +23,11 @@ import {
 import { useEffect } from "react";
 
 import { cn, initialsOf, namePartOfEmail } from "@/lib/utils";
+import { useDashboardData } from "@/lib/dashboard/use-dashboard-data";
+import {
+  computeAchievements,
+  countUnlocked,
+} from "@/lib/progress/achievements";
 import { useUiStore } from "@/stores/ui-store";
 import type { User } from "@/lib/api/schemas";
 
@@ -36,16 +41,36 @@ interface NavItem {
 }
 
 const MAIN_NAV: NavItem[] = [
-  { label: "Inicio", icon: Home, to: "/dashboard", match: (p) => p === "/dashboard" },
+  {
+    label: "Inicio",
+    icon: Home,
+    to: "/dashboard",
+    match: (p) => p === "/dashboard",
+  },
   {
     label: "Nueva sesión",
     icon: Mic,
     to: "/practice/new",
     match: (p) => p.startsWith("/practice"),
   },
-  { label: "Mi progreso", icon: Target, soon: true },
-  { label: "Histórico", icon: Clock, badge: "14", soon: true },
-  { label: "Logros", icon: Trophy, badge: "3", soon: true },
+  {
+    label: "Mi progreso",
+    icon: Target,
+    to: "/progress",
+    match: (p) => p.startsWith("/progress"),
+  },
+  {
+    label: "Histórico",
+    icon: Clock,
+    to: "/history",
+    match: (p) => p.startsWith("/history"),
+  },
+  {
+    label: "Logros",
+    icon: Trophy,
+    to: "/achievements",
+    match: (p) => p.startsWith("/achievements"),
+  },
 ];
 
 const ACCOUNT_NAV: NavItem[] = [
@@ -70,6 +95,32 @@ export function Sidebar({ user }: { user: User }) {
   }, [mobileNavOpen, closeMobileNav]);
 
   const displayName = user.full_name ?? namePartOfEmail(user.email);
+
+  // Live badges from the shared (cached) sessions query: history count and
+  // unlocked-achievements count. Falls back to no badge while loading.
+  const data = useDashboardData();
+  const unlockedCount = data.loading
+    ? 0
+    : countUnlocked(
+        computeAchievements({
+          sessions: data.sessions,
+          completedSessions: data.completedSessions,
+          streakDays: data.streakDays,
+          practicedSeconds: data.practicedSeconds,
+        }),
+      );
+  const badgeByLabel: Record<string, string | undefined> = {
+    Histórico:
+      data.loading || data.totalSessions === 0
+        ? undefined
+        : String(data.totalSessions),
+    Logros: unlockedCount > 0 ? String(unlockedCount) : undefined,
+  };
+  const mainNav = MAIN_NAV.map((item) =>
+    item.label in badgeByLabel
+      ? { ...item, badge: badgeByLabel[item.label] }
+      : item,
+  );
 
   return (
     <>
@@ -128,7 +179,7 @@ export function Sidebar({ user }: { user: User }) {
           <nav aria-label="Principal" className="mt-2">
             <GroupLabel collapsed={collapsed}>Principal</GroupLabel>
             <ul className="flex flex-col gap-0.5">
-              {MAIN_NAV.map((item) => (
+              {mainNav.map((item) => (
                 <li key={item.label}>
                   <NavLinkItem
                     item={item}
@@ -166,7 +217,9 @@ export function Sidebar({ user }: { user: User }) {
         <button
           type="button"
           onClick={toggleCollapsed}
-          aria-label={collapsed ? "Expandir barra lateral" : "Colapsar barra lateral"}
+          aria-label={
+            collapsed ? "Expandir barra lateral" : "Colapsar barra lateral"
+          }
           aria-expanded={!collapsed}
           className={cn(
             "hidden h-12 shrink-0 items-center gap-3 border-t border-line px-5 text-[13px] font-medium text-ink-soft transition-colors hover:text-ink lg:flex",
@@ -174,7 +227,10 @@ export function Sidebar({ user }: { user: User }) {
           )}
         >
           <PanelLeft
-            className={cn("h-5 w-5 shrink-0 transition-transform", collapsed && "rotate-180")}
+            className={cn(
+              "h-5 w-5 shrink-0 transition-transform",
+              collapsed && "rotate-180",
+            )}
             strokeWidth={1.8}
             aria-hidden
           />

@@ -8,7 +8,9 @@
  * <video> element by assembling a MediaStream from the subscribed remote
  * tracks and assigning it as srcObject.  Local mic + camera are sent by
  * default (Daily defaults capture both), which Tavus/Raven-1 requires to
- * hear and see the user.
+ * hear and see the user. The LOCAL camera track is also rendered as a small
+ * self-view (picture-in-picture) with an "analysis in progress" treatment, so
+ * the user sees themselves and understands their body language is being read.
  *
  * Subscribes to Daily's `app-message` events to capture Tavus' Interactions
  * Protocol stream — utterances (with user_visual_analysis / user_audio_analysis
@@ -25,7 +27,8 @@ import DailyIframe, {
   type DailyCall,
   type DailyParticipant,
 } from "@daily-co/daily-js";
-import { useEffect, useRef } from "react";
+import { ScanFace } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 
 import { parseAppMessage, type TavusEvent } from "@/lib/practice/tavus-events";
 
@@ -35,6 +38,8 @@ interface AvatarCallProps {
   conversationUrl: string;
   /** Presenter name passed to Daily on join. */
   userName?: string;
+  /** Latest Raven-1 reading of the user's camera, surfaced in the self-view. */
+  visualInsight?: string | null;
   onEnd: () => void;
   onError?: (err: Error) => void;
   onEvent?: (event: TavusEvent) => void;
@@ -68,11 +73,31 @@ function pickTrack(
 }
 
 /**
+ * Assign a fresh track set to a <video> element's srcObject only when the set
+ * actually changed, to avoid unnecessary flicker / seek resets.
+ */
+function assignTracks(
+  videoEl: HTMLVideoElement,
+  tracks: MediaStreamTrack[],
+): void {
+  const current = videoEl.srcObject;
+  const currentTracks =
+    current instanceof MediaStream ? current.getTracks() : [];
+  const sameSet =
+    tracks.length === currentTracks.length &&
+    tracks.every((t) => currentTracks.includes(t));
+  if (sameSet) return;
+  videoEl.srcObject = tracks.length > 0 ? new MediaStream(tracks) : null;
+  if (tracks.length > 0) {
+    videoEl.play().catch(() => {
+      // Autoplay blocked — browser will unblock on first user gesture.
+    });
+  }
+}
+
+/**
  * Rebuild the remote MediaStream from the first non-local Daily participant
  * (the Tavus replica) and assign it to the <video> element's srcObject.
- *
- * Reassigns srcObject only when the track set actually changes to avoid
- * unnecessary flicker / seek resets.
  */
 function syncRemoteMedia(call: DailyCall, videoEl: HTMLVideoElement): void {
   const participants = call.participants();
@@ -87,31 +112,25 @@ function syncRemoteMedia(call: DailyCall, videoEl: HTMLVideoElement): void {
   }
 
   const tracks: MediaStreamTrack[] = [];
-
   if (replica) {
     const videoTrack = pickTrack(replica.tracks?.video);
     const audioTrack = pickTrack(replica.tracks?.audio);
     if (videoTrack) tracks.push(videoTrack);
     if (audioTrack) tracks.push(audioTrack);
   }
+  assignTracks(videoEl, tracks);
+}
 
-  // Compare with the current srcObject to skip unnecessary reassignments.
-  const current = videoEl.srcObject;
-  const currentTracks =
-    current instanceof MediaStream ? current.getTracks() : [];
-
-  const sameSet =
-    tracks.length === currentTracks.length &&
-    tracks.every((t) => currentTracks.includes(t));
-
-  if (!sameSet) {
-    videoEl.srcObject = tracks.length > 0 ? new MediaStream(tracks) : null;
-    if (tracks.length > 0) {
-      videoEl.play().catch(() => {
-        // Autoplay blocked — browser will unblock on first user gesture.
-      });
-    }
-  }
+/**
+ * Mirror the LOCAL camera track into the self-view <video>. Audio is never
+ * added here (the self-view is muted to avoid echo). Returns true when a live
+ * camera track is present, so the caller can show/hide the PiP.
+ */
+function syncLocalMedia(call: DailyCall, videoEl: HTMLVideoElement): boolean {
+  const local = call.participants()?.local;
+  const videoTrack = pickTrack(local?.tracks?.video);
+  assignTracks(videoEl, videoTrack ? [videoTrack] : []);
+  return Boolean(videoTrack);
 }
 
 // ---------------------------------------------------------------------------
@@ -121,15 +140,19 @@ function syncRemoteMedia(call: DailyCall, videoEl: HTMLVideoElement): void {
 export function AvatarCall({
   conversationUrl,
   userName,
+  visualInsight,
   onEnd,
   onError,
   onEvent,
 }: AvatarCallProps) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
+  const localVideoRef = useRef<HTMLVideoElement | null>(null);
   const callRef = useRef<DailyCall | null>(null);
   const onEndRef = useRef(onEnd);
   const onErrorRef = useRef(onError);
   const onEventRef = useRef(onEvent);
+  // Whether the local camera is available — drives the self-view visibility.
+  const [hasCamera, setHasCamera] = useState(false);
   // userName arrives asynchronously (auth store hydration). Keep it in a ref so
   // its change does NOT re-run the join effect — re-running mid-join makes Daily
   // leave the meeting and the recreate collides with the singleton, leaving a
@@ -168,7 +191,12 @@ export function AvatarCall({
       if (event) onEventRef.current?.(event);
     };
     const handleMediaUpdate = () => {
-      if (call && videoRef.current) syncRemoteMedia(call, videoRef.current);
+      if (!call) return;
+      if (videoRef.current) syncRemoteMedia(call, videoRef.current);
+      if (localVideoRef.current) {
+        const present = syncLocalMedia(call, localVideoRef.current);
+        setHasCamera(present);
+      }
     };
     const detach = (c: DailyCall) => {
       c.off("left-meeting", handleLeft);
@@ -230,8 +258,12 @@ export function AvatarCall({
           userName: userNameRef.current || "Orador/a",
         });
         // Some track-started events can fire before listeners attach; sync once.
-        if (!disposed && videoRef.current)
-          syncRemoteMedia(call, videoRef.current);
+        if (!disposed) {
+          if (videoRef.current) syncRemoteMedia(call, videoRef.current);
+          if (localVideoRef.current) {
+            setHasCamera(syncLocalMedia(call, localVideoRef.current));
+          }
+        }
       } catch (err) {
         if (!disposed) {
           onErrorRef.current?.(
@@ -273,6 +305,88 @@ export function AvatarCall({
         className="h-full w-full object-cover"
         // Audio from the replica must NOT be muted so the user hears the avatar.
       />
+
+      {/* Self-view (PiP) — the user's own camera, with an active-analysis
+          treatment so it's clear the AI is reading their body language. */}
+      <SelfView
+        ref={localVideoRef}
+        visible={hasCamera}
+        insight={visualInsight ?? null}
+      />
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Self-view with camera-analysis treatment
+// ---------------------------------------------------------------------------
+
+function SelfView({
+  ref,
+  visible,
+  insight,
+}: {
+  ref: React.Ref<HTMLVideoElement>;
+  visible: boolean;
+  insight: string | null;
+}) {
+  return (
+    <div
+      className={`pointer-events-none absolute bottom-4 right-4 w-40 transition-opacity duration-500 sm:w-52 ${
+        visible ? "opacity-100" : "opacity-0"
+      }`}
+    >
+      <div className="relative aspect-[3/4] overflow-hidden rounded-xl bg-black shadow-[0_8px_30px_rgba(0,0,0,0.5)] ring-2 ring-[#C6FF3D]/70">
+        {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
+        <video
+          ref={ref}
+          autoPlay
+          playsInline
+          muted
+          className="h-full w-full -scale-x-100 object-cover"
+        />
+
+        {/* Scanning line — implies active visual analysis. */}
+        <span className="scan-line pointer-events-none absolute inset-x-0 top-0 h-14 bg-gradient-to-b from-[#C6FF3D]/35 to-transparent" />
+
+        {/* Corner brackets — camera "reticle". */}
+        <span className="pointer-events-none absolute left-1.5 top-1.5 h-4 w-4 rounded-tl border-l-2 border-t-2 border-[#C6FF3D]/80" />
+        <span className="pointer-events-none absolute right-1.5 top-1.5 h-4 w-4 rounded-tr border-r-2 border-t-2 border-[#C6FF3D]/80" />
+        <span className="pointer-events-none absolute bottom-1.5 left-1.5 h-4 w-4 rounded-bl border-b-2 border-l-2 border-[#C6FF3D]/80" />
+        <span className="pointer-events-none absolute bottom-1.5 right-1.5 h-4 w-4 rounded-br border-b-2 border-r-2 border-[#C6FF3D]/80" />
+
+        {/* Active-analysis badge. */}
+        <span className="absolute left-1.5 top-1.5 inline-flex items-center gap-1 rounded-md bg-black/60 px-1.5 py-1 text-[9px] font-bold uppercase tracking-wider text-[#C6FF3D] backdrop-blur">
+          <ScanFace className="h-3 w-3 animate-pulse" strokeWidth={2.2} />
+          Analizando
+        </span>
+      </div>
+
+      <p className="mt-1.5 text-center text-[10px] font-semibold uppercase tracking-wider text-white/50">
+        Tu cámara
+      </p>
+
+      {/* Latest real Raven-1 reading of the user's camera. */}
+      {insight && (
+        <p className="mt-1 line-clamp-3 rounded-lg bg-black/60 px-2 py-1.5 text-[11px] leading-snug text-white/85 backdrop-blur">
+          <span className="font-semibold text-[#C6FF3D]">Lectura IA: </span>
+          {insight}
+        </p>
+      )}
+
+      {/* Scoped keyframes for the scan line — no global config needed. */}
+      <style>{`
+        @keyframes oratoria-scan {
+          0% { transform: translateY(-100%); opacity: 0; }
+          15% { opacity: 1; }
+          85% { opacity: 1; }
+          100% { transform: translateY(320%); opacity: 0; }
+        }
+        .scan-line { animation: oratoria-scan 2.6s ease-in-out infinite; }
+        @media (prefers-reduced-motion: reduce) {
+          .scan-line { animation: none; opacity: 0.5; }
+        }
+      `}</style>
     </div>
   );
 }
