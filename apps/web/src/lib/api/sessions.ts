@@ -30,6 +30,17 @@ export type FillerByWord = z.infer<typeof FillerByWordSchema>;
 //     {title, description, dimension, evidence, impact} and
 //     improvements as {... suggestion, priority}.
 // Use loose record types and let the UI layer normalize per-item.
+export const PitchSectionSchema = z.object({
+  label: z.string(),
+  content: z.string(),
+});
+export const StructuredPitchSchema = z.object({
+  headline: z.string(),
+  sections: z.array(PitchSectionSchema),
+  delivery_note: z.string(),
+});
+export type StructuredPitch = z.infer<typeof StructuredPitchSchema>;
+
 export const SessionReportSchema = z.object({
   score: z.number().int(),
   summary: z.string(),
@@ -37,6 +48,7 @@ export const SessionReportSchema = z.object({
   improvements: z.array(z.record(z.string(), z.unknown())),
   paraverbal_metrics: z.record(z.string(), z.unknown()),
   next_steps: z.array(z.string()).default([]),
+  structured_pitch: StructuredPitchSchema.nullable().default(null),
 });
 export type SessionReport = z.infer<typeof SessionReportSchema>;
 
@@ -121,7 +133,6 @@ export async function evaluateSession(sessionId: string): Promise<ReportRead> {
     .json();
   return ReportReadSchema.parse(data);
 }
-
 
 export const SessionListResponseSchema = z.object({
   items: z.array(SessionSummarySchema),
