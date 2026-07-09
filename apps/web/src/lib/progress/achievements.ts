@@ -21,11 +21,25 @@ export type AchievementIcon =
   | "trending"
   | "layers";
 
+/** Per-achievement accent color, so the wall reads as alive, not monochrome. */
+export type AchievementColor =
+  | "lime"
+  | "emerald"
+  | "teal"
+  | "sky"
+  | "violet"
+  | "fuchsia"
+  | "rose"
+  | "orange"
+  | "amber"
+  | "yellow";
+
 export interface Achievement {
   id: string;
   title: string;
   description: string;
   icon: AchievementIcon;
+  color: AchievementColor;
   /** 0..1 completion toward the goal. */
   progress: number;
   unlocked: boolean;
@@ -51,6 +65,7 @@ interface Def {
   title: string;
   description: string;
   icon: AchievementIcon;
+  color: AchievementColor;
   goal: number;
   current: number;
   unit: string;
@@ -91,6 +106,7 @@ export function computeAchievements(input: AchievementInput): Achievement[] {
       title: "Primer paso",
       description: "Completá tu primera sesión de práctica.",
       icon: "star",
+      color: "amber",
       goal: 1,
       current: completedCount,
       unit: "sesión",
@@ -100,6 +116,7 @@ export function computeAchievements(input: AchievementInput): Achievement[] {
       title: "En marcha",
       description: "Completá 5 sesiones y agarrá ritmo.",
       icon: "target",
+      color: "emerald",
       goal: 5,
       current: completedCount,
       unit: "sesiones",
@@ -109,6 +126,7 @@ export function computeAchievements(input: AchievementInput): Achievement[] {
       title: "Orador incansable",
       description: "Completá 15 sesiones de práctica.",
       icon: "medal",
+      color: "sky",
       goal: 15,
       current: completedCount,
       unit: "sesiones",
@@ -118,6 +136,7 @@ export function computeAchievements(input: AchievementInput): Achievement[] {
       title: "En racha",
       description: "Practicá 3 días seguidos.",
       icon: "flame",
+      color: "orange",
       goal: 3,
       current: streakDays,
       unit: "días",
@@ -127,6 +146,7 @@ export function computeAchievements(input: AchievementInput): Achievement[] {
       title: "Semana perfecta",
       description: "Mantené una racha de 7 días.",
       icon: "zap",
+      color: "yellow",
       goal: 7,
       current: streakDays,
       unit: "días",
@@ -136,6 +156,7 @@ export function computeAchievements(input: AchievementInput): Achievement[] {
       title: "Buen orador",
       description: "Alcanzá un score de 80 en una sesión.",
       icon: "trophy",
+      color: "violet",
       goal: 80,
       current: bestScore,
       unit: "pts",
@@ -145,6 +166,7 @@ export function computeAchievements(input: AchievementInput): Achievement[] {
       title: "Maestría",
       description: "Alcanzá un score de 90 en una sesión.",
       icon: "sparkles",
+      color: "fuchsia",
       goal: 90,
       current: bestScore,
       unit: "pts",
@@ -154,6 +176,7 @@ export function computeAchievements(input: AchievementInput): Achievement[] {
       title: "Mejora sostenida",
       description: "Subí 10 puntos entre tu primera y tu última sesión.",
       icon: "trending",
+      color: "teal",
       goal: 10,
       current: Math.max(0, improvement),
       unit: "pts",
@@ -163,6 +186,7 @@ export function computeAchievements(input: AchievementInput): Achievement[] {
       title: "Tiempo al aire",
       description: "Acumulá 60 minutos frente al micrófono.",
       icon: "clock",
+      color: "rose",
       goal: 60,
       current: practicedMinutes,
       unit: "min",
@@ -172,6 +196,7 @@ export function computeAchievements(input: AchievementInput): Achievement[] {
       title: "Versátil",
       description: "Probá los dos modos: en vivo y análisis de video.",
       icon: "layers",
+      color: "lime",
       goal: 2,
       current: versatility,
       unit: "modos",
@@ -185,6 +210,7 @@ export function computeAchievements(input: AchievementInput): Achievement[] {
       title: d.title,
       description: d.description,
       icon: d.icon,
+      color: d.color,
       progress,
       unlocked: d.current >= d.goal,
       current: d.current,

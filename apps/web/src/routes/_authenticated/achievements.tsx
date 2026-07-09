@@ -25,6 +25,7 @@ import {
   computeAchievements,
   countUnlocked,
   type Achievement,
+  type AchievementColor,
   type AchievementIcon,
 } from "@/lib/progress/achievements";
 import { useDashboardData } from "@/lib/dashboard/use-dashboard-data";
@@ -45,6 +46,102 @@ const ICONS: Record<AchievementIcon, LucideIcon> = {
   zap: Zap,
   trending: TrendingUp,
   layers: Layers,
+};
+
+// Per-color class sets (literal strings so Tailwind's JIT keeps them). Each
+// achievement gets its own accent for its icon + progress bar; unlocked is
+// vivid, locked is a softer tint. The success frame + badge stay brand-green
+// (see AchievementCard) so the wall feels alive but still cohesive.
+interface Tone {
+  tile: string;
+  icon: string;
+  bar: string;
+  tileOff: string;
+  iconOff: string;
+  barOff: string;
+}
+
+const THEME: Record<AchievementColor, Tone> = {
+  lime: {
+    tile: "bg-lime-500/15",
+    icon: "text-lime-600",
+    bar: "bg-lime-500",
+    tileOff: "bg-lime-500/10",
+    iconOff: "text-lime-600/50",
+    barOff: "bg-lime-500/30",
+  },
+  emerald: {
+    tile: "bg-emerald-500/15",
+    icon: "text-emerald-600",
+    bar: "bg-emerald-500",
+    tileOff: "bg-emerald-500/10",
+    iconOff: "text-emerald-600/50",
+    barOff: "bg-emerald-500/30",
+  },
+  teal: {
+    tile: "bg-teal-500/15",
+    icon: "text-teal-600",
+    bar: "bg-teal-500",
+    tileOff: "bg-teal-500/10",
+    iconOff: "text-teal-600/50",
+    barOff: "bg-teal-500/30",
+  },
+  sky: {
+    tile: "bg-sky-500/15",
+    icon: "text-sky-600",
+    bar: "bg-sky-500",
+    tileOff: "bg-sky-500/10",
+    iconOff: "text-sky-600/50",
+    barOff: "bg-sky-500/30",
+  },
+  violet: {
+    tile: "bg-violet-500/15",
+    icon: "text-violet-600",
+    bar: "bg-violet-500",
+    tileOff: "bg-violet-500/10",
+    iconOff: "text-violet-600/50",
+    barOff: "bg-violet-500/30",
+  },
+  fuchsia: {
+    tile: "bg-fuchsia-500/15",
+    icon: "text-fuchsia-600",
+    bar: "bg-fuchsia-500",
+    tileOff: "bg-fuchsia-500/10",
+    iconOff: "text-fuchsia-600/50",
+    barOff: "bg-fuchsia-500/30",
+  },
+  rose: {
+    tile: "bg-rose-500/15",
+    icon: "text-rose-500",
+    bar: "bg-rose-500",
+    tileOff: "bg-rose-500/10",
+    iconOff: "text-rose-500/50",
+    barOff: "bg-rose-500/30",
+  },
+  orange: {
+    tile: "bg-orange-500/15",
+    icon: "text-orange-600",
+    bar: "bg-orange-500",
+    tileOff: "bg-orange-500/10",
+    iconOff: "text-orange-600/50",
+    barOff: "bg-orange-500/30",
+  },
+  amber: {
+    tile: "bg-amber-500/15",
+    icon: "text-amber-600",
+    bar: "bg-amber-500",
+    tileOff: "bg-amber-500/10",
+    iconOff: "text-amber-600/50",
+    barOff: "bg-amber-500/30",
+  },
+  yellow: {
+    tile: "bg-yellow-500/15",
+    icon: "text-yellow-600",
+    bar: "bg-yellow-500",
+    tileOff: "bg-yellow-500/10",
+    iconOff: "text-yellow-600/50",
+    barOff: "bg-yellow-500/30",
+  },
 };
 
 function AchievementsPage() {
@@ -119,6 +216,7 @@ function AchievementsPage() {
 
 function AchievementCard({ achievement: a }: { achievement: Achievement }) {
   const Icon = ICONS[a.icon];
+  const tone = THEME[a.color];
   const pct = Math.round(a.progress * 100);
 
   return (
@@ -133,10 +231,10 @@ function AchievementCard({ achievement: a }: { achievement: Achievement }) {
       <div className="flex items-start justify-between">
         <span
           className={cn(
-            "grid h-12 w-12 place-items-center rounded-xl",
+            "grid h-12 w-12 place-items-center rounded-xl transition-colors",
             a.unlocked
-              ? "bg-accent/15 text-accent"
-              : "bg-surface-2 text-ink-faint",
+              ? cn(tone.tile, tone.icon)
+              : cn(tone.tileOff, tone.iconOff),
           )}
         >
           <Icon className="h-6 w-6" strokeWidth={1.8} aria-hidden />
@@ -169,7 +267,7 @@ function AchievementCard({ achievement: a }: { achievement: Achievement }) {
           <div
             className={cn(
               "h-full rounded-full transition-[width] duration-700",
-              a.unlocked ? "bg-accent" : "bg-ink-faint/40",
+              a.unlocked ? tone.bar : tone.barOff,
             )}
             style={{ width: `${pct}%` }}
           />

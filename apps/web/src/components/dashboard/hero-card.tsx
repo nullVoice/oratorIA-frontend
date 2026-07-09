@@ -68,7 +68,7 @@ export function HeroCard({
           to="/practice/new"
           className="group inline-flex h-12 items-center gap-2 rounded-lg bg-lime px-6 text-sm font-bold text-on-lime shadow-[0_0_30px_var(--color-lime-shadow)] transition-all hover:bg-lime-dim hover:shadow-[0_0_42px_var(--color-lime-shadow)]"
         >
-          Iniciar sparring
+          Iniciar práctica
           <ArrowUpRight
             className="h-4 w-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
             strokeWidth={2.4}
