@@ -7,7 +7,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { Loader2, Plus } from "lucide-react";
 import { useMemo, useState } from "react";
 
-import { SessionsList } from "@/components/dashboard/sessions-list";
+import { SessionTimeline } from "@/components/dashboard/session-timeline";
 import { useReveal } from "@/lib/anim/use-reveal";
 import { useDashboardData } from "@/lib/dashboard/use-dashboard-data";
 import { cn } from "@/lib/utils";
@@ -60,6 +60,11 @@ function HistoryPage() {
     [sorted, filter],
   );
 
+  const bestScore =
+    data.completedSessions.length > 0
+      ? Math.max(...data.completedSessions.map((s) => s.score ?? 0))
+      : null;
+
   if (data.loading) {
     return (
       <div className="grid place-items-center py-24 text-sm text-ink-soft">
@@ -70,8 +75,11 @@ function HistoryPage() {
 
   return (
     <div ref={reveal} className="flex flex-col gap-8">
-      <header data-reveal className="flex flex-col gap-1">
-        <h1 className="font-display text-3xl font-bold tracking-tight text-ink">
+      <header data-reveal className="flex flex-col gap-1.5">
+        <p className="font-mono text-[11px] font-medium uppercase tracking-[0.24em] text-accent">
+          Tu progresión
+        </p>
+        <h1 className="font-display text-4xl font-bold tracking-tight text-ink">
           Histórico
         </h1>
         <p className="text-sm text-ink-soft">
@@ -83,11 +91,20 @@ function HistoryPage() {
         </p>
       </header>
 
+      <div data-reveal>
+        <StatsBanner
+          total={data.totalSessions}
+          average={data.averageScore}
+          best={bestScore}
+          practicedSeconds={data.practicedSeconds}
+        />
+      </div>
+
       <div
         data-reveal
         role="tablist"
         aria-label="Filtrar sesiones"
-        className="flex flex-wrap gap-2"
+        className="-mb-px flex flex-wrap gap-6 border-b border-line"
       >
         {FILTERS.map((f) => {
           const active = filter === f.id;
@@ -100,23 +117,16 @@ function HistoryPage() {
               aria-selected={active}
               onClick={() => setFilter(f.id)}
               className={cn(
-                "inline-flex items-center gap-2 rounded-full px-4 py-2 text-[13px] font-semibold transition-colors",
+                "inline-flex items-center gap-1.5 border-b-2 pb-2.5 font-mono text-[11px] uppercase tracking-[0.14em] transition-colors focus-visible:outline-none",
                 active
-                  ? "bg-ink text-stage"
-                  : "bg-surface text-ink-soft hover:bg-surface-2 hover:text-ink",
+                  ? "border-lime text-ink"
+                  : "border-transparent text-ink-faint hover:text-ink",
               )}
             >
               {f.label}
-              <span
-                className={cn(
-                  "rounded-md px-1.5 py-0.5 text-[10px] font-bold tabular-nums",
-                  active
-                    ? "bg-stage/20 text-stage"
-                    : "bg-surface-2 text-ink-faint",
-                )}
-              >
+              <sup className="text-[9px] font-semibold tabular-nums text-ink-faint">
                 {count}
-              </span>
+              </sup>
             </button>
           );
         })}
@@ -126,9 +136,67 @@ function HistoryPage() {
         {filtered.length === 0 ? (
           <EmptyHistory />
         ) : (
-          <SessionsList sessions={filtered} />
+          <SessionTimeline sessions={filtered} />
         )}
       </section>
+    </div>
+  );
+}
+
+function formatPracticed(seconds: number): string {
+  const h = Math.floor(seconds / 3600);
+  const m = Math.round((seconds % 3600) / 60);
+  if (h > 0) return `${h}h ${m}m`;
+  if (m > 0) return `${m} min`;
+  return "—";
+}
+
+function StatsBanner({
+  total,
+  average,
+  best,
+  practicedSeconds,
+}: {
+  total: number;
+  average: number | null;
+  best: number | null;
+  practicedSeconds: number;
+}) {
+  // One dominant metric (score promedio) + a mono ledger — a hierarchy, not
+  // four equal tiles.
+  const ledger: { label: string; value: string }[] = [
+    { label: "Sesiones", value: String(total) },
+    { label: "Mejor score", value: best === null ? "—" : String(best) },
+    { label: "Tiempo total", value: formatPracticed(practicedSeconds) },
+  ];
+  return (
+    <div className="grid grid-cols-1 gap-px overflow-hidden rounded-2xl bg-line lg:grid-cols-[1.4fr_1fr]">
+      <div className="flex flex-col justify-center bg-surface px-6 py-7">
+        <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-ink-faint">
+          Score promedio
+        </p>
+        <p className="font-display mt-2 flex items-baseline text-6xl font-bold tabular-nums text-ink">
+          {average ?? "—"}
+          <span className="ml-1.5 text-2xl font-semibold text-ink-faint">
+            /100
+          </span>
+        </p>
+      </div>
+      <div className="grid grid-rows-3 divide-y divide-line bg-surface">
+        {ledger.map((it) => (
+          <div
+            key={it.label}
+            className="flex items-baseline justify-between px-6 py-3"
+          >
+            <span className="font-mono text-[11px] uppercase tracking-[0.16em] text-ink-faint">
+              {it.label}
+            </span>
+            <span className="font-display text-lg font-bold tabular-nums text-ink">
+              {it.value}
+            </span>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
